@@ -188,7 +188,7 @@ The main ingredients in this recipe are:
 > The code listings in this section are all part of a complete application on GitHub, which you can build and run. Just click the link above each listing to go to the source. In this section we are looking at the pio/hello_pio example in pico-examples. You might choose to build this application and run it, to see what it does, before reading through this section.
 
 >  TIP
-> このセクションのコード一覧はすべて、GitHubにある完全なアプリケーションの一部であり、ビルドして実行することができます。各リストの上にあるリンクをクリックすると、ソースにジャンプします。このセクションではpico-examplesのpio/hello_pioの例を見ています。このセクションを読む前に、このアプリケーショ ンをビルドして実行し、その動作を確認することもできます。
+> このセクションのコード一覧はすべて、GitHubにある完全なアプリケーションの一部であり、ビルドして実行することができます。各リストの上にあるリンクをクリックすると、ソースにジャンプします。このセクションでは `pico-examples` の `pio/hello_pio` の例を見ています。このセクションを読む前に、このアプリケーションをビルドして実行し、その動作を確認することもできます。
 
 >  NOTE
 > The focus here is on the main moving parts required to use a PIO program, not so much on the PIO program itself.
@@ -220,13 +220,9 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/hell
 16 jmp loop
 ```
 
-The pull instruction takes one data item from the transmit FIFO buffer, and places it in the output shift register (OSR).
+The pull instruction takes one data item from the transmit FIFO buffer, and places it in the output shift register (OSR).  Data moves from the FIFO to the OSR one word (32 bits) at a time. The OSR is able to shift this data out, one or more bits at a time, to further destinations, using an out instruction.
 
-pull 命令は、送信FIFOバッファから1つのデータを取り出し、それを出力シフト・レジスタ(OSR)に配置します。
-
-Data moves from the FIFO to the OSR one word (32 bits) at a time. The OSR is able to shift this data out, one or more bits at a time, to further destinations, using an out instruction.
-
-データはFIFOから一度に1ワード(32ビット)ずつOSRに移動します。OSRは、out命令を使用して、このデータを一度に1ビットまたは複数ビットずつ、さらなる宛先にシフトアウトすることができます。
+`pull` 命令は、送信FIFOバッファから1つのデータを取り出し、それを出力シフト・レジスタ(OSR)に配置します。データはFIFOから一度に1ワード(32ビット)ずつOSRに移動します。OSRは、 `out` 命令を使用して、このデータを一度に1ビットまたは複数ビットずつ、さらなる宛先にシフトアウトすることができます。
 
 > FIFOs?
 > FIFOs are data queues, implemented in hardware. Each state machine has two FIFOs, between the state machine and the system bus, for data travelling out of (TX) and into (RX) the chip. Their name (first in, first out) comes from the fact that data appears at the FIFO’s output in the same order as it was presented to the FIFO’s input.
@@ -234,9 +230,9 @@ Data moves from the FIFO to the OSR one word (32 bits) at a time. The OSR is abl
 > FIFOとは？
 > FIFOはハードウェアで実装されたデータ・キューである。各ステート・マシンは、ステート・マシンとシステム・バスの間に、チップの外(TX)と内(RX)にデータを転送するための2つのFIFOを持っている。この2つのFIFOの名前(first in, first out)は、データがFIFOの入力と同じ順序でFIFOの出力に現れることに由来する。
 
-The out instruction here takes one bit from the data we just pull-ed from the FIFO, and writes that data to some pins. We will see later how to decide which pins these are.
+The `out` instruction here takes one bit from the data we just pull-ed from the FIFO, and writes that data to some pins. We will see later how to decide which pins these are.
 
-ここでの `out` 命令は、先ほどFIFOから取り出したデータから1ビットを取り出し、そのデータをいくつかのピンに書き込みます。どのピンに書き込むかは後で説明します。
+ここでの `out` 命令は、先ほどFIFOから取り出したデータから1ビットを `pull` し、そのデータをいくつかのピンに書き込みます。どのピンに書き込むかは後で説明します。
 
 The jmp instruction jumps back to the loop: label, so that the program repeats indefinitely. So, to sum up the function of this program: repeatedly take one data item from a FIFO, take one bit from this data item, and write it to a pin.
 
@@ -279,7 +275,7 @@ Here the main thing to set up is the GPIO we intend to output our data to. There
 
 (和訳)
 
-1. ステートマシンに、どのGPIOに出力するかを指示する必要がある。4つの異なるピン・グループがあり、状況に応じて異なる命令で使用されます。ここでは、`out`命令を使用しているため、`out`ピン・グループを使用します。
+1. ステートマシンに、どのGPIOに出力するかを指示する必要がある。4つの異なるピン・グループがあり、状況に応じて異なる命令で使用されます。ここでは、`out` 命令を使用しているため、 `out` ピン・グループを使用します。
 
 2. また、GPIOはPIOが制御していることを伝える必要があります(GPIOファンクション・セレクト)
 
@@ -456,19 +452,19 @@ Figure 3. WS2812 line format. Wide positive pulse for 1, narrow positive pulse f
 
 <img width=700 src="img/fig3.png"/>
 
-Unfortunately the LEDs receive and retransmit serial data in quite an unusual format. Each bit is transferred as a positive pulse, and the width of the pulse determines whether it is a 1 or a 0 bit. There is a family of WS2812-like LEDs available, which often have slightly different timings, and demand precision. It is possible to bit-bang this protocol, or to write canned bit patterns into some generic serial peripheral like SPI or I2S to get firmer guarantees on the timing, but there is still some software complexity and cost associated with generating the bit patterns.
+Unfortunately the LEDs receive and retransmit serial data in quite an unusual format. Each bit is transferred as a positive pulse, and the width of the pulse determines whether it is a `1` or a `0` bit. There is a family of WS2812-like LEDs available, which often have slightly different timings, and demand precision. It is possible to bit-bang this protocol, or to write canned bit patterns into some generic serial peripheral like SPI or I2S to get firmer guarantees on the timing, but there is still some software complexity and cost associated with generating the bit patterns.
 
 Ideally we would like to have all of our CPU cycles available to generate colour patterns to put on the lights, or to handle any other responsibilities the processor may have in the embedded system the LEDs are connected to.
 
 >  TIP
-> Once more, this section is going to discuss a real, complete program, that you can build and run on your Pico-series device. Follow the links above the program listings if you’d prefer to build the program yourself and run it, before going through it in detail. This section explores the pio/ws2812 example in pico-examples.
+> Once more, this section is going to discuss a real, complete program, that you can build and run on your Pico-series device. Follow the links above the program listings if you’d prefer to build the program yourself and run it, before going through it in detail. This section explores the `pio/ws2812` example in `pico-examples`.
 
-残念なことに、LEDはかなり変わったフォーマットでシリアル・データを受信し、再送信する。各ビットは正のパルスとして転送され、パルスの幅によって1ビットか0ビットかが決まる。WS2812のようなLEDのファミリーが利用可能で、それらはしばしば微妙に異なるタイミングを持ち、精度が要求される。このプロトコルをビットバンギングしたり、SPIやI2Sのような一般的なシリアル・ペリフェラルに定型のビットパターンを書き込んで、タイミングをより確実に保証することは可能ですが、ビットパターンを生成するためのソフトウェアの複雑さとコストがまだ残っています。
+残念なことに、LEDはかなり変わったフォーマットでシリアル・データを受信し、再送信する。各ビットは正のパルスとして転送され、パルスの幅によってビット`1`かビット`0`かが決まる。WS2812のようなLEDのファミリーが利用可能で、それらはしばしば微妙に異なるタイミングを持ち、精度が要求される。このプロトコルをビットバンギングしたり、SPIやI2Sのような一般的なシリアル・ペリフェラルに定型のビットパターンを書き込んで、タイミングをより確実に保証することは可能ですが、ビットパターンを生成するためのソフトウェアの複雑さとコストがまだ残っています。
 
 理想的には、すべてのCPUサイクルを、点灯させるためのカラーパターンの生成や、LEDが接続されている組み込みシステムでプロセッサが持つ可能性のあるその他の責務の処理に利用できるようにしたいものです。
 
 >  TIP
-> もう一度言いますが、このセクションではPicoシリーズのデバイス上で実行可能な、実際の完全なプログラムについて説明します。自分でプログラムをビルドして実行したい場合は、プログラムのリストの上にあるリンクをたどってください。このセクションでは、pico-examples の pio/ws2812 の例について説明します。
+> もう一度言いますが、このセクションではPicoシリーズのデバイス上で実行可能な、実際の完全なプログラムについて説明します。自分でプログラムをビルドして実行したい場合は、プログラムのリストの上にあるリンクをたどってください。このセクションでは、`pico-examples` の `pio/ws2812` の例について説明します。
 
 #### 3.2.2.1. PIO Program
 
@@ -509,11 +505,11 @@ The previous example was a bit of a whistle-stop tour of the anatomy of a PIO-ba
 .program ws2812
 ```
 
-We can have multiple programs in one .pio file (and you will see this if you click the GitHub link above the main program listing), and each of these will have its own .program directive with a different name. The assembler will go through each program in turn, and all the assembled programs will appear in the output file.
+We can have multiple programs in one `.pio` file (and you will see this if you click the GitHub link above the main program listing), and each of these will have its own `.program` directive with a different name. The assembler will go through each program in turn, and all the assembled programs will appear in the output file.
 
 Each PIO instruction is 16 bits in size. Generally, 5 of those bits in each instruction are used for the “delay” which is usually 0 to 31 cycles (after the instruction completes and before moving to the next instruction). If you have read the PIO chapter of the RP2350 Datasheet, you may have already know that these 5 bits can be used for a different purpose:
 
-1つの.pioファイルには複数のプログラムを入れることができ(メイン・プログラムのリストの上にあるGitHubのリンクをクリックすると、これが表示される)、それぞれ異なる名前の.programディレクティブを持つことになる。アセンブラは各プログラムを順番に実行し、アセンブルされたすべてのプログラムが出力ファイルに表示されます。
+1つの`.pio`ファイルには複数のプログラムを入れることができ(メイン・プログラムのリストの上にあるGitHubのリンクをクリックすると、これが表示される)、それぞれ異なる名前の`.program`ディレクティブを持つことになる。アセンブラは各プログラムを順番に実行し、アセンブルされたすべてのプログラムが出力ファイルに表示されます。
 
 各PIO命令のサイズは16ビットである。一般に、各命令のうち5ビットが「遅延」に使用され、通常は0～31サイクル(命令が完了した後、次の命令に移る前)である。RP2350データシートのPIOの章を読んだことがある人は、これらの5ビットが別の目的に使用できることをすでに知っているかもしれない:
 
@@ -521,13 +517,13 @@ Each PIO instruction is 16 bits in size. Generally, 5 of those bits in each inst
 .side_set 1
 ```
 
-This directive .side_set 1 says we’re stealing one of those delay bits to use for "side-set". The state machine will use this bit to drive the values of some pins, once per instruction, in addition to what the instructions are themselves doing. This is very useful for high frequency use cases (e.g. pixel clocks for DPI panels), but also for shrinking program size, to fit into the shared instruction memory.
+This directive `.side_set 1` says we’re stealing one of those delay bits to use for "side-set". The state machine will use this bit to drive the values of some pins, once per instruction, in addition to what the instructions are themselves doing. This is very useful for high frequency use cases (e.g. pixel clocks for DPI panels), but also for shrinking program size, to fit into the shared instruction memory.
 
-Note that stealing one bit has left our delay range from 0-15 (4 bits), but that is quite natural because you rarely want to mix side-set with lower frequency stuff. Because we didn’t say .side_set 1 opt, which would mean the side-set is optional (at the cost of another bit to say whether the instruction does a side-set), we have to specify a side-set value for every instruction in the program. This is the side N you will see on each instruction in the listing.
+Note that stealing one bit has left our delay range from 0-15 (4 bits), but that is quite natural because you rarely want to mix side-set with lower frequency stuff. Because we didn’t say `.side_set 1 opt`, which would mean the side-set is optional (at the cost of another bit to say whether the instruction does a side-set), we have to specify a side-set value for every instruction in the program. This is the `side N` you will see on each instruction in the listing.
 
-この.side_set 1指令は、「サイドセット」に使用する遅延ビットの1つを盗むことを意味しています。ステートマシンはこのビットを使って、命令自体が行っていることに加えて、命令ごとに1回、いくつかのピンの値を駆動します。これは、高周波数で使用する場合(DPIパネルのピクセルクロックなど)に非常に便利ですが、プログラムサイズを縮小して共有命令メモリに収めることもできます。
+この `.side_set 1` 指令は、「サイドセット」に使用する遅延ビットの1つを盗むことを意味しています。ステートマシンはこのビットを使って、命令自体が行っていることに加えて、命令ごとに1回、いくつかのピンの値を駆動します。これは、高周波数で使用する場合(DPIパネルのピクセルクロックなど)に非常に便利ですが、プログラムサイズを縮小して共有命令メモリに収めることもできます。
 
-しかし、サイドセットを低周波のものと混在させることはほとんどないので、これはごく自然なことです。.side_set 1 optとしなかったのは、サイドセットがオプションであることを意味します(その命令がサイドセットを行うかどうかを示す別のビットが必要です)。これは、リスト内の各命令に表示されるサイドNです。
+しかし、サイドセットを低周波のものと混在させることはほとんどないので、これはごく自然なことです。`.side_set 1 opt`としなかったのは、サイドセットがオプションであることを意味します(その命令がサイドセットを行うかどうかを示す別のビットが必要です)。これは、リスト内の各命令に表示される `side N` です。
 
 ```
 .define public T1 2
@@ -535,9 +531,9 @@ Note that stealing one bit has left our delay range from 0-15 (4 bits), but that
 .define public T3 3
 ```
 
-.define lets you declare constants. The public keyword means that the assembler will also write out the value of the define in the output file for use by other software: in the context of the SDK, this is a #define. We are going to use T1, T2 and T3 in calculating the delay cycles on each instruction.
+`.define` lets you declare constants. The `public` keyword means that the assembler will also write out the value of the define in the output file for use by other software: in the context of the SDK, this is a `#define`. We are going to use `T1`, `T2` and `T3` in calculating the delay cycles on each instruction.
 
-.defineでは定数を宣言できます。publicキーワードは、アセンブラがdefineの値を出力ファイルに書き出し、他のソフトウェアでも使用できるようにすることを意味します。SDKのコンテキストでは、これは#defineです。各命令の遅延サイクルを計算する際に、T1、T2、T3を使用します。
+`.define` では定数を宣言できます。`public` キーワードは、アセンブラが define の値を出力ファイルに書き出し、他のソフトウェアでも使用できるようにすることを意味します。SDKのコンテキストでは、これは `#define` です。各命令の遅延サイクルを計算する際に、`T1`、`T2`、`T3` を使用します。
 
 ```
 .lang_opt python
@@ -553,15 +549,15 @@ This is used to specify some PIO hardware defaults as used by the MicroPython PI
 
 We’ll ignore this for now, and come back to it later, when we meet its friend .wrap.
 
-今は無視することにして、後日、その友人である.wrapに会うときにまた話そう。
+今は無視することにして、後日、その友人である `.wrap` に会うときにまた話そう。
 
 ```
 bitloop:
 ```
 
-This is a label. A label tells the assembler that this point in your code is interesting to you, and you want to refer to it later by name. Labels are mainly used with jmp instructions.
+This is a label. A label tells the assembler that this point in your code is interesting to you, and you want to refer to it later by name. Labels are mainly used with `jmp` instructions.
 
-これはラベルである。ラベルはアセンブラに、コード中のこのポイントがあなたにとって興味深いものであり、後でその名前を参照したいことを伝えます。ラベルは主にjmp命令で使われます。
+これはラベルである。ラベルはアセンブラに、コード中のこのポイントがあなたにとって興味深いものであり、後でその名前を参照したいことを伝えます。ラベルは主に `jmp` 命令で使われます。
 
 ```
   out x, 1 side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
@@ -569,11 +565,11 @@ This is a label. A label tells the assembler that this point in your code is int
 
 Finally we reach a line with a PIO instruction. There is a lot to see here.
 
-* This is an out instruction. out takes some bits from the output shift register (OSR), and writes them somewhere else. In this case, the OSR will contain pixel data destined for our LEDs.
+* This is an `out` instruction. `out` takes some bits from the *output shift register* (OSR), and writes them somewhere else. In this case, the OSR will contain pixel data destined for our LEDs.
 
-* [T3 - 1] is the number of delay cycles (T3 minus 1). T3 is a constant we defined earlier.
+* `[T3 - 1]` is the number of delay cycles (T3 minus 1). `T3` is a constant we defined earlier.
 
-* x (one of two scratch registers; the other imaginatively called y) is the destination of the write data. State machines use their scratch registers to hold and compare temporary data.
+* `x` (one of two scratch registers; the other imaginatively called `y`) is the destination of the write data. State machines use their scratch registers to hold and compare temporary data.
 
 * side 0: Drive low (0) the pin configured for side-set.
 
@@ -581,27 +577,27 @@ Finally we reach a line with a PIO instruction. There is a lot to see here.
 
 最後にPIO命令のある行にたどり着く。ここには見るべきものがたくさんある。
 
-* outは出力シフトレジスタ(OSR)からビットを取り出し、別の場所に書き込む。この場合、OSRにはLED用のピクセル・データが格納されます。
+* `out`は*出力シフトレジスタ*(OSR)からビットを取り出し、別の場所に書き込む。この場合、OSRにはLED用のピクセル・データが格納されます。
 
-* T3 - 1]は遅延サイクル数(T3から1を引いた値)です。T3は先ほど定義した定数です。
+* `[T3 - 1]` は遅延サイクル数(T3から1を引いた値)です。`T3` は先ほど定義した定数です。
 
-* x(2つのスクラッチ・レジスタのうちの1つ。ステートマシンは、スクラッチ・レジスタを使って一時的なデータを保持し、比較する。
+* `x` (2つのスクラッチ・レジスタのうちの1つ。もう一つは `y` である) はデータを書き込む際のディスティネーションである。ステートマシンは、スクラッチ・レジスタを使って一時的なデータを保持し、比較する。
 
-* サイド0:サイドセット用に設定されたピンをロー(0)にドライブする。
+* `side 0`:サイドセット用に設定されたピンをロー(`0`)にドライブする。
 
-* 文字以降はすべてコメントである。アセンブラはコメントを無視する。
+* 文字 `;` 以降はすべて*コメント*である。アセンブラはコメントを無視する。コメントは人間が読むための注意書きにすぎない。
 
 > Output Shift Register
 > 
-> The OSR is a staging area for data entering the state machine through the TX FIFO. Data is pulled from the TX FIFO into the OSR one 32-bit chunk at a time. When an out instruction is executed, the OSR can break this data into smaller pieces by shifting to the left or right, and sending the bits that drop off the end to one of a handful of different destinations, such as the pins.
+> The OSR is a staging area for data entering the state machine through the TX FIFO. Data is pulled from the TX FIFO into the OSR one 32-bit chunk at a time. When an `out` instruction is executed, the OSR can break this data into smaller pieces by shifting to the left or right, and sending the bits that drop off the end to one of a handful of different destinations, such as the pins.
 > 
-> The amount of data to be shifted is encoded by the out instruction, and the direction of the shift (left or right) is configured ahead of time. For full details and diagrams, see the RP2350 Datasheet.
+> The amount of data to be shifted is encoded by the `out` instruction, and the direction of the shift (left or right) is configured ahead of time. For full details and diagrams, see the RP2350 Datasheet.
 
 > 出力シフト・レジスタ
 >
-> OSRは、TX FIFOを通してステートマシンに入るデータのステージング・エリアである。データはTX FIFOから一度に32ビットずつOSRに取り込まれます。アウト命令が実行されると、OSRはこのデータを左または右にシフトすることで、より小さな断片に分割し、端から落ちたビットをピンなどのいくつかの異なる宛先のいずれかに送信することができます。
+> OSRは、TX FIFOを通してステートマシンに入るデータのステージング・エリアである。データはTX FIFOから一度に32ビットずつOSRに取り込まれます。 `out` 命令が実行されると、OSRはこのデータを左または右に*シフトする*ことで、より小さな断片に分割し、端から落ちたビットをピンなどのいくつかの異なる宛先のいずれかに送信することができます。
 >
-> シフトされるデータ量はout命令によってエンコードされ、シフトの方向(左または右)は前もって設定される。詳細と図表については、RP2350 データシートを参照してください。
+> シフトされるデータ量は `out` 命令によってエンコードされ、シフトの方向(左または右)は前もって設定される。詳細と図表については、RP2350 データシートを参照してください。
 
 So, the state machine will do the following operations when it executes this instruction:
 
@@ -609,9 +605,7 @@ So, the state machine will do the following operations when it executes this ins
 
 2. Shift one bit out of the OSR into the x register. The value of the x register will be either 0 or 1.
 
-3. Wait T3 - 1 cycles after the instruction (I.e. the whole thing takes T3 cycles since the instruction itself took a cycle).
-
-Note that when we say cycle, we mean state machine execution cycles: a state machine can be made to execute at a slower rate than the system clock, by configuring its clock divider.
+3. Wait `T3 - 1` cycles after the instruction (i.e. the whole thing takes `T3` cycles since the instruction itself took a cycle).  Note that when we say cycle, we mean state machine execution cycles: a state machine can be made to execute at a slower rate than the system clock, by configuring its clock divider.
 
 Let’s look at the next instruction in the program.
 
@@ -621,9 +615,7 @@ Let’s look at the next instruction in the program.
 
 2. OSRからxレジスタに1ビットシフトする。xレジスタの値は0または1になる。
 
-3. 命令の後、T3 - 1サイクル待つ(つまり、命令自体が1サイクルかかるので、全体でT3サイクルかかる)。
-
-クロック分周器を設定することにより、ステートマシンをシステムクロックより遅い速度で実行させることができる。
+3. 命令の後、`T3 - 1` サイクル待つ(つまり、命令自体が1サイクルかかるので、全体で `T3` サイクルかかる)。*クロック分周器(clock divider)*を設定することにより、ステートマシンをシステムクロックより遅い速度で実行させることができる。
 
 プログラムの次の命令を見てみよう。
 
@@ -631,31 +623,33 @@ Let’s look at the next instruction in the program.
   jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
 ```
 
-1. side 1 on the side-set pin (this is the leading edge of our pulse) 
+1. `side 1` on the side-set pin (this is the leading edge of our pulse) 
 
 2. If x == 0 then go to the instruction labelled do_zero, otherwise continue on sequentially to the next instruction 
 
 3. We delay T1 - 1 after the instruction (whether the branch is taken or not)
 
+(和約)
+
+1. サイドセットピンの `side 1`(これはパルスのリーディングエッジです)
+
+2. `x == 0` なら `do_zero` と書かれた命令に進み、そうでなければ次の命令に順次進みます
+
+3. 分岐が行われたかどうかにかかわらず)命令の後に `T1 - 1` を遅延させる
+
 Let’s look at what our output pin has done so far in the program.
-
-Figure 4. The state machine drives the line low for time T1 as it shifts out one data bit from the OSR, and then high for time T2 whilst branching on the value of the bit.
-
-<img width=400 src="img/fig4.png"/>
-
-The pin has been low for time T3, and high for time T1. If the x register is 1 (remember this contains our 1 bit of pixel data) then we will fall through to the instruction labelled do_one:
-
-1. サイドセットピンのサイド1(これはパルスのリーディングエッジです)
-
-2. x == 0ならdo_zeroと書かれた命令に進み、そうでなければ次の命令に順次進みます
-
-3. 分岐が行われたかどうかにかかわらず)命令の後にT1 - 1を遅延させる
 
 出力ピンがプログラムの中でこれまでに何を行ってきたかを見てみましょう。
 
+Figure 4. The state machine drives the line low for time T1 as it shifts out one data bit from the OSR, and then high for time T2 whilst branching on the value of the bit.
+
 図4. ステートマシンは、OSRからデータビットを1つシフトアウトさせるため、時間T1の間このピンをLowにし、ビットの値で分岐する間、時間T2の間Highにします。
 
-ピンは時間T3でローになり、時間T1でハイになります。もしxレジスタが1であれば(このレジスタには1ビットのピクセル・データが格納されていることを思い出してください)、do_one命令へフォールスルーします:
+<img width=400 src="img/fig4.png"/>
+
+The pin has been low for time T3, and high for time T1. If the x register is 1 (remember this contains our 1 bit of pixel data) then we will fall through to the instruction labelled `do_one`:
+
+ピンは時間T3でローになり、時間T1でハイになります。もしxレジスタが1であれば(このレジスタには1ビットのピクセル・データが格納されていることを思い出してください)、`do_one` 命令へフォールスルーします:
 
 ```
 do_one:
@@ -664,11 +658,19 @@ do_one:
 
 On this side of the branch we do the following:
 
-1. side 1 on the side-set pin (continue the pulse) 
+1. `side 1` on the side-set pin (continue the pulse) 
 
-2. jmp unconditionally back to bitloop (the label we defined earlier, at the top of the program); the state machine is done with this data bit, and will get another from its OSR 
+2. `jmp` unconditionally back to `bitloop` (the label we defined earlier, at the top of the program); the state machine is done with this data bit, and will get another from its OSR 
 
-3. Delay for T2 - 1 cycles after the instruction
+3. Delay for `T2 - 1` cycles after the instruction
+
+この分岐の側では、次のようにする:
+
+1. サイドセットピンの `side 1`(パルスを続ける)
+
+2. 無条件に `bitloop`(プログラムの先頭で先に定義したラベル)に `jmp` で戻る。ステートマシンはこのデータビットで終了し、OSRから別のビットを取得する
+
+3. 命令の後、`T2 - 1` サイクル遅延する
 
 The waveform at our output pin now looks like this:
 
@@ -677,34 +679,26 @@ Figure 5. On a one data bit, the line is driven low for time T3, high for time T
 This accounts for the case where we shifted a 1 data bit into the x register. For a 0 bit, we will have jumped over the last instruction we looked at, to the instruction labelled do_zero:
 
 
-この分岐の側では、次のようにする:
-
-1. サイドセットピンのサイド1(パルスの継続)
-
-2. 無条件にbitloop(プログラムの先頭で先に定義したラベル)にjmpで戻る。ステートマシンはこのデータビットで終了し、OSRから別のビットを取得する
-
-3. 命令の後、T2 - 1サイクル遅延する
-
 出力ピンの波形は次のようになります:
 
 図5. 1データ・ビットの場合、ラインは時間T3の間Lowに、時間T1の間Highに、さらに時間T2の間Highに駆動される
 
-これは1データ・ビットをxレジスタにシフトした場合を考慮したものである。0ビットの場合は、最後に見たdo_zeroという命令を飛び越えたことになる:
+<img src="img/fig5.png"/>
+
+これはデータ・ビット `1` を x レジスタにシフトした場合を考慮したものである。ビット `0` の場合は、最後に見た `do_zero` というラベルが付いた命令を飛び越えたことになる:
 
 ```
 do_zero:
   	nop side 0 [T2 - 1] ; Or drive low, for a short pulse
 ```
 
-1. side 0 on the side-set pin (the trailing edge of our pulse)
+1. `side 0` on the side-set pin (the trailing edge of our pulse)
 
-2. nop means no operation. We don’t have anything else we particularly want to do, so waste a cycle
+2. `nop` means no operation. We don’t have anything else we particularly want to do, so waste a cycle
 
 3. The instruction takes T2 cycles in total
 
-For the x == 0 case, we get this on our output pin:
-
-Figure 6. On a zero data bit, the line is driven low for time T3, high for time T1, then low again for time T1 The final line of our program is this:
+For the `x == 0` case, we get this on our output pin:
 
 1. サイドセットピンのサイド0(パルスの後縁)
 
@@ -714,94 +708,98 @@ Figure 6. On a zero data bit, the line is driven low for time T3, high for time 
 
 x==0の場合、出力ピンにはこのように出力される:
 
+Figure 6. On a zero data bit, the line is driven low for time T3, high for time T1, then low again for time T1 The final line of our program is this:
+
 図6. データ・ビットがゼロの場合、このラインは時間T3だけLowになり、時間T1だけHighになり、時間T1だけ再びLowになる:
+
+<img src="img/fig6.png"/>
 
 ```
 .wrap
 ```
 
-This matches with the .wrap_target directive at the top of the program. Wrapping is a hardware feature of the state machine which behaves like a wormhole: you go in through the .wrap statement and appear at the .wrap_target zero cycles later, unless the .wrap is preceded immediately by a jmp whose condition is true. This is important for getting precise timing with programs that must run quickly, and often also saves you a slot in the instruction memory.
+This matches with the `.wrap_target` directive at the top of the program. Wrapping is a hardware feature of the state machine which behaves like a wormhole: you go in through the `.wrap` statement and appear at the `.wrap_target` zero cycles later, unless the `.wrap` is preceded immediately by a `jmp` whose condition is true. This is important for getting precise timing with programs that must run quickly, and often also saves you a slot in the instruction memory.
+
+これは、プログラムの先頭にある `.wrap_target` ディレクティブと対応する。ラップは、ステートマシンのハードウェア機能であり、ワームホールのように動作する。 `.wrap` 文を通して中に入ると、 `.wrap` の直前に条件が真である `jmp` がない限り、0サイクル後に `.wrap_target` に現れる。これは、素早く実行しなければならないプログラムで正確なタイミングを得るために重要であり、多くの場合、命令メモリのスロットを節約することもできる。
 
 >  TIP
 > Often an explicit .wrap_target/.wrap pair is not necessary, because the default configuration produced by pioasm has an implicit wrap from the end of the program back to the beginning, if you didn’t specify one.
 
+>  TIP
+> 多くの場合、明示的な`.wrap_target`/`.wrap`のペアは必要ありません。なぜなら、`pioasm` が生成するデフォルトのコンフィギュレーションでは、指定しなかった場合、プログラムの終わりから最初に戻る暗黙的なラップがあるからです。
+
 > NOPs
 > 
-> NOP, or no operation, means precisely that: do nothing! You may notice there is no nop instruction defined in the instruction set reference: nop is really a synonym for mov y, y in PIO assembly.
-
-これは、プログラムの先頭にある.wrap_targetディレクティブと一致する。ラップは、ステートマシンのハードウェア機能であり、ワームホールのように動作する。.wrap文を通して中に入ると、.wrapの直前に条件が真であるjmpがない限り、0サイクル後に.wrap_targetに現れる。これは、素早く実行しなければならないプログラムで正確なタイミングを得るために重要であり、多くの場合、命令メモリのスロットを節約することもできる。
-
->  TIP
-> 多くの場合、明示的な.wrap_target/.wrapのペアは必要ありません。なぜなら、pioasmが生成するデフォルトのコンフィギュレーションでは、指定しなかった場合、プログラムの終わりから最初に戻る暗黙的なラップがあるからです。
+> NOP, or no operation, means precisely that: do nothing! You may notice there is no `nop` instruction defined in the instruction set reference: `nop` is really a synonym for `mov y, y` in PIO assembly.
+> 
+> Why did we insert a nop in this example when we could have jmp-ed? Good question! It’s a dramatic device we contrived so we could discuss nop and .wrap. Writing documentation is hard. In general, though, nop is useful when you need to perform a side-set and have nothing else to do, or you need a very slightly longer delay than is available on a single instruction.
 
 > NOPs
 >
-> NOP(操作なし)とは、まさに「何もしない」という意味です！命令セット・リファレンスにnop命令が定義されていないことにお気づきでしょうか。nopは、PIOアセンブリのmov y, yの同義語です。
+> NOP(操作なし)とは、まさに「何もしない」という意味です！命令セット・リファレンスに `nop` 命令が定義されていないことにお気づきでしょうか。 `nop` は、PIOアセンブリの `mov y, y` の同義語です。
+>
+> この例では `jmp` することができたのに、なぜ `nop` を挿入したのでしょうか？いい質問だ！これは、 `nop` と `.wrap` について議論するために仕組んだ演出なのです。ドキュメントを書くのは難しい。しかし、一般的には、 `nop` はサイドセットを実行する必要があり、他にすることがない場合や、1つの命令で利用できるよりも非常に長い遅延が必要な場合に便利です。
 
-> 
-> Why did we insert a nop in this example when we could have jmp-ed? Good question! It’s a dramatic device we contrived so we could discuss nop and .wrap. Writing documentation is hard. In general, though, nop is useful when you need to perform a side-set and have nothing else to do, or you need a very slightly longer delay than is available on a single instruction.
 
 It is hopefully becoming clear why our timings T1, T2, T3 are numbered this way, because what the LED string sees really is one of these two cases:
 
 Figure 7. The line is initially low in the idle (latch) state, and the LED is waiting for the first rising edge. It sees our pulse timings in the order T1-T2-T3, until the very last T3, where it sees a much longer negative period once the state machine runs out of data.
 
-This should look familiar if you refer back to Figure 3.
-
->
-> この例ではjmpすることができたのに、なぜnopを挿入したのでしょうか？いい質問だ！これは、nopと.wrapについて議論するために仕組んだ演出なんだ。ドキュメントを書くのは難しい。しかし、一般的には、nopはサイドセットを実行する必要があり、他にすることがない場合や、1つの命令で利用できるよりも非常に長い遅延が必要な場合に便利です。
-
 なぜT1、T2、T3のタイミングにこのような番号を振っているのか、LEDストリングが見ているのはこの2つのケースのどちらかだからだ:
 
-図7. 図7: ラインはアイドル(ラッチ)状態で最初はローであり、LEDは最初の立ち上がりエッジを待っている。T1-T2-T3の順でパルスのタイミングを見ますが、最後のT3では、ステートマシンがデータを使い果たした後、より長い負の期間を見ます。
+図7: ラインはアイドル(ラッチ)状態で最初はローであり、LEDは最初の立ち上がりエッジを待っている。T1-T2-T3の順でパルスのタイミングを見ますが、最後のT3では、ステートマシンがデータを使い果たした後、より長い負の期間を見ます。
+
+<img src="img/fig7.png"/>
+
+This should look familiar if you refer back to Figure 3.
 
 これは、図3を参照すれば見覚えがあるはずだ。
 
 After thoroughly dissecting our program, and hopefully being satisfied that it will repeatedly send one well-formed data bit to a string of WS2812 LEDs, we’re left with a question: where is the data coming from? This is more thoroughly explained in the RP2350 Datasheet, but the data that we are shifting out from the OSR came from the state machine’s TX FIFO. The TX FIFO is a data buffer between the state machine and the rest of RP-series microcontroller, filled either via direct poking from the CPU, or by the system DMA, which is much faster.
 
-The out instruction shifts data out from the OSR, and zeroes are shifted in from the other end to fill the vacuum.  Because the OSR is 32 bits wide, you will start getting zeroes once you have shifted out a total of 32 bits. There is a pull instruction which explicitly takes data from the TX FIFO and put it in the OSR (stalling the state machine if the FIFO is empty).
-
-However, in the majority of cases it is simpler to configure autopull, a mode where the state machine automatically refills the OSR from the TX FIFO (an automatic pull) when a configured number of bits have been shifted out. Autopull happens in the background, in parallel with whatever else the state machine may be up to (in other words it has a cost of zero cycles). We’ll see how this is configured in the next section.
-
 プログラムを徹底的に分解し、WS2812 LED のストリングに 1 つの整ったデータ・ビットを繰り返し送信することに満足したところで、「データはどこから来ているのか」という疑問が残る。これは RP2350 のデータシートに詳しく説明されているが、OSR からシフトアウトされるデータは、ステートマシンの TX FIFO から送られる。TX FIFOは、ステートマシンとRPシリーズ・マイコンの残りの部分との間のデータ・バッファで、CPUから直接つつくか、システムDMAによって満たされます。
 
-out命令によってOSRからデータがシフトアウトされ、もう一方の端からゼロがシフトインされて空白を埋める。 OSRの幅は32ビットなので、合計32ビットをシフト・アウトすると、ゼロが入るようになります。明示的にTX FIFOからデータを取り出してOSRに入れる(FIFOが空の場合、ステートマシンをストールさせる)プル命令があります。
+The out instruction shifts data out from the OSR, and zeroes are shifted in from the other end to fill the vacuum.  Because the OSR is 32 bits wide, you will start getting zeroes once you have shifted out a total of 32 bits. There is a pull instruction which explicitly takes data from the TX FIFO and put it in the OSR (stalling the state machine if the FIFO is empty).
 
-このモードでは、設定されたビット数がシフト・アウトされると、ステート・マシンが自動的にTX FIFOからOSRを補充します(自動プル)。オートプルはバックグラウンドで、ステートマシンが行っている他の作業と並行して行われる(言い換えれば、コストはゼロサイクル)。これがどのように設定されるかは、次のセクションで説明する。
+`out` 命令によってOSRからデータがシフトアウトされ、もう一方の端からゼロがシフトインされて空白を埋める。 OSRの幅は32ビットなので、合計32ビットをシフト・アウトすると、ゼロが入るようになります。明示的にTX FIFOからデータを取り出してOSRに入れる(FIFOが空の場合、ステートマシンをストールさせる) `pull` 命令があります。
+
+However, in the majority of cases it is simpler to configure autopull, a mode where the state machine automatically refills the OSR from the TX FIFO (an automatic `pull`) when a configured number of bits have been shifted out. Autopull happens in the background, in parallel with whatever else the state machine may be up to (in other words it has a cost of zero cycles). We’ll see how this is configured in the next section.
+
+このモードでは、設定されたビット数がシフト・アウトされると、ステート・マシンが自動的にTX FIFOからOSRを補充します(自動 `pull`)。オートプルはバックグラウンドで、ステートマシンが行っている他の作業と並行して行われる(言い換えれば、コストはゼロサイクル)。これがどのように設定されるかは、次のセクションで説明する。
 
 #### 3.2.2.2. State Machine Configuration
 
-When we run pioasm on the .pio file we have been looking at, and ask it to spit out SDK code (which is the default), it will create some static variables describing the program, and a method ws2812_default_program_config which configures a PIO state machine based on user parameters, and the directives in the actual PIO program (namely the .side_set and .wrap in this case).
+When we run `pioasm` on the `.pio` file we have been looking at, and ask it to spit out SDK code (which is the default), it will create some static variables describing the program, and a method ws2812_default_program_config which configures a PIO state machine based on user parameters, and the directives in the actual PIO program (namely the `.side_set` and `.wrap` in this case).
+
+これまで見てきた `.pio` ファイルで `pioasm` を実行し、SDKコードを吐き出すように指示すると(これがデフォルト)、プログラムを記述するいくつかの静的変数と、ユーザパラメータと実際のPIOプログラムのディレクティブ(この場合は `.side_set` と `.wrap`)に基づいてPIOステートマシンを設定するメソッド `ws2812_default_program_config` が作成される。
 
 Of course how you configure the PIO SM when using the program is very much related to the program you have written.
 
+もちろん、プログラム使用時にPIO SM(State Machine) をどのように設定するかは、あなたが書いたプログラムに大きく関係しています。
+
 Rather than try to store a data representation off all that information, and parse it at runtime, for the use cases where you’d like to encapsulate setup or other API functions with your PIO program, you can embed code within the .pio file.
 
-これまで見てきた.pioファイルでpioasmを実行し、SDKコードを吐き出すように頼むと(これがデフォルト)、プログラムを記述するいくつかの静的変数と、ユーザー・パラメーターと実際のPIOプログラムのディレクティブ(この場合は.side_setと.wrap)に基づいてPIOステートマシンを設定するメソッドws2812_default_program_configが作成される。
-
-もちろん、プログラム使用時にPIO SMをどのように設定するかは、あなたが書いたプログラムに大きく関係しています。
-
-PIOプログラムでセットアップやその他のAPI関数をカプセル化したい場合、これらの情報をすべてデータとして保存し、実行時に解析するのではなく、.pioファイル内にコードを埋め込むことができます。
+PIOプログラムでセットアップやその他のAPI関数をカプセル化したい場合、これらの情報をすべてデータとして保存し、実行時に解析するのではなく、`.pio` ファイル内にコードを埋め込むことができます。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.pio Lines 36 - 52
 
 ```
-36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq,
-  bool rgbw) {
+36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq, bool rgbw) {
 37
-38 pio_gpio_init(pio, pin);
-39 pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+38    pio_gpio_init(pio, pin);
+39    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 40
-41 pio_sm_config c = ws2812_program_get_default_config(offset);
-42 sm_config_set_sideset_pins(&c, pin);
-43 sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
-44 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+41    pio_sm_config c = ws2812_program_get_default_config(offset);
+42    sm_config_set_sideset_pins(&c, pin);
+43    sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
+44    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 45
-46 int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
-47 float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
-48 sm_config_set_clkdiv(&c, div);
+46    int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
+47    float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+48    sm_config_set_clkdiv(&c, div);
 49
-50 pio_sm_init(pio, sm, offset, &c);
-51 pio_sm_set_enabled(pio, sm, true);
+50    pio_sm_init(pio, sm, offset, &c);
+51    pio_sm_set_enabled(pio, sm, true);
 52 }
 ```
 
@@ -813,9 +811,9 @@ In this case we are passing through code for the SDK, as requested by this line 
 % c-sdk {
 ```
 
-We have here a function ws2812_program_init which is provided to help the user to instantiate an instance of the LED driver program, based on a handful of parameters:
+We have here a function `ws2812_program_init` which is provided to help the user to instantiate an instance of the LED driver program, based on a handful of parameters:
 
-ws2812_program_init関数は、ユーザーがいくつかのパラメータに基づいてLEDドライバー・プログラムのインスタンスを生成するのを助けるために用意されている:
+`ws2812_program_init` 関数は、ユーザがいくつかのパラメータに基づいてLEDドライバー・プログラムのインスタンスを生成するのを助けるために用意されている:
 
 <desc>
 
@@ -835,49 +833,49 @@ ws2812_program_init関数は、ユーザーがいくつかのパラメータに�
 
 Such that:
 
-* pio_gpio_init(pio, pin); Configure a GPIO for use by PIO. (Set the GPIO function select.)
+* `pio_gpio_init(pio, pin);` Configure a GPIO for use by PIO. (Set the GPIO function select.)
 
-* pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true); Sets the PIO pin direction of 1 pin starting at pin number pin to out
+* `pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);` Sets the PIO pin direction of 1 pin starting at pin number `pin` to out
 
-* pio_sm_config c = ws2812_program_default_config(offset); Get the default configuration using the generated function for this program (this includes things like the .wrap and .side_set configurations from the program). We’ll modify this configuration before loading it into the state machine.
+* `pio_sm_config c = ws2812_program_default_config(offset);` Get the default configuration using the generated function for this program (this includes things like the `.wrap` and .`side_set` configurations from the program). We’ll modify this configuration before loading it into the state machine.
 
-* sm_config_set_sideset_pins(&c, pin); Sets the side-set to write to pins starting at pin pin (we say starting at because if you had .side_set 3, then it would be outputting values on numbers pin, pin+1, pin+2)
+* `sm_config_set_sideset_pins(&c, pin);` Sets the side-set to write to pins starting at pin `pin` (we say starting at because if you had .side_set 3, then it would be outputting values on numbers `pin`, `pin+1`, `pin+2`)
 
-* sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24); False for shift_to_right (i.e. we want to shift out MSB first). True for autopull. 32 or 24 for the number of bits for the autopull threshold, i.e. the point at which the state machine triggers a refill of the OSR, depending on whether the LEDs are RGB or RGBW.
+* `sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);` False for shift_to_right (i.e. we want to shift out MSB first). True for autopull. 32 or 24 for the number of bits for the autopull threshold, i.e. the point at which the state machine triggers a refill of the OSR, depending on whether the LEDs are RGB or RGBW.
 
-* int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3; This is the total number of execution cycles to output a single bit. Here we see the benefit of .define public; we can use the T1 - T3 values in our code.
+* `int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;` This is the total number of execution cycles to output a single bit. Here we see the benefit of .define public; we can use the T1 - T3 values in our code.
+
+* `float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);` `sm_config_clkdiv(&c, div);` Slow the state machine’s execution down, based on the system clock speed and the number of execution cycles required per WS2812 data bit, so that we achieve the correct bit rate.
+
+* `pio_sm_init(pio, sm, offset, &c);` Load our configuration into the state machine, and go to the start address (offset)
+
+* `pio_sm_set_enabled(pio, sm, true);` And make it go now!
 
 このような
 
-* pio_gpio_init(pio, pin); PIOが使用するGPIOを設定する。(GPIOのファンクション・セレクトを設定する。)
+* `pio_gpio_init(pio, pin);` PIOが使用するGPIOを設定する。(GPIOのファンクション・セレクトを設定する。)
 
-* pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true); ピン番号pinから始まる1ピンのPIOピンの方向をoutに設定する
+* `pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);` ピン番号 `pin` から始まる1ピンのPIOピンの方向をoutに設定する
 
-* pio_sm_config c = ws2812_program_default_config(offset); このプログラム用に生成された関数を使用してデフォルト・コンフィギュレーションを取得する(これには、プログラムからの.wrapや.side_setコンフィギュレーションなどが含まれる)。ステートマシンにロードする前に、このコンフィギュレーションを修正する。
+* `pio_sm_config c = ws2812_program_default_config(offset);` このプログラム用に生成された関数を使用してデフォルト・コンフィギュレーションを取得する(これには、プログラムからの `.wrap` や `.side_set` コンフィギュレーションなどが含まれる)。ステートマシンにロードする前に、このコンフィギュレーションを修正する。
 
-* sm_config_set_sideset_pins(&c, pin); ピンpinから始まるピンに書き込むサイドセットを設定する(ここから始まるというのは、.side_set 3を設定した場合、番号pin, pin+1, pin+2に値を出力することになるから)
+* `sm_config_set_sideset_pins(&c, pin);` ピン `pin` から始まるピンに書き込むサイドセットを設定する(ここから始まるというのは、`.side_set 3` を設定した場合、番号 `pin`, `pin+1`, `pin+2` に値を出力することになるから)
 
-* sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24); shift_to_rightの場合はfalse(つまり、MSBを最初にシフトアウトしたい)。オートプルの場合はtrue。オートプルしきい値のビット数は32または24(LEDがRGBかRGBWかによって、ステートマシンがOSRの再充填をトリガーするポイント)。
+* `sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);` shift_to_right(つまり、MSBを最初にシフトアウトしたい)場合はfalse。オートプルの場合はtrue。オートプル閾値のビット数は32または24(LEDがRGBかRGBWかによって、ステートマシンがOSRの再充填をトリガーするポイント)。
 
-* int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3; これは、1ビットを出力するための総実行サイクル数です。ここで、.define publicの利点がわかる。T1～T3の値をコードで使うことができる。
+* `int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;` これは、1ビットを出力するための総実行サイクル数です。ここで、`.define public` の利点がわかる。T1からT3の値をコードで使うことができる。
 
-* float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit); sm_config_clkdiv(&c, div); Slow the state machine’s execution down, based on the system clock speed and the number of execution cycles required per WS2812 data bit, so that we achieve the correct bit rate.
+* `float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);` `sm_config_clkdiv(&amp;c, div);` システム・クロック速度と WS2812 データビットあたりに必要な実行サイクル数に基づいて、正しいビットレートを達成するように、ステートマシンの実行をスローダウンする。
 
-* pio_sm_init(pio, sm, offset, &c); Load our configuration into the state machine, and go to the start address (offset)
+* `pio_sm_init(pio, sm, offset, &c);` コンフィギュレーションをステートマシンにロードし、開始アドレス(`offset`)に進む。
 
-* pio_sm_set_enabled(pio, sm, true); And make it go now!
+* `pio_sm_set_enabled(pio, sm, true);` そして実行させます！
 
-At this point the program will be stuck on the first out waiting for data. This is because we have autopull enabled, the OSR is initially empty, and there is no data to be pulled. The state machine refuses to continue until the first piece of data arrives in the FIFO.
+At this point the program will be stuck on the first `out` waiting for data. This is because we have autopull enabled, the OSR is initially empty, and there is no data to be pulled. The state machine refuses to continue until the first piece of data arrives in the FIFO.
 
 As an aside, this last point sheds some light on the slightly cryptic comment at the start of the PIO program:
 
-* float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit); sm_config_clkdiv(&amp;c, div); システム・クロック速度と WS2812 データ・ビットあたりに必要な実行サイクル数に基づいて、正しいビット・レートを達成するように、ステート・マシンの実行をスローダウンする。
-
-* pio_sm_init(pio, sm, offset, &c); コンフィギュレーションをステートマシンにロードし、開始アドレス(オフセット)
-
-* pio_sm_set_enabled(pio, sm, true); そして実行させます！
-
-この時点で、プログラムはデータ待ちの最初のアウトでスタックします。これは、オートプルを有効にしているためで、OSRは最初は空であり、プルされるデータはない。ステートマシンは、最初のデータがFIFOに到着するまで処理を続行しない。
+この時点で、プログラムはデータ待ちの最初の `out` でスタックします。これは、オートプルを有効にしているためで、OSRは最初は空であり、プルされるデータはない。ステートマシンは、最初のデータがFIFOに到着するまで処理を続行しない。
 
 余談だが、この最後のポイントは、PIOプログラム冒頭の少し不可解なコメントに光を当てている:
 
@@ -887,20 +885,20 @@ As an aside, this last point sheds some light on the slightly cryptic comment at
 
 This comment is giving us an important piece of context. We stall on this instruction initially, before the first data is added, and also every time we finish sending the last piece of data at the end of a long serial burst. When a state machine stalls, it does not continue to the next instruction, rather it will reattempt the current instruction on the next divided clock cycle. However, side-set still takes place. This works in our favour here, because we consequently always return the line to the idle (low) state when we stall.
 
-このコメントは重要な文脈を与えてくれている。この命令でストールするのは、最初のデータが追加される前と、長いシリアル・バーストの最後に最後のデータを送信し終えるときである。ステートマシンがストールすると、次の命令には進まず、次の分割クロックサイクルで現在の命令を再試行する。しかし、サイドセットは依然として行われる。これは、ストールしたときに常にアイドル(Low)状態にラインを戻すので、ここ では有利に働きます。
+このコメントは重要な文脈を与えてくれている。この命令でストールするのは、最初のデータが追加される前と、長いシリアル・バーストの最後に最後のデータを送信し終えるときである。ステートマシンがストールすると、次の命令には進まず、次の分割クロックサイクルで現在の命令を再試行する。しかし、サイドセットは依然として行われる。これは、ストールしたときに常にアイドル(Low)状態にラインを戻すので、ここでは有利に働きます。
 
 #### 3.2.2.3. Cプログラム
 
-The companion to the .pio file we’ve looked at is a .c file which drives some interesting colour patterns out onto a string of LEDs. We’ll just look at the parts that are directly relevant to PIO.
+The companion to the `.pio` file we’ve looked at is a `.c` file which drives some interesting colour patterns out onto a string of LEDs. We’ll just look at the parts that are directly relevant to PIO.
 
 
-これまで見てきた.pioファイルの仲間は、LEDのストリングにいくつかの興味深いカラー・パター ンを表示する.cファイルです。ここでは、PIOに直接関係する部分だけを見ていきます。
+これまで見てきた `.pio` ファイルの仲間は、LEDのストリングにいくつかの興味深いカラー・パターンを表示する `.c` ファイルです。ここでは、PIOに直接関係する部分だけを見ていきます。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.c Lines 43 - 45
 
 ```
 43 static inline void put_pixel(PIO pio, uint sm, uint32_t pixel_grb) {
-44 pio_sm_put_blocking(pio, sm, pixel_grb << 8u);
+44    pio_sm_put_blocking(pio, sm, pixel_grb << 8u);
 45 }
 ```
 
@@ -908,33 +906,33 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 ```
 47 static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
-48 return
-49 ((uint32_t) (r) << 8) |
-50 ((uint32_t) (g) << 16) |
-51 (uint32_t) (b);
+48      return
+49              ((uint32_t) (r) << 8) |
+50              ((uint32_t) (g) << 16) |
+51              (uint32_t) (b);
 52 }
 ```
 
-Here we are writing 32-bit values into the FIFO, one at a time, directly from the CPU. pio_sm_put_blocking is a helper method that waits until there is room in the FIFO before pushing your data.
+Here we are writing 32-bit values into the FIFO, one at a time, directly from the CPU. `pio_sm_put_blocking` is a helper method that waits until there is room in the FIFO before pushing your data.
 
 You’ll notice the << 8 in put_pixel(): remember we are shifting out starting with the MSB, so we want the 24-bit colour values at the top. This works fine for WGBR too, just that the W is always 0.
 
 This program has a handful of colour patterns, which call our put_pixel helper above to output a sequence of pixel values:
 
-pio_sm_put_blockingは、データをプッシュする前にFIFOに空きができるまで待機するヘルパー・メソッドです。
+ここで 32ビットの値を、一度に1個ずつ CPUから FIFO に書き込んでいます。`pio_sm_put_blocking` は、データをプッシュする前にFIFOに空きができるまで待機するヘルパー・メソッドです。
 
-put_pixel()の `<< 8` にお気づきでしょう:MSBからシフトアウトしていることを思い出してください。これはWGBRでも問題なく動作するが、Wは常に0である。
+`put_pixel()` の `<< 8` にお気づきでしょう: MSBからシフトアウトしていることを思い出してください。これはWGBRでも問題なく動作するが、Wは常に0である。
 
-このプログラムにはいくつかのカラーパターンがあり、上記のput_pixelヘルパーを呼び出して一連のピクセル値を出力します:
+このプログラムにはいくつかのカラーパターンがあり、上記の `put_pixel` ヘルパーを呼び出して一連のピクセル値を出力します:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.c Lines 76 - 81
 
 ```
 76 void pattern_random(PIO pio, uint sm, uint len, uint t) {
-77 if (t % 8)
-78 return;
-79 for (uint i = 0; i < len; ++i)
-80 put_pixel(pio, sm, rand());
+77    if (t % 8)
+78        return;
+79    for (uint i = 0; i < len; ++i)
+80        put_pixel(pio, sm, rand());
 81 }
 ```
 
@@ -946,40 +944,41 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 ```
 110 int main() {
-111 //set_sys_clock_48();
-112 stdio_init_all();
-113 printf("WS2812 Smoke Test, using pin %d\n", WS2812_PIN);
+111     //set_sys_clock_48();
+112     stdio_init_all();
+113     printf("WS2812 Smoke Test, using pin %d\n", WS2812_PIN);
 114
-115 // todo get free sm
-116 PIO pio;
-117 uint sm;
-118 uint offset;
+115     // todo get free sm
+116     PIO pio;
+117     uint sm;
+118     uint offset;
 119
-120 // This will find a free pio and state machine for our program and load it for us
-121 // We use pio_claim_free_sm_and_add_program_for_gpio_range (for_gpio_range variant)
-122 // so we will get a PIO instance suitable for addressing gpios >= 32 if needed and
+120     // This will find a free pio and state machine for our program and load it for us
+121     // We use pio_claim_free_sm_and_add_program_for_gpio_range (for_gpio_range variant)
+122     // so we will get a PIO instance suitable for addressing gpios >= 32 if needed and
   supported by the hardware
-123 bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&ws2812_program, &pio,
-  &sm, &offset, WS2812_PIN, 1, true);
-124 hard_assert(success);
+123     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(
+            &ws2812_program, &pio,
+            &sm, &offset, WS2812_PIN, 1, true);
+124     hard_assert(success);
 125
-126 ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
+126     ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
 127
-128 int t = 0;
-129 while (1) {
-130 int pat = rand() % count_of(pattern_table);
-131 int dir = (rand() >> 30) & 1 ? 1 : -1;
-132 puts(pattern_table[pat].name);
-133 puts(dir == 1 ? "(forward)" : "(backward)");
-134 for (int i = 0; i < 1000; ++i) {
-135 pattern_table[pat].pat(pio, sm, NUM_PIXELS, t);
-136 sleep_ms(10);
-137 t += dir;
-138 }
-139 }
+128     int t = 0;
+129     while (1) {
+130         int pat = rand() % count_of(pattern_table);
+131         int dir = (rand() >> 30) & 1 ? 1 : -1;
+132         puts(pattern_table[pat].name);
+133         puts(dir == 1 ? "(forward)" : "(backward)");
+134         for (int i = 0; i < 1000; ++i) {
+135             pattern_table[pat].pat(pio, sm, NUM_PIXELS, t);
+136             sleep_ms(10);
+137             t += dir;
+138         }
+139     }
 140
-141 // This will free resources and unload our program
-142 pio_remove_program_and_unclaim_sm(&ws2812_program, pio, sm, offset);
+141     // This will free resources and unload our program
+142     pio_remove_program_and_unclaim_sm(&ws2812_program, pio, sm, offset);
 143 }
 ```
 
@@ -987,192 +986,185 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 So far we have looked at writing data to PIO directly from the processor. This often leads to the processor spinning its wheels waiting for room in a FIFO to make a data transfer, which is not a good investment of its time. It also limits the total data throughput you can achieve.
 
-RP-series microcontrollers are equipped with a powerful direct memory access unit (DMA), which can transfer data for you in the background. Suitably programmed, the DMA can make quite long sequences of transfers without supervision.
-
-Up to one word per system clock can be transferred to or from a PIO state machine, which is, to be quite technically precise, more bandwidth than you can shake a stick at. The bandwidth is shared across all state machines, but you can use the full amount on one state machine.
-
-Let’s take a look at the logic_analyser example, which uses PIO to sample some of the RP-series microcontroller’s own pins, and capture a logic trace of what is going on there, at full system speed.
-
 これまで、プロセッサから直接PIOにデータを書き込むことについて見てきた。これはしばしば、プロセッサがデータ転送を行うためにFIFOの空きを待って空回りすることにつながる。また、達成できるデータ・スループットも制限されます。
+
+RP-series microcontrollers are equipped with a powerful direct memory access unit (DMA), which can transfer data for you in the background. Suitably programmed, the DMA can make quite long sequences of transfers without supervision.
 
 RPシリーズ・マイコンには、強力なダイレクト・メモリ・アクセス・ユニット(DMA)が搭載されており、バックグラウンドでデータ転送を行うことができます。適切にプログラムされたDMAは、監視なしで非常に長い転送シーケンスを実行できます。
 
+Up to one word per system clock can be transferred to or from a PIO state machine, which is, to be quite technically precise, more bandwidth than you can shake a stick at. The bandwidth is shared across all state machines, but you can use the full amount on one state machine.
+
 システムクロックあたり最大1ワードをPIOステートマシンに転送することができる。帯域幅はすべてのステートマシンで共有されますが、1つのステートマシンで全量を使用できます。
 
-logic_analyserの例を見てみましょう。この例では、PIOを使用してRPシリーズ・マイクロコントローラ自身のピンの一部をサンプリングし、そこで何が起こっているのかのロジック・トレースを、フル・システム速度でキャプチャします。
+Let’s take a look at the `logic_analyser` example, which uses PIO to sample some of the RP-series microcontroller’s own pins, and capture a logic trace of what is going on there, at full system speed.
+
+`logic_analyser` の例を見てみましょう。この例では、PIOを使用してRPシリーズ・マイクロコントローラ自身のピンの一部をサンプリングし、そこで何が起こっているのかのロジック・トレースを、フル・システム速度でキャプチャします。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/logic_analyser/logic_analyser.c Lines 40 - 63
 
 ```
 40 void logic_analyser_init(PIO pio, uint sm, uint pin_base, uint pin_count, float div) {
-41 // Load a program to capture n pins. This is just a single `in pins, n`
-42 // instruction with a wrap.
-43 uint16_t capture_prog_instr = pio_encode_in(pio_pins, pin_count);
-44 struct pio_program capture_prog = {
-45 .instructions = &capture_prog_instr,
-46 .length = 1,
-47 .origin = -1
-48 };
-49 uint offset = pio_add_program(pio, &capture_prog);
+41      // Load a program to capture n pins. This is just a single `in pins, n`
+42      // instruction with a wrap.
+43      uint16_t capture_prog_instr = pio_encode_in(pio_pins, pin_count);
+44      struct pio_program capture_prog = {
+45          .instructions = &capture_prog_instr,
+46          .length = 1,
+47          .origin = -1
+48      };
+49      uint offset = pio_add_program(pio, &capture_prog);
 50
-51 // Configure state machine to loop over this `in` instruction forever,
-52 // with autopush enabled.
-53 pio_sm_config c = pio_get_default_sm_config();
-54 sm_config_set_in_pins(&c, pin_base);
-55 sm_config_set_wrap(&c, offset, offset);
-56 sm_config_set_clkdiv(&c, div);
-57 // Note that we may push at a < 32 bit threshold if pin_count does not
-58 // divide 32. We are using shift-to-right, so the sample data ends up
-59 // left-justified in the FIFO in this case, with some zeroes at the LSBs.
-60 sm_config_set_in_shift(&c, true, true, bits_packed_per_word(pin_count));
-61 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
-62 pio_sm_init(pio, sm, offset, &c);
+51      // Configure state machine to loop over this `in` instruction forever,
+52      // with autopush enabled.
+53      pio_sm_config c = pio_get_default_sm_config();
+54      sm_config_set_in_pins(&c, pin_base);
+55      sm_config_set_wrap(&c, offset, offset);
+56      sm_config_set_clkdiv(&c, div);
+57      // Note that we may push at a < 32 bit threshold if pin_count does not
+58      // divide 32. We are using shift-to-right, so the sample data ends up
+59      // left-justified in the FIFO in this case, with some zeroes at the LSBs.
+60      sm_config_set_in_shift(&c, true, true, bits_packed_per_word(pin_count));
+61      sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+62      pio_sm_init(pio, sm, offset, &c);
 63 }
 ```
 
-Our program consists only of a single in pins, <pin_count> instruction, with program wrapping and autopull enabled.  Because the amount of data to be shifted is only known at runtime, and because the program is so short, we are generating the program dynamically here (using the pio_encode_ functions) instead of pushing it through pioasm. The program is wrapped in a data structure stating how big the program is, and where it must be loaded — in this case origin = -1 meaning "don’t care".
+Our program consists only of a single `in pins`, `<pin_count>` instruction, with program wrapping and autopull enabled.  Because the amount of data to be shifted is only known at runtime, and because the program is so short, we are generating the program dynamically here (using the pio_encode_ functions) instead of pushing it through pioasm. The program is wrapped in a data structure stating how big the program is, and where it must be loaded — in this case origin = -1 meaning "don’t care".
+
+私たちのプログラムは、プログラム・ラッピングとオートプルを有効にした、1つの `in pins`、`<pin_count>` 命令のみで構成されています。 シフトされるデータ量は実行時にしかわからないし、プログラムも短いので、ここでは `pioasm` 通してプログラムをプッシュするのではなく、(`pio_encode_` 関数を使用して)動的にプログラムを生成している。プログラムはデータ構造でラップされ、そのデータ構造にはプログラムのサイズとロードされる場所(この場合、`origin = -1` は "don't care" を意味する)が記述されている。
 
 > Input Shift Register
 > 
-> The input shift register (ISR) is the mirror image of the OSR. Generally data flows through a state machine in one of two directions: System → TX FIFO → OSR → Pins, or Pins → ISR → RX FIFO → System. An in instruction shifts data into the ISR.
-
+> The *input shift register* (ISR) is the mirror image of the OSR. Generally data flows through a state machine in one of two directions: System → TX FIFO → OSR → Pins, or Pins → ISR → RX FIFO → System. An `in` instruction shifts data into the ISR.
 > 
 > If you don’t need the ISR’s shifting ability — for example, if your program is output-only — you can use the ISR as a third scratch register. It’s 32 bits in size, the same as X, Y and the OSR. The full details are in the RP2350 Datasheet.
 
-私たちのプログラムは、プログラム・ラッピングとオートプルを有効にした、1つのインピ ン、<pin_count> 命令のみで構成されています。 シフトされるデータ量は実行時にしかわからないし、プログラムも短いので、ここではpioasmを通してプログラムをプッシュするのではなく、(pio_encode_関数を使用して)動的にプログラムを生成している。プログラムはデータ構造でラップされ、そのデータ構造にはプログラムのサイズとロードされる場所(この場合、origin = -1は 「don't care 」を意味する)が記述されている。
-
 > 入力シフト・レジスタ
 >
-> 入力シフト・レジスタ(ISR)はOSRの鏡像である。一般的に、データはステートマシンを2つの方向のいずれかで流れる: システム → TX FIFO → OSR → ピン、またはピン → ISR → RX FIFO → システムです。in 命令はデータを ISR にシフトします。
+> *入力シフト・レジスタ*(ISR)はOSRの鏡像である。一般的に、データはステートマシンを2つの方向のいずれかで流れる: システム → TX FIFO → OSR → ピン、またはピン → ISR → RX FIFO → システムです。 `in` 命令はデータを ISR にシフトします。
 >
 > ISRのシフト機能を必要としない場合、例えばプログラムが出力のみの場合、ISRを第3のスクラッチ・レジスタとして使用することができます。サイズは32ビットで、X、Y、OSRと同じです。詳細はRP2350データシートに記載されています。
 
-We load the program into the chosen PIO, and then configure the input pin mapping on the chosen state machine so that its in pins instruction will see the pins we care about. For an in instruction we only need to worry about configuring the base pin, i.e. the pin which is the least significant bit of the in instruction’s sample. The number of pins to be sampled is determined by the bit count parameter of the in pins instruction — it will sample n pins starting at the base we specified, and shift them into the ISR.
+We load the program into the chosen PIO, and then configure the input pin mapping on the chosen state machine so that its `in pins` instruction will see the pins we care about. For an `in` instruction we only need to worry about configuring the base pin, i.e. the pin which is the least significant bit of the `in` instruction’s sample. The number of pins to be sampled is determined by the bit count parameter of the `in pins` instruction — it will sample *n* pins starting at the base we specified, and shift them into the ISR.
+
+選択したPIOにプログラムをロードし、選択したステートマシンの入力ピン・マッピングを設定し、 `in pins` 命令で気になるピンを確認できるようにします。 `in` 命令では、ベース・ピン、つまり `in` 命令のサンプルの最下位ビットとなるピンの設定だけを気にすればよい。サンプリングするピンの数は、`in pins` 命令のビットカウントパラメータで決定します。 指定したベースからはじまる *n* ピンをサンプリングし、ISR にシフトして入れ込む。
 
 > Pin Groups (Mapping)
 > 
 > We mentioned earlier that there are four pin groups to configure, to connect a state machine’s internal data buses to the GPIOs it manipulates. A state machine accesses all pins within a group at once, and pin groups can overlap. So far we have seen the out, side-set and in pin groups. The fourth is set.
-
 > 
-> The out group is the pins affected by shifting out data from the OSR, using out pins or out pindirs, up to 32 bits at a time. The set group is used with set pins and set pindirs instructions, up to 5 bits at a time, with data that is encoded directly in the instruction. It’s useful for toggling control signals. The side-set group is similar to the set group, but runs simultaneously with another instruction. Note: mov pin uses the in or out group, depending on direction.
-
-選択したPIOにプログラムをロードし、選択したステートマシンの入力ピン・マッピングを設定し、イン・ピン命令で気になるピンを確認できるようにします。in命令では、ベース・ピン、つまりin命令のサンプルの最下位ビットとなるピンの設定だけを気にすればよい。サンプリングするピンの数は、in pins命令のビットカウントパラメータで決定します。
+> The out group is the pins affected by shifting out data from the OSR, using `out pins` or `out pindirs`, up to 32 bits at a time. The set group is used with `set pins` and `set pindirs` instructions, up to 5 bits at a time, with data that is encoded directly in the instruction. It’s useful for toggling control signals. The side-set group is similar to the set group, but runs simultaneously with another instruction. Note: `mov pin` uses the in or out group, depending on direction.
 
 > Pin Groups (Mapping)
 >
 > ステートマシンの内部データバスを操作するGPIOに接続するために、設定すべき4つのピングループがあることを前述しました。ステートマシンはグループ内のすべてのピンに一度にアクセスし、ピングループは重複することがあります。これまで、out、side-set、inのピングループを見てきた。4つ目はセットである。
-
 >
-> アウト・グループは、アウト・ピンまたはアウト・ピンディールを使ってOSRからデータをシフト・アウトすることによって影響を受けるピンで、一度に最大32ビットまで使用できる。setグループはset pins命令やset pindirs命令で使用され、一度に最大5ビットまで、命令で直接エンコードされたデータで使用されます。制御信号をトグルするのに便利です。side-setグループはsetグループに似ていますが、別の命令と同時に実行されます。注:movピンは、方向によってinまたはoutグループを使用します。
+> アウト・グループは、`out pins` または `out pindirs` を使ってOSRからデータをシフト・アウトすることによって影響を受けるピンで、一度に最大32ビットまで使用できる。 setグループは `set pins` 命令や `set pindirs` 命令で使用され、一度に最大5ビットまで、命令で直接エンコードされたデータで使用されます。これは制御信号をトグルするのに便利です。side-setグループはsetグループに似ていますが、別の命令と同時に実行されます。注: `mov pin` は、方向によってinまたはoutグループを使用します。
 
 Configuring the clock divider optionally slows down the state machine’s execution: a clock divisor of n means 1 instruction will be executed per n system clock cycles. The default system clock frequency for SDK is 125MHz.
 
-sm_config_set_in_shift sets the shift direction to rightward, enables autopush, and sets the autopush threshold to 32.
-
-The state machine keeps an eye on the total amount of data shifted into the ISR, and on the in which reaches or breaches a total shift count of 32 (or whatever number you have configured), the ISR contents, along with the new data from the in. goes straight to the RX FIFO. The ISR is cleared to zero in the same operation.
-
-sm_config_set_fifo_join is used to manipulate the FIFOs so that the DMA can get more throughput. If we want to sample every pin on every clock cycle, that’s a lot of bandwidth! We’ve finished describing how the state machine should be configured, so we use pio_sm_init to load the configuration into the state machine, and get the state machine into a clean initial state.
-
 クロック分周器を設定すると、オプションでステートマシンの実行速度が遅くなる:クロック分周器をnに設定すると、nシステム・クロック・サイクルあたり1命令が実行されることになる。SDKのデフォルトのシステムクロック周波数は125MHzである。
 
-sm_config_set_in_shift シフト方向を右方向に設定し、オートプッシュを有効にし、オートプッシュしきい値を32に設定する。
+`sm_config_set_in_shift` sets the shift direction to rightward, enables autopush, and sets the autopush threshold to 32.  The state machine keeps an eye on the total amount of data shifted into the ISR, and on the `in` which reaches or breaches a total shift count of 32 (or whatever number you have configured), the ISR contents, along with the new data from the `in.` goes straight to the RX FIFO. The ISR is cleared to zero in the same operation.
 
-ステートマシンはISRにシフトされたデータの総量を監視し、シフト総カウントが32(または設定された任意の数)に達するか突破したin.で、ISRの内容はin.からの新しいデータと共にRX FIFOに直接送られる。sm_config_set_fifo_join は、DMA がより多くのスループットを得られるように FIFO を操作するために使用される。毎クロック・サイクルですべてのピンをサンプリングしようとすると、それはかなりの帯域幅になります！ステートマシンがどのように設定されるべきかを説明し終わったので、pio_sm_init を使用してステートマシンにコンフィギュレーションをロードし、ステートマシンをクリーンな初期状態にします。
+
+`sm_config_set_in_shift` シフト方向を右方向に設定し、オートプッシュを有効にし、オートプッシュしきい値を32に設定する。ステートマシンはISRにシフトされたデータの総量を監視し、シフト総カウントが32(または設定された任意の数)に達するか突破した `in` で、ISRの内容は `in` からの新しいデータと共にRX FIFOに直接送られる。同じオペレーションで、ISR はゼロクリアされる。
+
+
+`sm_config_set_fifo_join` is used to manipulate the FIFOs so that the DMA can get more throughput. If we want to sample every pin on every clock cycle, that’s a lot of bandwidth! We’ve finished describing how the state machine should be configured, so we use `pio_sm_init` to load the configuration into the state machine, and get the state machine into a clean initial state.
+
+`sm_config_set_fifo_join` は、DMA がより多くのスループットを得られるように FIFO を操作するために使用される。毎クロック・サイクルですべてのピンをサンプリングしようとすると、それはかなりの帯域幅になります！ステートマシンがどのように設定されるべきかを説明し終わったので、 `pio_sm_init` を使用してステートマシンにコンフィギュレーションをロードし、ステートマシンをクリーンな初期状態にします。
 
 > FIFO Joining
 > 
 > Each state machine is equipped with a FIFO going in each direction: the TX FIFO buffers data on its way out of the system, and the RX FIFO does the same for data coming in. Each FIFO has four data slots, each holding 32 bits of data. Generally you want FIFOs to be as deep as possible, so there is more slack time between the timing-critical operation of a peripheral, and data transfers from system agents which may be quite busy or have high access latency. However this comes with significant hardware cost.
-
 > 
 > If you are only using one of the two FIFOs — TX or RX — a state machine can pool its resources to provide a single FIFO with double the depth. The RP2350 Datasheet goes into much more detail, including how this mechanism actually works under the hood.
-
-Our state machine is ready to sample some pins. Let’s take a look at how we hook up the DMA to our state machine, and tell the state machine to start sampling once it sees some trigger condition.
 
 > FIFO Joining
 >
 > 各ステートマシンには、各方向に向かうFIFOが装備されている。TX FIFOはシステムから出るデータをバッファリングし、RX FIFOは入ってくるデータに対して同じことを行う。各FIFOには4つのデータ・スロットがあり、それぞれ32ビットのデータを保持する。ペリフェラルのタイミングが重要な動作と、非常にビジーであったりアクセスレイテンシが高かったりするシステムエージェントからのデータ転送の間に、より多くのスラックタイムがあるように、一般的にFIFOはできるだけ深くしたいものです。しかし、これには大きなハードウェアコストがかかります。
-
 >
 > TXまたはRXの2つのFIFOのうち1つだけを使用する場合、ステートマシンはそのリソースをプールして、2倍の深さの1つのFIFOを提供することができます。RP2350のデータシートでは、このメカニズムが実際にどのように動作するのかを含め、より詳細に説明しています。
+
+Our state machine is ready to sample some pins. Let’s take a look at how we hook up the DMA to our state machine, and tell the state machine to start sampling once it sees some trigger condition.
 
 ステートマシンは、いくつかのピンをサンプリングする準備ができています。DMAをステートマシンに接続し、トリガ条件を見つけたらサンプリングを開始するようにステートマシンに指示する方法を見てみましょう。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/logic_analyser/logic_analyser.c Lines 65 - 87
 
 ```
-65 void logic_analyser_arm(PIO pio, uint sm, uint dma_chan, uint32_t *capture_buf, size_t
-  capture_size_words,
-66 uint trigger_pin, bool trigger_level) {
-67 pio_sm_set_enabled(pio, sm, false);
-68 // Need to clear _input shift counter_, as well as FIFO, because there may be
-69 // partial ISR contents left over from a previous run. sm_restart does this.
-70 pio_sm_clear_fifos(pio, sm);
-71 pio_sm_restart(pio, sm);
+65 void logic_analyser_arm(PIO pio, uint sm, uint dma_chan, uint32_t 
+            *capture_buf, size_t capture_size_words,
+66          uint trigger_pin, bool trigger_level) {
+67      pio_sm_set_enabled(pio, sm, false);
+68      // Need to clear _input shift counter_, as well as FIFO, because there may be
+69      // partial ISR contents left over from a previous run. sm_restart does this.
+70      pio_sm_clear_fifos(pio, sm);
+71      pio_sm_restart(pio, sm);
 72
-73 dma_channel_config c = dma_channel_get_default_config(dma_chan);
-74 channel_config_set_read_increment(&c, false);
-75 channel_config_set_write_increment(&c, true);
-76 channel_config_set_dreq(&c, pio_get_dreq(pio, sm, false));
+73      dma_channel_config c = dma_channel_get_default_config(dma_chan);
+74      channel_config_set_read_increment(&c, false);
+75      channel_config_set_write_increment(&c, true);
+76      channel_config_set_dreq(&c, pio_get_dreq(pio, sm, false));
 77
-78 dma_channel_configure(dma_chan, &c,
-79 capture_buf, // Destination pointer
-80 &pio->rxf[sm], // Source pointer
-81 capture_size_words, // Number of transfers
-82 true // Start immediately
-83 );
+78      dma_channel_configure(dma_chan, &c,
+79              capture_buf,        // Destination pointer
+80              &pio->rxf[sm],      // Source pointer
+81              capture_size_words, // Number of transfers
+82              true                // Start immediately
+83      );
 84
-85 pio_sm_exec(pio, sm, pio_encode_wait_gpio(trigger_level, trigger_pin));
-86 pio_sm_set_enabled(pio, sm, true);
+85      pio_sm_exec(pio, sm, pio_encode_wait_gpio(trigger_level, trigger_pin));
+86      pio_sm_set_enabled(pio, sm, true);
 87 }
 ```
 
 We want the DMA to read from the RX FIFO on our PIO state machine, so every DMA read is from the same address.
 
+DMAはPIOステートマシンのRX FIFOから読み込みたいので、すべてのDMA読み込みは同じアドレスからとなる。
+
 The write address, on the other hand, should increment after every DMA transfer so that the DMA gradually fills up our capture buffer as data comes in. We need to specify a data request signal (DREQ) so that the DMA transfers data at the proper rate.
+
+一方、書き込みアドレスは、DMA転送のたびにインクリメントして、データが入ってくるたびにDMAがキャプチャ・バッファを徐々に埋めていくようにします。DMAが適切なレートでデータを転送できるように、データ要求信号(DREQ)を指定する必要がある。
 
 > Data request signals
 > 
 > The DMA can transfer data incredibly fast, and almost invariably this will be much faster than your PIO program actually needs. The DMA paces itself based on a data request handshake with the state machine, so there’s no worry about it overflowing or underflowing a FIFO, as long as you have selected the correct DREQ signal. The state machine coordinates with the DMA to tell it when it has room available in its TX FIFO, or data available in its RX FIFO.
 
-We need to provide the DMA channel with an initial read address, an initial write address, and the total number of reads/writes to be performed (not the total number of bytes). We start the DMA channel immediately — from this point on, the DMA is poised, waiting for the state machine to produce data. As soon as data appears in the RX FIFO, the DMA will pounce and whisk the data away to our capture buffer in system memory.
-
-DMAはPIOステートマシンのRX FIFOから読み込みたいので、すべてのDMA読み込みは同じアドレスからとなる。
-
-一方、書き込みアドレスは、DMA転送のたびにインクリメントして、データが入ってくるたびにDMAがキャプチャ・バッファを徐々に埋めていくようにします。DMAが適切なレートでデータを転送できるように、データ要求信号(DREQ)を指定する必要がある。
-
 > データ要求信号
 >
 > DMAは信じられないほど高速にデータを転送することができ、ほとんどの場合、これはPIOプログラムが実際に必要とする速度よりもはるかに速くなります。DMAは、ステートマシンとのデータ要求ハンドシェイクに基づいてペース配分するので、正しいDREQ信号を選択している限り、FIFOがオーバーフローしたりアンダーフローしたりする心配はない。ステートマシンはDMAと協調して、TX FIFOに空きがあるとき、またはRX FIFOにデータがあるとき、それをDMAに伝えます。
 
+We need to provide the DMA channel with an initial read address, an initial write address, and the total number of reads/writes to be performed (not the total number of bytes). We start the DMA channel immediately — from this point on, the DMA is poised, waiting for the state machine to produce data. As soon as data appears in the RX FIFO, the DMA will pounce and whisk the data away to our capture buffer in system memory.
+
 DMAチャネルに、初期読み取りアドレス、初期書き込みアドレス、および実行される読み取り/書き込みの合計数(合計バイト数ではない)を提供する必要があります。この時点からDMAは待機し、ステートマシンがデータを生成するのを待っている。データがRX FIFOに現れるとすぐに、DMAは飛びかかり、システム・メモリ内のキャプチャ・バッファにデータを運びます。
 
-As things stand right now, the state machine will immediately go into a 1-cycle loop of in instructions once enabled.
+As things stand right now, the state machine will immediately go into a 1-cycle loop of in instructions once enabled.  Since the system memory available for capture is quite limited, it would be better for the state machine to wait for some trigger before it starts sampling. Specifically, we are using a `wait pin` instruction to stall the state machine until a certain pin goes high or low, and again we are using one of the `pio_encode_` functions to encode this instruction on-the-fly.
 
-Since the system memory available for capture is quite limited, it would be better for the state machine to wait for some trigger before it starts sampling. Specifically, we are using a wait pin instruction to stall the state machine until a certain pin goes high or low, and again we are using one of the pio_encode_ functions to encode this instruction on-the-fly.
+現状では、ステートマシンはイネーブルになるとすぐにイン命令の1サイクルループに入る。キャプチャに使用できるシステム・メモリはかなり限られているため、ステート・マシンがサンプリングを開始する前に何らかのトリガーを待つ方が良いだろう。具体的には、あるピンがHighまたはLowになるまでステートマシンをストールさせるために `wait pin` 命令を使用します。また、この命令をオンザフライでエンコードするために `pio_encode_` 関数の1つを使用します。
 
-pio_sm_exec tells the state machine to immediately execute some instruction you give it. This instruction never gets written to the instruction memory, and if the instruction stalls (as it will in this case — a wait instruction’s job is to stall) then the state machine will latch the instruction until it completes. With the state machine stalled on the wait instruction, we can enable it without being immediately flooded by data.
+`pio_sm_exec` tells the state machine to immediately execute some instruction you give it. This instruction never gets written to the instruction memory, and if the instruction stalls (as it will in this case — a `wait` instruction’s job is to stall) then the state machine will latch the instruction until it completes. With the state machine stalled on the `wait` instruction, we can enable it without being immediately flooded by data.
+
+`pio_sm_exec` は、ステートマシンに与えた命令を即座に実行するように指示します。この命令が命令メモリに書き込まれることはなく、命令がストールした場合(この場合、 `wait` 命令の仕事はストールすることです)、ステートマシンは命令が完了するまでその命令をラッチします。ステートマシンが `wait` 命令でストールしているため、すぐにデータが殺到することなく、 `wait` 命令を有効にすることができる。
 
 At this point everything is armed and waiting for the trigger signal from the chosen GPIO. This will lead to the following sequence of events:
 
-1. The wait instruction will clear
+この時点で、すべてが待機状態となり、選択されたGPIOからのトリガ信号を待っている。これにより、以下の一連のイベントが発生する:
 
-2. On the very next cycle, state machine will start to execute in instructions from the program memory
+1. The `wait` instruction will clear
+
+2. On the very next cycle, state machine will start to execute `in` instructions from the program memory
 
 3. As soon as data appears in the RX FIFO, the DMA will start to transfer it.
 
 4. Once the requested amount of data has been transferred by the DMA, it’ll automatically stop
 
-現状では、ステートマシンはイネーブルになるとすぐにイン命令の1サイクルループに入る。
+(和約)
 
-キャプチャに使用できるシステム・メモリはかなり限られているため、ステート・マシンがサンプリングを開始する前に何らかのトリガーを待つ方が良いだろう。具体的には、あるピンがHighまたはLowになるまでステートマシンをストールさせるためにwait pin命令を使用します。また、この命令をオンザフライでエンコードするためにpio_encode_関数の1つを使用します。
+1. `wait` 命令がクリアされる。
 
-pio_sm_execは、ステートマシンに与えた命令を即座に実行するように指示します。この命令が命令メモリに書き込まれることはなく、命令がストールした場合(この場合、待機命令の仕事はストールすることです)、ステートマシンは命令が完了するまでその命令をラッチします。ステートマシンが待機命令でストールしているため、すぐにデータが殺到することなく、待機命令を有効にすることができる。
-
-この時点で、すべてが待機状態となり、選択されたGPIOからのトリガ信号を待っている。これにより、以下の一連のイベントが発生する:
-
-1. wait命令により、
-
-2. 次のサイクルで、ステートマシンがプログラム・メモリからの命令の実行を開始する。
+2. 次のサイクルで、ステートマシンがプログラム・メモリからの `in` 命令の実行を開始する。
 
 3. データがRX FIFOに現れるとすぐに、DMAはそのデータの転送を開始する。
 
@@ -1180,46 +1172,43 @@ pio_sm_execは、ステートマシンに与えた命令を即座に実行する
 
 > State Machine EXEC Functionality
 > 
-> So far our state machines have executed instructions from the instruction memory, but there are other options. One is the SMx_INSTR register (used by pio_sm_exec()): the state machine will immediately execute whatever you write here, momentarily interrupting the current program it’s running if necessary. This is useful for poking around inside the state machine from the system side, for initial setup.
-
+> So far our state machines have executed instructions from the instruction memory, but there are other options. One is the `SMx_INSTR` register (used by `pio_sm_exec()`): the state machine will immediately execute whatever you write here, momentarily interrupting the current program it’s running if necessary. This is useful for poking around inside the state machine from the system side, for initial setup.
 > 
-> The other two options, which use the same underlying hardware, are out exec (shift out an instruction from the data being streamed through the OSR, and execute it) and mov exec (execute an instruction stashed in e.g. a scratch register). Besides making people’s eyes bulge, these are really useful if you want the state machine to perform some data-defined operation at a certain point in an output stream.
+> The other two options, which use the same underlying hardware, are `out exec` (shift out an instruction from the data being streamed through the OSR, and execute it) and `mov exec` (execute an instruction stashed in e.g. a scratch register). Besides making people’s eyes bulge, these are really useful if you want the state machine to perform some data-defined operation at a certain point in an output stream.
 
 > State Machine EXEC Functionality
 >
-> ここまでのステートマシンは命令メモリから命令を実行してきたが、他にも選択肢がある。その1つがSMx_INSTRレジスタ(pio_sm_exec()で使用)です。ステートマシンはここに書き込んだものを即座に実行し、必要であれば実行中のプログラムを一瞬中断します。これは、システム側からステートマシンの内部を覗いたり、初期設定を行ったりするのに便利です。
-
+> ここまでのステートマシンは命令メモリから命令を実行してきたが、他にも選択肢がある。その1つが `SMx_INSTR` レジスタ(`pio_sm_exec()`で使用)です。ステートマシンはここに書き込んだものを即座に実行し、必要であれば実行中のプログラムを一瞬中断します。これは、システム側からステートマシンの内部を覗いたり、初期設定を行ったりするのに便利です。
 >
-> 他の2つのオプションは、同じ基礎となるハードウェアを使用するもので、out exec(OSRを通してストリームされているデータから命令をシフトアウトして実行する)とmov exec(例えばスクラッチ・レジスタに格納された命令を実行する)です。これらは、人々の目を肥大化させるだけでなく、出力ストリームのある時点で、ステートマシンに何らかのデータ定義の操作を実行させたい場合に本当に便利です。
+> 他の2つのオプションは、同じ下回りハードウェアを使用するもので、`out exec`(OSRを通してストリームされているデータから命令をシフトアウトして実行する)と `mov exec`(例えばスクラッチ・レジスタに格納された命令を実行する)です。これらは、人々の目を丸くするだけでなく、出力ストリームのある時点で、ステートマシンに何らかのデータ定義の操作を実行させたい場合に本当に便利です。
 
 The example code provides this cute function for displaying the captured logic trace as ASCII art in a terminal:
 
-サンプル・コードは、キャプチャしたロジック・トレースをASCIIアートとしてターミナルに表示するための、このかわいい機能を提供します:
+サンプルコードは、キャプチャしたロジックトレースをASCIIアートとしてターミナルに表示するための、このかわいい機能を提供します:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/logic_analyser/logic_analyser.c Lines 89 - 108
 
 ```
- 89 void print_capture_buf(const uint32_t *buf, uint pin_base, uint pin_count, uint32_t
-  n_samples) {
- 90 // Display the capture buffer in text form, like this:
- 91 // 00: __--__--__--__--__--__--
- 92 // 01: ____----____----____----
- 93 printf("Capture:\n");
- 94 // Each FIFO record may be only partially filled with bits, depending on
- 95 // whether pin_count is a factor of 32.
- 96 uint record_size_bits = bits_packed_per_word(pin_count);
- 97 for (uint pin = 0; pin < pin_count; ++pin) {
- 98 printf("%02d: ", pin + pin_base);
- 99 for (uint32_t sample = 0; sample < n_samples; ++sample) {
-100 uint bit_index = pin + sample * pin_count;
-101 uint word_index = bit_index / record_size_bits;
-102 // Data is left-justified in each FIFO entry, hence the (32 - record_size_bits)
-  offset
-103 uint word_mask = 1u << (bit_index % record_size_bits + 32 - record_size_bits);
-104 printf(buf[word_index] & word_mask ? "-" : "_");
-105 }
-106 printf("\n");
-107 }
+ 89 void print_capture_buf(const uint32_t *buf, uint pin_base, uint pin_count,  
+                            uint32_t n_samples) {
+ 90     // Display the capture buffer in text form, like this:
+ 91     // 00: __--__--__--__--__--__--
+ 92     // 01: ____----____----____----
+ 93     printf("Capture:\n");
+ 94     // Each FIFO record may be only partially filled with bits, depending on
+ 95     // whether pin_count is a factor of 32.
+ 96     uint record_size_bits = bits_packed_per_word(pin_count);
+ 97     for (uint pin = 0; pin < pin_count; ++pin) {
+ 98         printf("%02d: ", pin + pin_base);
+ 99         for (uint32_t sample = 0; sample < n_samples; ++sample) {
+100             uint bit_index = pin + sample * pin_count;
+101             uint word_index = bit_index / record_size_bits;
+102             // Data is left-justified in each FIFO entry, hence the (32 - record_size_bits) offset
+103             uint word_mask = 1u << (bit_index % record_size_bits + 32 - record_size_bits);
+104             printf(buf[word_index] & word_mask ? "-" : "_");
+105         }
+106         printf("\n");
+107     }
 108 }
 ```
 
@@ -1231,56 +1220,55 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/logi
 
 ```
 110 int main() {
-111 stdio_init_all();
-112 printf("PIO logic analyser example\n");
+111     stdio_init_all();
+112     printf("PIO logic analyser example\n");
 113
-114 // We're going to capture into a u32 buffer, for best DMA efficiency. Need
-115 // to be careful of rounding in case the number of pins being sampled
-116 // isn't a power of 2.
-117 uint total_sample_bits = CAPTURE_N_SAMPLES * CAPTURE_PIN_COUNT;
-118 total_sample_bits += bits_packed_per_word(CAPTURE_PIN_COUNT) - 1;
-119 uint buf_size_words = total_sample_bits / bits_packed_per_word(CAPTURE_PIN_COUNT);
-120 uint32_t *capture_buf = malloc(buf_size_words * sizeof(uint32_t));
-121 hard_assert(capture_buf);
+114     // We're going to capture into a u32 buffer, for best DMA efficiency. Need
+115     // to be careful of rounding in case the number of pins being sampled
+116     // isn't a power of 2.
+117     uint total_sample_bits = CAPTURE_N_SAMPLES * CAPTURE_PIN_COUNT;
+118     total_sample_bits += bits_packed_per_word(CAPTURE_PIN_COUNT) - 1;
+119     uint buf_size_words = total_sample_bits / bits_packed_per_word(CAPTURE_PIN_COUNT);
+120     uint32_t *capture_buf = malloc(buf_size_words * sizeof(uint32_t));
+121     hard_assert(capture_buf);
 122
-123 // Grant high bus priority to the DMA, so it can shove the processors out
-124 // of the way. This should only be needed if you are pushing things up to
-125 // >16bits/clk here, i.e. if you need to saturate the bus completely.
-126 bus_ctrl_hw->priority = BUSCTRL_BUS_PRIORITY_DMA_W_BITS |
+123     // Grant high bus priority to the DMA, so it can shove the processors out
+124     // of the way. This should only be needed if you are pushing things up to
+125     // >16bits/clk here, i.e. if you need to saturate the bus completely.
+126     bus_ctrl_hw->priority = BUSCTRL_BUS_PRIORITY_DMA_W_BITS |
   BUSCTRL_BUS_PRIORITY_DMA_R_BITS;
 127
-128 PIO pio = pio0;
-129 uint sm = 0;
-130 uint dma_chan = 0;
+128     PIO pio = pio0;
+129     uint sm = 0;
+130     uint dma_chan = 0;
 131
-132 logic_analyser_init(pio, sm, CAPTURE_PIN_BASE, CAPTURE_PIN_COUNT, 1.f);
+132     logic_analyser_init(pio, sm, CAPTURE_PIN_BASE, CAPTURE_PIN_COUNT, 1.f);
 133
-134 printf("Arming trigger\n");
-135 logic_analyser_arm(pio, sm, dma_chan, capture_buf, buf_size_words, CAPTURE_PIN_BASE,
-  true);
+134     printf("Arming trigger\n");
+135     logic_analyser_arm(pio, sm, dma_chan, capture_buf, buf_size_words, CAPTURE_PIN_BASE, true);
 136
-137 printf("Starting PWM example\n");
-138 // PWM example: -----------------------------------------------------------
-139 gpio_set_function(CAPTURE_PIN_BASE, GPIO_FUNC_PWM);
-140 gpio_set_function(CAPTURE_PIN_BASE + 1, GPIO_FUNC_PWM);
-141 // Topmost value of 3: count from 0 to 3 and then wrap, so period is 4 cycles
-142 pwm_hw->slice[0].top = 3;
-143 // Divide frequency by two to slow things down a little
-144 pwm_hw->slice[0].div = 4 << PWM_CH0_DIV_INT_LSB;
-145 // Set channel A to be high for 1 cycle each period (duty cycle 1/4) and
-146 // channel B for 3 cycles (duty cycle 3/4)
-147 pwm_hw->slice[0].cc =
-148 (1 << PWM_CH0_CC_A_LSB) |
-149 (3 << PWM_CH0_CC_B_LSB);
-150 // Enable this PWM slice
-151 pwm_hw->slice[0].csr = PWM_CH0_CSR_EN_BITS;
-152 // ------------------------------------------------------------------------
+137     printf("Starting PWM example\n");
+138     // PWM example: -----------------------------------------------------------
+139     gpio_set_function(CAPTURE_PIN_BASE, GPIO_FUNC_PWM);
+140     gpio_set_function(CAPTURE_PIN_BASE + 1, GPIO_FUNC_PWM);
+141     // Topmost value of 3: count from 0 to 3 and then wrap, so period is 4 cycles
+142     pwm_hw->slice[0].top = 3;
+143     // Divide frequency by two to slow things down a little
+144     pwm_hw->slice[0].div = 4 << PWM_CH0_DIV_INT_LSB;
+145     // Set channel A to be high for 1 cycle each period (duty cycle 1/4) and
+146     // channel B for 3 cycles (duty cycle 3/4)
+147     pwm_hw->slice[0].cc =
+148             (1 << PWM_CH0_CC_A_LSB) |
+149             (3 << PWM_CH0_CC_B_LSB);
+150     // Enable this PWM slice
+151     pwm_hw->slice[0].csr = PWM_CH0_CSR_EN_BITS;
+152     // ------------------------------------------------------------------------
 153
-154 // The logic analyser should have started capturing as soon as it saw the
-155 // first transition. Wait until the last sample comes in from the DMA.
-156 dma_channel_wait_for_finish_blocking(dma_chan);
+154     // The logic analyser should have started capturing as soon as it saw the
+155     // first transition. Wait until the last sample comes in from the DMA.
+156     dma_channel_wait_for_finish_blocking(dma_chan);
 157
-158 print_capture_buf(capture_buf, CAPTURE_PIN_BASE, CAPTURE_PIN_COUNT, CAPTURE_N_SAMPLES);
+158     print_capture_buf(capture_buf, CAPTURE_PIN_BASE, CAPTURE_PIN_COUNT, CAPTURE_N_SAMPLES);
 159 }
 ```
 
@@ -1382,7 +1370,7 @@ list of pioasm directives
 
 `#define <program_name>_<symbol>` value for program symbols or `#define <symbol> value` for global symbols
 
-||.define ( PUBLIC )<symbol> <value>||<symbol> という名前の整数シンボルを値<value> で定義する(セクション 3.3.3 参照)。この.defineが入力ファイルの最初のプログラムの前に現れる場合、このdefineは全てのプログラムに対してグローバルであり、そうでない場合、このdefineが現れるプログラムに対してローカルである。PUBLICが指定された場合、シンボルはユーザーコードで使用するためにアセンブルされた出力に出力されます。SDKの場合、これは次のような形になります:
+||.define ( PUBLIC )<symbol> <value>||<symbol> という名前の整数シンボルを値<value> で定義する(セクション 3.3.3 参照)。この.defineが入力ファイルの最初のプログラムの前に現れる場合、このdefineは全てのプログラムに対してグローバルであり、そうでない場合、このdefineが現れるプログラムに対してローカルである。PUBLICが指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDKの場合、これは次のような形になります:
 
 プログラムシンボルでは `#define <プログラム名>_<シンボル>` の値、グローバルシンボルでは `#define <シンボル>` の値
 
@@ -1561,7 +1549,7 @@ at the start of a line.
 > A label is really just an automatic .define with a value set to the current program instruction offset. A PUBLIC label is exposed to the user code in the same way as a PUBLIC .define.
 
 >  TIP
-> ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動 `.define` にすぎません。 *PUBLIC* ラベルは *PUBLIC* `.define` と同じようにユーザーコードに公開されます。
+> ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動 `.define` にすぎません。 *PUBLIC* ラベルは *PUBLIC* `.define` と同じようにユーザコードに公開されます。
 
 ### 3.3.7. Instructions
 
