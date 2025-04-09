@@ -18,7 +18,13 @@ sed '# preprocess
     }
 }' |
 sed '
+/^<directive>/,/^<\/directive>/b env
 /^<desc>/,/^<\/desc>/{
+:env
+    /^<directive>/{
+        s/^.*/<div class="directive">/
+        b
+    }
     /^<desc>/{
         s/^.*/<div class="desc">/
         b
@@ -29,11 +35,16 @@ sed '
         s/.*/  <\/span>\
  <\/div>/
         x
-        s/^||\([^|][^|]*\)||/ <div class="desc-entry">\
-  <span class="desc-word">\1<\/span>\
-  <span class="desc-body">/
+        # escape < to &lt;
+        s/</\&lt;/g
+        s/\&lt;br>/<br>/g
+        s/^||\(..*\)||/ <div class="desc-entry">\
+  <span class="word">\1<\/span>\
+  <span class="body">/
     }
+    /^<\/directive>/b endenv
     /^<\/desc>/{
+    :endenv
         x
         /^./p
         s/.*//
