@@ -2,8 +2,8 @@
 
 all: pic-doc.pdf
 
-#XTARGET= memo_jp_x.md
-XTARGET= test_x.md
+XTARGET= memo_jp_x.md
+#XTARGET= test_x.md
 
 TARGET= $(XTARGET)
 

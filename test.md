@@ -1,3 +1,26 @@
+#### test
+
+Table 4. alphabetical
+list of pioasm directives
+
+<directive>
+
+||.define ( PUBLIC ) <symbol> <value>||Define an integer symbol named <symbol> with the value <value> (see Section 3.3.3). If this .define appears before the first program in the input file, then this define is global to all programs, otherwise it is local to the program in which it occurs. If PUBLIC is specified the symbol will be emitted into the assembled output for use by user code. For the SDK this takes the form of:
+
+#define <program_name>_<symbol> value for program symbols or #define <symbol>
+
+value for global symbols
+
+|| .clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point value, but may not currently use arithmetic expressions or defined values. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
+
+||.define ( PUBLIC )<symbol> <value>||<symbol> という名前の整数シンボルを値<value> で定義する(セクション 3.3.3 参照)。この.defineが入力ファイルの最初のプログラムの前に現れる場合、このdefineは全てのプログラムに対してグローバルであり、そうでない場合、このdefineが現れるプログラムに対してローカルである。PUBLICが指定された場合、シンボルはユーザーコードで使用するためにアセンブルされた出力に出力されます。SDKの場合、これは次のような形になります:
+
+プログラムシンボルでは #define <プログラム名>_<シンボル> の値、グローバルシンボルでは #define <シンボル>
+
+の値
+
+</directive>
+
 #### 3.2.2.2. State Machine Configuration
 
 We have here a function ws2812_program_init which is provided to help the user to instantiate an instance of the LED driver program, based on a handful of parameters:
@@ -8,28 +31,18 @@ ws2812_program_init関数は、ユーザーがいくつかのパラメータに�
 
 ||pio|| Which of the PIO instances we are dealing with
 
+and some more
 ||sm|| Which state machine on that PIO we want to configure to run the WS2812 program
-
 ||offset|| Where the PIO program was loaded in PIO’s 5-bit program address space
-
 ||pin|| which GPIO pin our WS2812 LED chain is connected to
-
 ||freq|| The frequency (or rather baud rate) we want to output data at.
-
 ||rgbw|| True if we are using 4-colour LEDs (red, green, blue, white) rather than the usual 3.
-
-||pio|| どのPIOインスタンスを扱っているか
-
+||pio|| どのPIOインスタンスを<br>扱っているか
 ||sm|| WS2812プログラムを実行するために設定したいPIO上のステートマシン
-
 ||offset|| PIOの5ビットプログラムアドレス空間でPIOプログラムがロードされた場所
-
 ||pin|| WS2812 LEDチェーンがどのGPIOピンに接続されているか
-
 ||freq|| データを出力したい周波数(というかボーレート)。
-
 ||rgbw|| 4色LED(赤、緑、青、白)を使う場合は真。
-
 </desc>
 
 Such that:

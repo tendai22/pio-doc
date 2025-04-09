@@ -817,29 +817,21 @@ We have here a function ws2812_program_init which is provided to help the user t
 
 ws2812_program_init関数は、ユーザーがいくつかのパラメータに基づいてLEDドライバー・プログラムのインスタンスを生成するのを助けるために用意されている:
 
+<desc>
+
 ||pio|| Which of the PIO instances we are dealing with
-
 ||sm|| Which state machine on that PIO we want to configure to run the WS2812 program
-
 ||offset|| Where the PIO program was loaded in PIO’s 5-bit program address space
-
 ||pin|| which GPIO pin our WS2812 LED chain is connected to
-
 ||freq|| The frequency (or rather baud rate) we want to output data at.
-
 ||rgbw|| True if we are using 4-colour LEDs (red, green, blue, white) rather than the usual 3.
-
 ||pio|| どのPIOインスタンスを扱っているか
-
 ||sm|| WS2812プログラムを実行するために設定したいPIO上のステートマシン
-
 ||offset|| PIOの5ビットプログラムアドレス空間でPIOプログラムがロードされた場所
-
 ||pin|| WS2812 LEDチェーンがどのGPIOピンに接続されているか
-
 ||freq|| データを出力したい周波数(というかボーレート)。
-
 ||rgbw|| 4色LED(赤、緑、青、白)を使う場合は真。
+</desc>
 
 Such that:
 
@@ -1384,19 +1376,17 @@ The following directives control the assembly of PIO programs:
 Table 4. alphabetical
 list of pioasm directives
 
+<directive>
+
 ||.define ( PUBLIC ) <symbol> <value>||Define an integer symbol named <symbol> with the value <value> (see Section 3.3.3). If this .define appears before the first program in the input file, then this define is global to all programs, otherwise it is local to the program in which it occurs. If PUBLIC is specified the symbol will be emitted into the assembled output for use by user code. For the SDK this takes the form of:
 
-#define <program_name>_<symbol> value for program symbols or #define <symbol>
-
-value for global symbols
-
-|| .clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point value, but may not currently use arithmetic expressions or defined values. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
+`#define <program_name>_<symbol>` value for program symbols or `#define <symbol> value` for global symbols
 
 ||.define ( PUBLIC )<symbol> <value>||<symbol> という名前の整数シンボルを値<value> で定義する(セクション 3.3.3 参照)。この.defineが入力ファイルの最初のプログラムの前に現れる場合、このdefineは全てのプログラムに対してグローバルであり、そうでない場合、このdefineが現れるプログラムに対してローカルである。PUBLICが指定された場合、シンボルはユーザーコードで使用するためにアセンブルされた出力に出力されます。SDKの場合、これは次のような形になります:
 
-プログラムシンボルでは #define <プログラム名>_<シンボル> の値、グローバルシンボルでは #define <シンボル>
+プログラムシンボルでは `#define <プログラム名>_<シンボル>` の値、グローバルシンボルでは `#define <シンボル>` の値
 
-の値
+|| .clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point value, but may not currently use arithmetic expressions or defined values. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
 
 || .clock_div <divider>||このディレクティブが存在する場合、<divider>はプログラムのステートマシンクロックディバイダです。dividerは浮動小数点値ですが、算術式や定義された値を使用することはできません。このディレクティブは、プログラムのデフォルトのステートマシン設定に影響します。この指令はプログラム内で最初の命令
 
@@ -1404,15 +1394,17 @@ value for global symbols
 
 The following values are supported:
 
-txrx: 4 FIFO entries for each of TX and RX; this is the default. tx - All 8 FIFO entries for TX.
+`txrx`: 4 FIFO entries for each of TX and RX; this is the default. 
 
-rx - All 8 FIFO entries for RX.
+`tx` - All 8 FIFO entries for TX.
 
-txput - 4 FIFO entries for TX, and 4 FIFO entries for mov rxfifo[index], isr aka put. This value is not supported on PIO version 0.
+`rx` - All 8 FIFO entries for RX.
 
-txget - 4 FIFO entries for TX, and 4 FIFO entries for mov osr, rxfifo[index] aka get. This value is not supported on PIO version 0.
+`txput` - 4 FIFO entries for TX, and 4 FIFO entries for `mov rxfifo[index], isr` aka put. This value is not supported on PIO version 0.
 
-putget - 4 FIFO entries for mov rxfifo[index], isr aka put, and 4 FIFO entries for mov osr, rxfifo[index] aka get. This value is not supported on PIO version 0.
+`txget` - 4 FIFO entries for TX, and 4 FIFO entries for `mov osr, rxfifo[index]` aka get. This value is not supported on PIO version 0.
+
+`putget` - 4 FIFO entries for `mov rxfifo[index], isr` aka put, and 4 FIFO entries for `mov osr, rxfifo[index]` aka get. This value is not supported on PIO version 0.
 
 This directive is only valid within a program before the first instruction
 
@@ -1420,73 +1412,85 @@ This directive is only valid within a program before the first instruction
 
 以下の値がサポートされている:
 
-txrx: rx - RXの8つのFIFOエントリすべて。
+`txrx`: rx - RXの8つのFIFOエントリすべて。
 
-txput - TXの4つのFIFOエントリ、およびmov rxfifo[index]、isr aka putの4つのFIFOエントリ。txget - TX用の4つのFIFOエントリと、mov osr, rxfifo[index]用の4つのFIFOエントリ。putget - mov rxfifo[index],isr(別名put)用の4つのFIFOエントリと、mov osr, rxfifo[index](別名get)用の4つのFIFOエントリ。この値はPIOバージョン0ではサポートされていません。
+`tx` - All 8 FIFO entries for TX.
+
+`rx` - All 8 FIFO entries for RX.
+
+`txput` - TXの4つのFIFOエントリ、および `mov rxfifo[index]、isr` (別名 put)の4つのFIFOエントリ。
+
+`txget` - TX用の4つのFIFOエントリと、`mov osr, rxfifo[index]` 用の4つのFIFOエントリ。
+
+`putget` - `mov rxfifo[index],isr` (別名put)用の4つのFIFOエントリと、`mov osr, rxfifo[index]`(別名get)用の4つのFIFOエントリ。この値はPIOバージョン0ではサポートされていません。
 
 この指令は、最初の命令の前のプログラム内でのみ有効です。
 
-||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq <(next|prev)> set <n>|| This directive configures the source for the mov , STATUS . One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higer numbered, or lowered numbered PIO instance if next or prev or specified). Note, that the IRQ option requires PIO version 1.
+||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq <(next|prev)> set <n>|| This directive configures the source for the `mov , STATUS` .
+One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higer numbered, or lowered numbered PIO instance if `next` or `prev` or specified). Note, that the IRQ option requires PIO version 1.
 
 This directive affects the default state machine configuration for a program.
 
 This directive is only valid within a program before the first instruction
 
-||.in <count> (left|right) (auto)<br>(<threshold>)|| If this directive is present, <count> indicates the number of IN bits to be used.  'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; <threshold>, if present, specifies the "auto-push" threshold. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction 
+||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq<(next|prev)> set<n>|| このディレクティブは、mov のソースである STATUS を設定します。RXFIFOレベルが値N以下であること、TXFIFOレベルが値N以下であること、またはIRQフラグNがこのPIOインスタンス(nextまたはprevが指定されている場合は、次の上位番号または下位番号のPIOインスタンス)で設定されていることに基づいてステータスを設定するには、3つの構文のいずれかを使用できます。IRQオプションはPIOバージョン1を必要とすることに注意。
+
+このディレクティブは、プログラムのデフォルトのステートマシン構成に影響します。このディレクティブは、プログラム内で最初の命令の前にのみ有効である
+
+||.in <count> (left|right) (auto) (<threshold>)|| If this directive is present, <count> indicates the number of IN bits to be used.  
+'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; <threshold>, if present, specifies the "auto-push" threshold. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction 
 
 When assembling for PIO version 0, count must be 32.
 
-||.mov_status rxfifo &lt;<n><br>.mov_status txfifo &lt;<n><br>.mov_status irq<(next|prev)> set<n>|| このディレクティブは、mov のソースである STATUS を設定します。RXFIFOレベルが値N以下であること、TXFIFOレベルが値N以下であること、またはIRQフラグNがこのPIOインスタンス(nextまたはprevが指定されている場合は、次の上位番号または下位番号のPIOインスタンス)で設定されていることに基づいてステータスを設定するには、3つの構文のいずれかを使用できます。IRQオプションはPIOバージョン1を必要とすることに注意。
+||.in <count> (left|right) (auto) (<threshold>)|| このディレクティブが存在する場合、`<count>` は使用するINビットの数を示す。 『`left`』または『`right`』が指定された場合、ISRのシフト方向を制御する。『`auto`』が指定された場合、「自動プッシュ」を有効にする。`<threshold>` が指定された場合、「自動プッシュ」のしきい値を指定する。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響する。このディレクティブは、プログラム内で最初の命令の前にのみ有効である。 
 
-このディレクティブは、プログラムのデフォルトのステートマシン構成に影響します。
-
-このディレクティブは、プログラム内で最初の命令の前にのみ有効である
-
-||.in <count> (left|right) (auto)<br>(<threshold>)|| このディレクティブが存在する場合、<count>は使用するINビットの数を示す。 『left』または『right』が指定された場合、ISRのシフト方向を制御する。『auto』が指定された場合、「自動プッシュ」を有効にする。<threshold> が指定された場合、「自動プッシュ」のしきい値を指定する。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響する。このディレクティブは、プログラム内で最初の命令
-
-の前にのみ有効である。 PIOバージョン0用にアセンブルする場合、countは32でなければならない。
+PIOバージョン0用にアセンブルする場合、count は 32 でなければならない。
 
 ||.program <name>||Start a new program with the name <name>. Note that that name is used in code so should be alphanumeric/underscore not starting with a digit. The program lasts until another .program directive or the end of the source file. PIO instructions are only allowed within a program
 
+||.program <name>||新しいプログラムを<name> という名前で開始する。この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の .program 命令かソース・ファイルの終わりまで続きます。PIO命令はプログラムの中でしか許可されません。
+
 ||.origin <offset>||Optional directive to specify the PIO instruction memory offset at which the program must load. Most commonly this is used for programs that must load at offset 0, because they use data based JMPs with the (absolute) jmp target being stored in only a few bits. This directive is invalid outside a program
-
-||.out <count> (left|right) (auto)<br>(<threshold>)|| If this directive is present, <count> indicates the number of OUT bits to be used. 'left' or 'right' if specified control the OSR shift direction; 'auto', if present, enables "auto-pull"; <threshold>, if present, specifies the "auto-pull" threshold.  This directive affects the default state machine configuration for a program.  This directive is only valid within a program before the first instruction
-
-||.pio_version <version>||This directive sets the target PIO hardware version. The version for RP2350 is 1 or RP2350, and is also the default version number. For backwards compatibility with RP2040, 0 or RP2040 may be used.
-
-||.program<name>||新しいプログラムを<name> という名前で開始する。この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の .program 命令かソース・ファイルの終わりまで続きます。PIO命令はプログラムの中でしか許可されません。
 
 ||.origin <offset>||プログラムがロードしなければならないPIO命令のメモリオフセットを指定するオプションの命令です。最も一般的には、オフセット 0 でロードしなければならないプログラムに使用されます。これは、データ・ベースの JMP を使用し、(絶対) JMP ターゲットがわずか数ビットに格納されているためです。このディレクティブはプログラムの外では無効である。
 
-||.out <count> (left|right) (auto)<br>(<threshold>)|| このディレクティブがある場合、<count> は使用するOUTビットの数を示す。『left』または『right』が指定された場合、OSRシフト方向を制御する。『auto』が指定された場合、「auto-pull 」を有効にする。<threshold> が指定された場合、「auto-pull 」のしきい値を指定する。 この指令は、プログラムのデフォルトのステートマシン構成に影響する。 ||.pio_version <version>|このディレクティブは、ターゲットPIOハードウェアのバージョンを設定します。RP2350 のバージョンは 1 または RP2350 で、デフォルトのバージョン番号でもあります。RP2040 との後方互換性のために、0 または RP2040 を使用することができます。
+||.out <count> (left|right) (auto)<br>(<threshold>)|| If this directive is present, <count> indicates the number of OUT bits to be used. 'left' or 'right' if specified control the OSR shift direction; 'auto', if present, enables "auto-pull"; <threshold>, if present, specifies the "auto-pull" threshold.  This directive affects the default state machine configuration for a program.  This directive is only valid within a program before the first instruction
+
+||.out <count> (left|right) (auto)<br>(<threshold>)|| このディレクティブがある場合、<count> は使用するOUTビットの数を示す。『left』または『right』が指定された場合、OSRシフト方向を制御する。『auto』が指定された場合、「auto-pull 」を有効にする。<threshold> が指定された場合、「auto-pull 」のしきい値を指定する。 この指令は、プログラムのデフォルトのステートマシン構成に影響する。 
+
+||.pio_version <version>||This directive sets the target PIO hardware version. The version for RP2350 is 1 or RP2350, and is also the default version number. For backwards compatibility with RP2040, 0 or RP2040 may be used.
 
 If this directive appears before the first program in the input file, then this define is the default for all programs, otherwise it specifies the version for the program in which it occurs. If specified for a program, it must occur before the first instruction.
 
-||.set <count>|||If this directive is present, <count> indicates the number of SET bits to be used. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
-
-||.side_set <count> (opt) (pindirs)||If this directive is present, <count> indicates the number of side-set bits to be used. Additionally opt may be specified to indicate that a side <value> is optional for instructions (note this requires stealing an extra bit — in addition to the <count> bits — from those available for the instruction delay). Finally, pindirs may be specified to indicate that the side set values should be applied to the PINDIRs and not the PINs. This directive is only valid within a program before the first instruction
+||.pio_version <version>||このディレクティブは、ターゲットPIOハードウェアのバージョンを設定します。RP2350 のバージョンは `1` または `RP2350` で、デフォルトのバージョン番号でもあります。 RP2040 との後方互換性のために、 `0` または `RP2040` を使用することができます。
 
 このディレクティブが入力ファイルの最初のプログラムの前にある場合、この定義はすべてのプログラムのデフォルトとなる。プログラムに指定する場合は、最初の命令の前になければならない。
 
-||.set<count>|||この指令がある場合、<count> 、使用するSETビットの数を示す。この指令はプログラムのデフォルトのステートマシン構成に影響する。この指令は、最初の命令の前のプログラム内でのみ有効である
+||.set <count>||If this directive is present, <count> indicates the number of SET bits to be used. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
 
-||.side_set <count> (opt) (pindirs)||この指令が存在する場合、<count>は使用されるサイドセットビットの数を示す。さらにoptは、命令に対してサイド<value> がオプションであることを示すために指定されるかもしれません(これは、命令遅延のために利用可能なものから<count> ビットに加えて、余分なビットを盗む必要があることに注意してください)。最後に、PINではなくPINDIRにサイドセット値を適用することを示すために、pindirsを指定することができる。この指令は、最初の命令
+||.set <count>||この指令がある場合、<count> 、使用するSETビットの数を示す。この指令はプログラムのデフォルトのステートマシン構成に影響する。この指令は、最初の命令の前のプログラム内でのみ有効である
+
+||.side_set <count> (opt) (pindirs)||If this directive is present, <count> indicates the number of side-set bits to be used. Additionally opt may be specified to indicate that a `side <value>` is optional for instructions (note this requires stealing an extra bit — in addition to the <count> bits — from those available for the instruction delay). Finally, pindirs may be specified to indicate that the side set values should be applied to the PINDIRs and not the PINs. This directive is only valid within a program before the first instruction
+
+||.side_set <count> (opt) (pindirs)||この指令が存在する場合、 *<count>* は使用されるサイドセットビットの数を示す。さらに *opt* は、命令に対して `side <value>` がオプションであることを示すために指定されるかもしれません(これは、命令遅延のために利用可能なものから *<count>* ビットに加えて、余分なビットを盗む必要があることに注意してください)。最後に、PINではなくPINDIRにサイドセット値を適用することを示すために、 *pindirs* を指定することができる。この指令は、最初の命令の前に置かれた場合のみ有効である。
 
 ||.wrap_target||Place prior to an instruction, this directive specifies the instruction where execution continues due to program wrapping. This directive is invalid outside of a program, may only be used once within a program, and if not specified defaults to the start of the program
 
-||.wrap||Placed after an instruction, this directive specifies the instruction after which, in normal control flow (i.e. jmp with false condition, or no jmp), the program wraps (to .wrap_target instruction). This directive is invalid outside of a program, may only be used once within a program, and if not specified defaults to after the last program instruction.
+||.wrap_target||命令の前に置かれ、プログラムの折り返しによって実行が継続される命令を指定する。このディレクティブは、プログラム外では無効で、プログラム内で一度だけ使用することができ、指定されなければ、プログラムの開始がデフォルトになります。
+
+||.wrap||Placed after an instruction, this directive specifies the instruction after which, in normal control flow (i.e. `jmp` with false condition, or no `jmp`), the program wraps (to .wrap_target instruction). This directive is invalid outside of a program, may only be used once within a program, and if not specified defaults to after the last program instruction.
+
+||.wrap||命令の後に置かれ、このディレクティブは、通常の制御フロー(すなわち、偽の条件での `jmp`、または `jmp` なし)で、プログラムがラップする(`.wrap_target` 命令へ)命令の後の命令を指定します。このディレクティブは、プログラム外では無効であり、プログラム内で一度だけ使用することができ、指定されなければ、最後のプログラム命令の後がデフォルトとなる。
 
 ||.lang_opt <lang> <name> <option>||Specifies an option for the program related to a particular language generator.  (See Section 3.3.10). This directive is invalid outside of a program
 
+||.lang_opt <lang> <name> <option>||特定の言語ジェネレータに関連するプログラムのオプションを指定する。 (セクション3.3.10参照)。このディレクティブはプログラムの外では無効である。
+
 ||.word <value>||Stores a raw 16-bit value as an instruction in the program. This directive is invalid outside of a program.
 
-|.wrap_target||命令の前に置かれ、プログラムの折り返しによって実行が継続される命令を指定する。このディレクティブは、プログラム外では無効で、プログラム内で一度だけ使用することができ、指定されなければ、プログラムの開始がデフォルトになります。
-
-||.wrap||命令の後に置かれ、このディレクティブは、通常の制御フロー(すなわち、偽の条件でのjmp、またはjmpなし)で、プログラムがラップする(.wrap_target命令へ)命令の後の命令を指定します。このディレクティブは、プログラム外では無効であり、プログラム内で一度だけ使用することができ、指定されなければ、最後のプログラム命令の後がデフォルトとなる。
-
-||.lang_opt<lang> <name> <option>||特定の言語ジェネレータに関連するプログラムのオプションを指定する。 (セクション3.3.10参照)。このディレクティブはプログラムの外では無効である。
-
 ||.word <value>||プログラム中の命令として生の16ビット値を格納する。この指令はプログラム外では無効である。
+
+</directive>
 
 ### 3.3.3. Values
 
@@ -1533,19 +1537,23 @@ in pioasm i.e. <expression>
 
 ### 3.3.5. Comments
 
-Line comments are supported with // or ; C-style block comments are supported via /* and */
+Line comments are supported with `//` or `;` 
 
-行コメントは // または ; C スタイルのブロックコメントは /* と */ でサポートされる。
+C-style block comments are supported via `/*` and `.`
+
+行コメントは `//` または `;` が使用できます。 
+
+C スタイルのブロックコメントは `/*` と `*/` でサポートされる。
 
 ### 3.3.6. Labels
 
 Labels are of the form:
 
-<symbol>:
+`<symbol>:`
 
 or
 
-PUBLIC <symbol>:
+`PUBLIC <symbol>:`
 
 at the start of a line.
 
@@ -1553,7 +1561,7 @@ at the start of a line.
 > A label is really just an automatic .define with a value set to the current program instruction offset. A PUBLIC label is exposed to the user code in the same way as a PUBLIC .define.
 
 >  TIP
-> ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動.defineにすぎません。PUBLICラベルはPUBLIC .defineと同じようにユーザーコードに公開されます。
+> ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動 `.define` にすぎません。 *PUBLIC* ラベルは *PUBLIC* `.define` と同じようにユーザーコードに公開されます。
 
 ### 3.3.7. Instructions
 
@@ -1567,35 +1575,46 @@ pioasm の指示はすべて共通のパターンに従っている:
 
 where:
 
-||<instruction>||Is an assembly instruction detailed in the following sections. (See Section 3.4) ||<side_set_value>||Is a value (see Section 3.3.3) to apply to the side_set pins at the start of the instruction. Note that the rules for a side-set value via side <side_set_value> are dependent on the .side_set (see pioasm_side_set) directive for the program. If no .side_set is specified then the side <side_set_value> is invalid, if an optional number of sideset pins is specified then side <side_set_value> may be present, and if a non-optional number of sideset pins is specified, then side <side_set_value> is required. The <side_set_value> must fit within the number of side-set bits specified in the .side_set directive.
+<directive>
 
-||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 3.3.3), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the .side_set (see pioasm_side_set) directive. If the <delay_value> is not present, then the instruction has no delay
+||<instruction>||Is an assembly instruction detailed in the following sections. (See Section 3.4) 
+||<side_set_value>||Is a value (see Section 3.3.3) to apply to the side_set pins at the start of the instruction. Note that the rules for a side-set value via `side <side_set_value>` are dependent on the .`side_set` (see `pioasm_side_set`) directive for the program. If no `.side_set` is specified then the `side <side_set_value>` is invalid, if an optional number of sideset pins is specified then `side <side_set_value>` may be present, and if a non-optional number of sideset pins is specified, then `side <side_set_value>` is required. The *<side_set_value>* must fit within the number of side-set bits specified in the `.side_set` directive.
+||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 3.3.3), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the `.side_set` (see `pioasm_side_set`) directive. If the *<delay_value>* is not present, then the instruction has no delay
 
-|||<instruction>|| 以下のセクションで詳述されるアセンブリ命令である。(セクション3.4参照) ||<side_set_value>||命令の開始時にside_setピンに適用する値(セクション3.3.3参照)です。サイド<side_set_value> を介したサイドセット値のルールは、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意してください。.side_setが指定されていない場合、side<side_set_value> 。オプションのサイドセット・ピン数が指定されている場合、side<side_set_value> 。オプションでないサイドセット・ピン数が指定されている場合、side<side_set_value> 。<side_set_value> は、.side_set 指令で指定されたサイドセットビット数に収まらなければならない。
-
+||<instruction>|| 以下のセクションで詳述されるアセンブリ命令である。(セクション3.4参照) 
+||<side_set_value>||命令の開始時にside_setピンに適用する値(セクション3.3.3参照)です。サイド<side_set_value> を介したサイドセット値のルールは、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意してください。.side_setが指定されていない場合、side<side_set_value> 。オプションのサイドセット・ピン数が指定されている場合、side<side_set_value> 。オプションでないサイドセット・ピン数が指定されている場合、side<side_set_value> 。<side_set_value> は、.side_set 指令で指定されたサイドセットビット数に収まらなければならない。
 ||<delay_value>||命令が完了した後に遅延させるサイクル数を指定する。delay_valueは値として指定され(セクション3.3.3参照)、一般的には0から31の間(5ビット値)ですが、.side_set(pioasm_side_set参照)指令によってサイドセットが有効になっている場合は、ビット数が減少します。<delay_value>が存在しない場合、その命令は遅延を持たない。
+
+</directive>
 
 >  NOTE
 > pioasm instruction names, keywords and directives are case insensitive; lower case is used in the Assembly Syntax sections below as this is the style used in the SDK.
 
 >  NOTE
-> Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. out pins, 3 may be written out pins 3, and jmp x-- label may be written as jmp x--, label. The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
+> Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. `out pins, 3` may be written `out pins 3`, and `jmp x-- label` may be written as `jmp x--, label.` The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
 >  NOTE
 > pioasm の命令名、キーワード、ディレクティブは大文字と小文字が区別されません。
 
-> 例えば、out pins, 3 は out pins 3 と書くことができ、jmp x-- label は jmp x--, label と書くことができます。例えば、out pins, 3 は out pins 3 と書くことができ、jmp x-- label は jmp x--, label と書くことができる。
+
+>  NOTE
+> Commas appear in some Assembly Syntax sections below, but are entirely optional, 例えば、out pins, 3 は out pins 3 と書くことができ、jmp x-- label は jmp x--, label と書くことができます。The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
 ### 3.3.8. 擬似命令
 
 Currently pioasm provides one pseudoinstruction, as a convenience:
 
+<desc>
+
 ||nop||Assembles to mov y, y. "No operation", has no particular side effect, but a useful vehicle for a side-set operation or an extra delay.
 
+</desc>
 
 現在 pioasm は、便宜上 1 つの擬似命令を提供しています:
 
-||nop||は mov y, y に組み合わされます。"操作なし" は特に副作用はありませんが、サイドセット操作や追加のディレイには便利です。
+<desc>
+||nop||`mov y, y` にアセンブルされます。"No operation" は特に副作用はありませんが、サイドセット操作や追加のディレイには便利です。
+</desc>
 
 ### 3.3.9. Output pass through
 
@@ -1626,13 +1645,21 @@ pass through contents
 
 with targets being recognized by a particular language generator (see Section 3.3.10; note that target is usually the language generator name e.g. c-sdk, but could potentially be some_language.some_group if the language generator supports different classes of pass through with different output locations.
 
+通常の書式は、
+
+```
+% target {
+pass through contents
+%}
+```
+
+ここで、target は特定の言語ジェネレーターを表します(see Section 3.3.10。 target は通常は言語ジェネレータ名 (例:c-sdk)ですが、その言語ジェネレーターが異なる出力場所を持つ異なるクラスのパススルーに対応している場合は、 some_language.some_group になる可能性もあります。
+
 This facility allows you to encapsulate both the PIO program and the associated setup required in the same source file.
 
-See Section 3.3.10 for a more complete example.
-
-通常、ターゲットは言語ジェネレーター名(例:c-sdk)で すが、言語ジェネレーターが異なる出力場所を持つ異なるクラスのパス スルーに対応している場合は、some_language.some_groupになる可能性があ ることに注意してください。
-
 この機能を使用すると、PIOプログラムと関連するセットアップの両方を同じソース・ファイルにカプセル化することができます。
+
+See Section 3.3.10 for a more complete example.
 
 より完全な例については、セクション3.3.10を参照してください。
 
@@ -1640,7 +1667,7 @@ See Section 3.3.10 for a more complete example.
 
 The following example shows a multi program source file (with multiple programs) which we will use to highlight c-sdk and python output features
 
-以下の例は、c-sdkとpythonの出力機能を強調するために使用するマルチ・プログラム・ ソース・ファイル(複数のプログラムを含む)を示しています。
+以下の例は、c-sdk と python の出力機能を強調するために使用するマルチ・プログラム・ ソース・ファイル(複数のプログラムを含む)を示しています。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.pio
 
@@ -1742,17 +1769,17 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 The c-sdk language generator produces a single header file with all the programs in the PIO source file:
 
-The pass through sections (% c-sdk {) are embedded in the output, and the PUBLIC defines are available via #define
-
->  TIP
-> pioasm creates a function for each program (e.g. ws2812_program_get_default_config()) returning a pio_sm_config based on the .side_set, .wrap and .wrap_target settings of the program, which you can then use as a basis for configuration the PIO state machine.
-
 c-sdk言語ジェネレーターは、PIOソースファイル内のすべてのプログラムを含む単一のヘッダーファイルを生成します:
 
-パス・スルー・セクション(% c-sdk {)は出力に埋め込まれ、PUBLIC定義は#define
+The pass through sections (`% c-sdk {`) are embedded in the output, and the `PUBLIC` defines are available via `#define`.
+
+パス・スルー・セクション(`% c-sdk {`)は出力に埋め込まれ、 `PUBLIC` 定義は `#define` を通じて利用可能です。
 
 >  TIP
-> pioasmは、プログラムの.side_set、.wrap、.wrap_target設定に基づいてpio_sm_configを返す各プログラム用の関数(例えばws2812_program_get_default_config())を作成します。
+> `pioasm` creates a function for each program (e.g. `ws2812_program_get_default_config()`) returning a `pio_sm_config` based on the `.side_set`, `.wrap` and `.wrap_target` settings of the program, which you can then use as a basis for configuration the PIO state machine.
+
+>  TIP
+> `pioasm` は、プログラムの `.side_set`、`.wrap`、`.wrap_target` 設定に基づいて `pio_sm_config` を返す各プログラム用の関数(例えば `ws2812_program_get_default_config()`)を作成します。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/generated/ws2812.pio.h
 
@@ -1888,21 +1915,22 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 The python language generator produces a single python file with all the programs in the PIO source file:
 
+python言語ジェネレータは、PIOソースファイルのすべてのプログラムを含む単一のpythonファイルを生成します:
+
 The pass through sections (% python {) would be embedded in the output, and the PUBLIC defines are available as python variables.
 
-Also note the use of .lang_opt python to pass initializers for the @pico.asm_pio decorator
+
+パススルーセクション(`% python {`)は出力に埋め込まれ、 `PUBLIC` 定義は python 変数として利用可能です。
+
+Also note the use of ``.lang_opt python` to pass initializers for the `@pico.asm_pio` decorator
+
+また、 `@pico.asm_pio` デコレータのイニシャライザを渡すために `.lang_opt python` を使用していることに注意してください。
 
 >  TIP
 > The python language output is provided as a utility. MicroPython supports programming with the PIO natively, so you may only want to use pioasm when sharing PIO code between the SDK and MicroPython. No effort is currently made to preserve label names, symbols or comments, as it is assumed you are either using the PIO file as a source or python; not both. The python language output can of course be used to bootstrap your MicroPython PIO development based on an existing PIO file.
 
-python言語ジェネレータは、PIOソースファイルのすべてのプログラムを含む単一のpythonファイルを生成します:
-
-パススルーセクション(% python {)は出力に埋め込まれ、PUBLIC定義はpython変数として利用可能です。
-
-また、@pico.asm_pio デコレータのイニシャライザを渡すために .lang_opt python を使用していることに注意してください
-
 >  TIP
-> python 言語出力はユーティリティとして提供されます。MicroPython はネイティブに PIO でのプログラミングをサポートしているので、SDK と MicroPython の間で PIO コードを共有するときだけ pioasm を使いたいかもしれません。PIOファイルをソースとして使うか、pythonを使うかのどちらかを想定しているため、ラベル名、シンボル、コメントを保持する努力は今のところしていません。python言語出力はもちろん、既存のPIOファイルに基づいてMicroPython PIO開発をブートストラップするために使用できます。
+> python 言語出力はユーティリティとして提供されます。 MicroPython はネイティブに PIO でのプログラミングをサポートしているので、SDK と MicroPython の間で PIO コードを共有するときだけ pioasm を使いたいかもしれません。PIOファイルをソースとして使うか、 python を使うかのどちらかを想定しているため、ラベル名、シンボル、コメントを保持する努力は今のところしていません。 python 言語出力はもちろん、既存のPIOファイルに基づいてMicroPython PIO開発をブートストラップするために使用できます。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/generated/ws2812.py
 
@@ -2020,6 +2048,8 @@ PIO命令は16ビット長で、以下のエンコーディングを持ちます
 Table 7. PIO
 instruction encoding
 
+<img src="img/Bit3_4_1.png"/>
+
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
 JMP 0 0 0 Delay/side-set Condition Address
@@ -2040,6 +2070,8 @@ PIO instructions are 16 bits long, and have the following encoding:
 
 Table 8. PIO
 instruction encoding
+
+<img src="img/Bit3_4_2.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2075,6 +2107,8 @@ Delay/side-setフィールドは全ての命令に存在する。その正確な
 ### 3.4.4. JMP
 
 #### 3.4.4.1. Encoding
+
+<img src="img/Bit3_4_4_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2135,9 +2169,13 @@ JMP X--とJMP Y--は、それぞれ常にスクラッチ・レジスタXまた�
 
 #### 3.4.4.3. Assembler Syntax
 
+```
 jmp ( <cond> ) <target>
+```
 
 where:
+
+<desc>
 
 ||<cond>||Is an optional condition listed above (e.g. !x for scratch X zero). If a condition code is not specified, the branch is always taken
 
@@ -2147,9 +2185,13 @@ where:
 
 ||<target>|| プログラム内の命令オフセット(最初の命令はオフセット0)を表すプログラムラベルまたは値(セクション3.3.3参照)です。PIO JMP 命令は PIO 命令メモリ内の絶対アドレスを使用するため、JMP は実行時のプログラム・ロード・オフセットに基づいて調整する必要があることに注意してください。これはSDKでプログラムをロードする際に処理されますが、OUT EXECで使用するJMP命令をエンコードする際には注意が必要です。
 
+</desc>
+
 ### 3.4.5. WAIT
 
 #### 3.4.5.1. Encoding
+
+<img src="img/Bit3_4_5_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2217,13 +2259,8 @@ For example, state machine 2 with a flag value of '0x11' will wait on flag 3, an
 * フラグ・インデックスは IRQ インデックス・フィールドと同じように、2 つの MSB からデコードされる(IRQ 命令 IdxMode フィールドと整列する):
 
     + 00:3つのLSBは、このPIOブロックのIRQフラグのインデックスに直接使用される。
-
     + 01 (バージョン1以上) (PREV), 命令はシステム内の次の下位番号のPIOからIRQを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
-
-    + 10 (REL)では、ステートマシンID (0...3)が、2つのLSBのモジュロ4加算によってIRQインデックスに加算される。
-
-例えば、フラグ値『0x11』のステート・マシン2はフラグ3で待機し、フラグ値『0x13』はフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
-
+    + 10 (REL)では、ステートマシンID (0...3)が、2つのLSBのモジュロ4加算によってIRQインデックスに加算される。<br><br>例えば、フラグ値『0x11』のステート・マシン2はフラグ3で待機し、フラグ値『0x13』はフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
     + 11(バージョン1以上)(NEXT)命令は、システム内で次に高い番号のPIOからIRQを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
 
 >  CAUTION
@@ -2234,13 +2271,15 @@ For example, state machine 2 with a flag value of '0x11' will wait on flag 3, an
 
 #### 3.4.5.3. Assembler Syntax
 
+```
 wait <polarity> gpio <gpio_num>
-
 wait <polarity> pin <pin_num>
-
 wait <polarity> irq <irq_num> ( rel )
+```
 
 where:
+
+<desc>
 
 ||<polarity>||Is a value (see Section 3.3.3) specifying the polarity (either 0 or 1) 
 
@@ -2258,9 +2297,13 @@ where:
 
 ||<irq_num> ( rel )||待機するirq番号(0-7)を指定する値(セクション3.3.3を参照)。relが存在する場合、実際に使用されるirq番号は、irq番号(irq_num10)の下位2ビットを和(irq_num10 + sm_num10)の下位2ビット(sm_num10はステートマシン番号)に置き換えて計算される。
 
+</desc>
+
 ### 3.4.6. IN
 
 #### 3.4.6.1. Encoding
+
+<img src="img/Bit3_4_6_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2288,22 +2331,21 @@ If automatic push is enabled, IN will also push the ISR contents to the RX FIFO 
 
 IN always uses the least significant Bit count bits of the source data. For example, if PINCTRL_IN_BASE is set to 5, the instruction IN PINS, 3 will take the values of pins 5, 6 and 7, and shift these into the ISR. First the ISR is shifted to the left or right to make room for the new input data, then the input data is copied into the gap this leaves. The bit order of the input data is not dependent on the shift direction.
 
-ソースから入力シ フ ト レジスタ(ISR) にビ ッ ト カ ウ ン ト ビ ッ ト をシ フ ト し ます。シ フ ト 方向は、SHIFTCTRL_IN_SHIFTDIR で各ス テー ト マシ ンに対 し て設定 さ れます。さらに、入力シ フ ト カ ウ ン ト をBit カ ウ ン ト 分増や し 、32 で飽和 さ せます。
+ソースから入力シフトレジスタ(ISR) にビットカウントビットをシフトします。シフト方向は、SHIFTCTRL_IN_SHIFTDIR で各ステートマシンに対して設定されます。さらに、入力シフトカウントをBitカウント分増やし、32 で飽和させます。
 
 * ソース:
-
     + 000: PINS
- + 001: X(スクラッチレジスタX)
- + 010: Y(スクラッチレジスタY)
- + 011: NULL(全てゼロ)
- + 100: 予約
- + 101: Reserved
- + 110: ISR
- + 111: OSR
+    + 001: X(スクラッチレジスタX)
+    + 010: Y(スクラッチレジスタY)
+    + 011: NULL(全てゼロ)
+    + 100: 予約
+    + 101: Reserved
+    + 110: ISR
+    + 111: OSR
 
 * ビット数: ISRに何ビットシフトするか。1...32ビット、32は00000としてエンコードされる。
 
-自動プッシュが有効な場合、プッシュしきい値(SHIFTCTRL_PUSH_THRESH)に達すると、INはISRの内容もRX FIFOにプッシュする。自動プッシュの有無に関わらず、INは1サイクルで実行される。自動プッシュが発生したときにRX FIFOが満杯であれば、ステートマシンはストールする。自動プ ッ シ ュ はISR の内容を ク リ ア し てすべて0 に し 、 入力シ フ ト カ ウ ン ト を ク リ ア し ます。
+自動プッシュが有効な場合、プッシュしきい値(SHIFTCTRL_PUSH_THRESH)に達すると、INはISRの内容もRX FIFOにプッシュする。自動プッシュの有無に関わらず、INは1サイクルで実行される。自動プッシュが発生したときにRX FIFOが満杯であれば、ステートマシンはストールする。自動プ ッ シ ュ はISR の内容をクリアしてすべて0 にし、入力シフトカウントをクリアします。
 
 IN は常にソースデータの最下位ビッ トカウントを使用する。例えば、PINCTRL_IN_BASE が 5 に設定されている場合、IN PINS, 3 命令はピン 5、6、7 の値を取り、これらを ISR にシフトします。最初にISRが左または右にシフトされ、新しい入力データのためのスペースが作られ、次に入力データがこの残されたギャップにコピーされる。入力データのビット順序はシフト方向に依存しない。
 
@@ -2317,22 +2359,25 @@ NULL は、ISR の内容のシフトに使用できます。例えば、UART は
 
 #### 3.4.6.3. Assembler Syntax
 
+```
 in <source>, <bit_count>
+```
 
 where:
 
+<desc>
+
 ||<source>||Is one of the sources specified above.
-
 ||<bit_count>||Is a value (see Section 3.3.3) specifying the number of bits to shift (valid range 1-32)
-
-|||<source>|| 上記で指定したソースの1つ。
-
-||<bit_count>|はシフトするビット数を指定する値(セクション3.3.3を参照)です(有効範囲は1〜32)。
-
+||<source>|| 上記で指定したソースの1つ。
+||<bit_count>||はシフトするビット数を指定する値(セクション3.3.3を参照)です(有効範囲は1〜32)。
+</desc>
 
 ### 3.4.7. OUT
 
 #### 3.4.7.1. Encoding
+
+<img src="img/Bit3_4_7_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2393,17 +2438,23 @@ OUT PCはOSRからシフトアウトされたアドレスへの無条件ジャ�
 
 #### 3.4.7.3. Assembler Syntax
 
+```
 out <destination>, <bit_count>
+```
 
 where:
 
-||<destination>||Is one of the destinations specified above.
+<desc>
 
+||<destination>||Is one of the destinations specified above.
 ||<bit_count>||Is a value (see Section 3.3.3) specifying the number of bits to shift (valid range 1-32)
+</desc>
 
 ### 3.4.8. PUSH
 
 #### 3.4.8.1. Encoding
+
+<img src="img/Bit3_4_8_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2434,29 +2485,29 @@ PIO アセンブラはデフォルトで Block ビットを設定する。Block 
 
 #### 3.4.8.3. Assembler Syntax
 
+```
 push ( iffull )
-
 push ( iffull ) block
-
 push ( iffull ) noblock
+```
 
 where:
 
+<desc>
+
 ||iffull||Is equivalent to IfFull == 1 above. i.e. the default if this is not specified is IfFull == 0
-
 ||block||Is equivalent to Block == 1 above. This is the default if neither block nor noblock are specified
-
 ||noblock||Is equivalent to Block == 0 above.
-
 ||iffull||は上記のIfFull==1と等価です。つまり、これが指定されない場合のデフォルトはIfFull==0
-
 ||block||は上記のBlock==1と等価です。これは、blockもnoblockも指定されていない場合のデフォルトである
-
 ||noblock||上記のBlock == 0と等価である。
+</desc>
 
 ### 3.4.9. PULL
 
 #### 3.4.9.1. Encoding
+
+<img src="img/Bit3_4_9_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2497,29 +2548,29 @@ PULL IFEMPTY は、TX FIFO が空になったときに、オートプル付き�
 
 #### 3.4.9.3. Assembler Syntax
 
+```
 pull ( ifempty )
-
 pull ( ifempty ) block
-
 pull ( ifempty ) noblock
+```
 
 where:
 
+<desc>
+
 ||ifempty||Is equivalent to IfEmpty == 1 above. i.e. the default if this is not specified is IfEmpty == 0
-
 ||block||Is equivalent to Block == 1 above. This is the default if neither block nor noblock are specified
-
 ||noblock||Is equivalent to Block == 0 above.
-
 ||ifempty||は上記のIfEmpty==1と等価です。つまり、これが指定されない場合のデフォルトはIfEmpty==0
-
 ||block||は上記のBlock==1と等価です。これは、
-
 ||noblock||上記のBlock == 0と同じです。
+</desc>
 
 ### 3.4.10. MOV (to RX)
 
 #### 3.4.10.1. Encoding
+
+<img src="img/Bit3_4_10_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2554,23 +2605,27 @@ SHIFTCTRL_FJOIN_RX_PUTとSHIFTCTRL_FJOIN_RX_GETの両方が設定されると、
 
 #### 3.4.10.3. Assembler Syntax
 
+```
 mov rxfifo[y], isr
-
 mov rxfifo[<index>], isr
+```
 
 where:
 
+<desc>
+
 ||y|| Is the literal token "y", indicating the RX FIFO entry is indexed by the Y register
-
 ||<index>||Is a value (see Section 3.3.3) specifying the RX FIFO entry to write (valid range 0-3)
-
 ||y|| リテラルトークン "y "で、RX FIFOエントリがYレジスタでインデックス付けされていることを示す
-
 ||<index>|| 書き込むRX FIFOエントリを指定する値(セクション3.3.3を参照)(有効範囲は0～3)。
+
+</desc>
 
 ### 3.4.11. MOV (from RX)
 
 #### 3.4.11.1. Encoding
+
+<img src="img/Bit3_4_11_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2589,11 +2644,11 @@ When only SHIFTCTRL_FJOIN_RX_GET is set, the system can also write the RX FIFO r
 
 When both SHIFTCTRL_FJOIN_RX_PUT and SHIFTCTRL_FJOIN_RX_GET are set, the system can no longer access the RX FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
 
-選択された RX FIFO エントリを OSR に読み込む。PIO ステート マシンは、Y レジスタまたは命令内の即時イ ンデ ッ ク ス を イ ンデ ッ ク ス と し て、 任意の順序でFIFO エン ト リ を読み出す こ と がで き ます。設定フ ィ ール ド が設定 さ れてい る 必要があ り 、 そ う でなければ動作は未定義です。
+選択された RX FIFO エントリを OSR に読み込む。PIO ステートマシンは、Y レジスタまたは命令内の即時インデックスをインデックスとして、 任意の順序でFIFO エントリを読み出すことができます。設定フィールドが設定されている必要があり、そうでなければ動作は未定義です。
 
 IdxI(即時インデックス)が設定されている場合、RX FIFOのレジスタはIndexオペランドの最下位ビット2つによってインデックス付けされます。そうでない場合は、Yレジスタの最下位ビット2つによってインデックスが付けられます。IdxIがクリアされている場合、Indexの0以外の値は全て予約エンコードであり、その動作は未定義である。
 
-SHIFTCTRL_FJOIN_RX_GETのみが設定されている場合、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。こ の ス テー ト では、RX FIFO レジスタ ストレージは追加のコンフィギュレーション レジスタ と し て再利用 さ れ、 シ ス テ ムは こ れ ら をい つで も 更新で き、 ス テー ト マシ ンは こ れ ら をい つで も 読み出 し で き ます。例えば、UART TX プログラムはこれらのレジスタを使用してデータ・ビット数や追加ストップ・ビットの有無を設定することができます。
+SHIFTCTRL_FJOIN_RX_GETのみが設定されている場合、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。こ の ス テー ト では、RX FIFO レジスタ ストレージは追加のコンフィギュレーションレジスタとして再利用され、システムはこれらをいつでも更新でき、ステートマシンはこれらをいつでも読み出しできます。例えば、UART TX プログラムはこれらのレジスタを使用してデータ・ビット数や追加ストップ・ビットの有無を設定することができます。
 
 SHIFTCTRL_FJOIN_RX_PUTとSHIFTCTRL_FJOIN_RX_GETの両方が設定されると、システムはRX FIFOストレージ・レジスタにアクセスできなくなります。
 
@@ -2604,23 +2659,27 @@ SHIFTCTRL_FJOIN_RX_PUTとSHIFTCTRL_FJOIN_RX_GETの両方が設定されると、
 
 #### 3.4.11.3. Assembler Syntax
 
+```
 mov osr, rxfifo[y]
-
 mov osr, rxfifo[<index>]
+```
 
 where:
 
+<desc>
+
 ||y|| Is the literal token "y", indicating the RX FIFO entry is indexed by the Y register
-
 ||<index>||Is a value (see Section 3.3.3) specifying the RX FIFO entry to read (valid range 0-3)
-
 ||y|| リテラルトークン "y "で、RX FIFOエントリがYレジスタでインデックス付けされていることを示す
-
 ||<index>|| 読み出すRX FIFOエントリを指定する値(セクション3.3.3を参照)(有効範囲は0～3)。
+</desc>
+
 
 ### 3.4.12. MOV
 
 #### 3.4.12.1. Encoding
+
+<img src="img/Bit3_4_12_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2682,12 +2741,14 @@ MOV dst、PINSはINピンマッピングを使用してピンを読み出し、�
 
 #### 3.4.12.3. Assembler Syntax
 
+```
 mov <destination>, ( op ) <source>
+```
 
 where:
 
+<desc>
 ||<destination>||Is one of the destinations specified above.
-
 ||<op>||If present, is:
 
 ! or ~ for NOT (Note: this is always a bitwise NOT)
@@ -2695,10 +2756,13 @@ where:
 :: for bit reverse
 
 ||<source>||Is one of the sources specified above.
+</desc>
 
 ### 3.4.13. IRQ
 
 #### 3.4.13.1. Encoding
+
+<img src="img/Bit3_4_13_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2714,10 +2778,10 @@ Set or clear the IRQ flag selected by Index argument.
 * Index: specifies an IRQ index from 0-7. This IRQ flag will be set/cleared depending on the Clear bit. 
 * IdxMode: modify the behaviour if the Index field, either modifying the index, or indexing IRQ flags from a different PIO block: 
 
-    00: the three LSBs are used directly to index the IRQ flags in this PIO block. 
-    01 (version 1 and above) (PREV): the instruction references an IRQ flag from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0. 
-    10 (REL): the state machine ID (0…3) is added to the IRQ flag index, by way of modulo-4 addition on the two LSBs. For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other. 
-    11 (version 1 and above) (NEXT): the instruction references an IRQ flag from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
+    + 00: the three LSBs are used directly to index the IRQ flags in this PIO block. 
+    + 01 (version 1 and above) (PREV): the instruction references an IRQ flag from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0. 
+    + 10 (REL): the state machine ID (0…3) is added to the IRQ flag index, by way of modulo-4 addition on the two LSBs. For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other. 
+    + 11 (version 1 and above) (NEXT): the instruction references an IRQ flag from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
 
 On PIO version 0, IRQ flags 4-7 are visible only to the state machines; IRQ flags 0-3 can be routed out to system level interrupts, on either of the PIO’s two external interrupt request lines, configured by IRQ0_INTE and IRQ1_INTE. PIO version 1 lifts this limitation and allows all eight flags to assert system interrupts.
 
@@ -2730,10 +2794,10 @@ The modulo addition mode allows relative addressing of 'IRQ' and 'WAIT' instruct
 * Index: 0～7 の IRQ インデックスを指定します。このIRQフラグはClearビットに依存してセット/クリアされる。
 * IdxMode:インデックス・フィールドの動作を変更します。インデックスを変更するか、別のPIOブロックからIRQフラグのインデックスを作成します。
 
- 00:3つのLSBは、このPIOブロックのIRQフラグのインデックスを作成するために直接使用されます。
-    01 (バージョン1以上) (PREV): 命令は、システム内の次の下位番号のPIOからIRQフラグを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
- 10 (REL): ステートマシンID (0～3)が、2つのLSBのモジュロ4加算によってIRQフラグ・インデックスに追加される。例えば、フラグ値が『0x11』のステート・マシン2はフラグ3で待機し、フラグ値が『0x13』のステート・マシンはフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
-    11 (バージョン1以上) (NEXT): 命令は、システム内で次に高い番号のPIOからIRQフラグを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
+    + 00:3つのLSBは、このPIOブロックのIRQフラグのインデックスを作成するために直接使用されます。
+    + 01 (バージョン1以上) (PREV): 命令は、システム内の次の下位番号のPIOからIRQフラグを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
+    + 10 (REL): ステートマシンID (0～3)が、2つのLSBのモジュロ4加算によってIRQフラグ・インデックスに追加される。例えば、フラグ値が『0x11』のステート・マシン2はフラグ3で待機し、フラグ値が『0x13』のステート・マシンはフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
+    + 11 (バージョン1以上) (NEXT): 命令は、システム内で次に高い番号のPIOからIRQフラグを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
 
 PIOバージョン0では、IRQフラグ4～7はステート・マシンにしか見えません。IRQフラグ0～3は、IRQ0_INTEとIRQ1_INTEで設定されたPIOの2つの外部割り込み要求ラインのいずれかで、システム・レベルの割り込みにルーティングできます。PIOバージョン1では、この制限が解除され、8つのフラグすべてがシステム割り込みをアサートできるようになりました。
 
@@ -2757,43 +2821,37 @@ Waitが設定されている場合、Delayサイクルは待機期間が経過�
 
 #### 3.4.13.3. Assembler Syntax
 
+```
 irq <irq_num> ( rel )
-
 irq set <irq_num> ( rel )
-
 irq nowait <irq_num> ( rel )
-
 irq wait <irq_num> ( rel )
-
 irq clear <irq_num> ( rel )
+```
 
 where:
 
+<desc>
+
 ||<irq_num> ( rel )||Is a value (see Section 3.3.3) specifying The irq number to wait on (0-7). If rel is present, then the actual irq number used is calculating by replacing the low two bits of the irq number (irq_num10) with the low two bits of the sum (irq_num10 + sm_num10) where sm_num10 is the state machine number
-
 ||irq||Means set the IRQ without waiting
-
 ||irq set||Also means set the IRQ without waiting
-
 ||irq nowait||Again, means set the IRQ without waiting
-
 ||irq wait||Means set the IRQ and wait for it to be cleared before proceeding
-
 ||irq clear||Means clear the IRQ
-
 ||<irq_num> ( rel )|| 待機するirq番号(0-7)を指定する値(セクション3.3.3参照)。relが存在する場合、実際に使用されるirq番号は、irq番号(irq_num10)の下位2ビットを、和(irq_num10 + sm_num10)の下位2ビット(sm_num10はステートマシン番号)に置き換えて計算される。
-
 ||irq||待たずにIRQを設定するという意味
-
 ||irq set||また、待たずにIRQを設定するという意味
-
-||irq nowait||また、 ||irq wait||IRQを設定し、次に進む前にIRQがクリアされるのを待つことを意味する
-
+||irq nowait||これまた、 待たずにIRQを設定するという意味
+||irq wait||IRQを設定し、IRQがクリアされるのを待って次に進むことを意味する
 ||irq clear||IRQをクリアすることを意味する
+</desc>
 
 ### 3.4.14. SET
 
 #### 3.4.14.1. Encoding
+
+<img src="img/Bit3_4_14_1.png"/>
 
 ```
 Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
@@ -2821,6 +2879,21 @@ This can be used to assert control signals such as a clock or chip select, or to
 
 The mapping of SET and OUT onto pins is configured independently. They may be mapped to distinct locations, for example if one pin is to be used as a clock signal, and another for data. They may also be overlapping ranges of pins: a UART transmitter might use SET to assert start and stop bits, and OUT instructions to shift out FIFO data to the same pins.
 
+Write immediate value Data to Destination.
+
+ディスティネーションにイミディエイト値 Data を書き込む。
+
+* ディスティネーション:
+
+    + 000: PINS   
+    + 001: X (scratch register X) 5 LSBs are set to Data, all others cleared to 0.
+    + 010: Y (scratch register Y) 5 LSBs are set to Data, all others cleared to 0.
+    + 011: Reserved   
+    + 100: PINDIRS   
+    + 101: Reserved   
+    + 110: Reserved   
+    + 111: Reserved
+
 * データ: データ:ピンまたはレジスタにドライブする5ビットの即時値。
 
 クロックやチップ・セレクトなどの制御信号のアサートや、ループ・カウンターの初期化に使用できる。Dataは5ビットなので、スクラッチ・レジスタを0～31の値にSETすることができ、これは32回繰り返しのループには十分です。
@@ -2829,10 +2902,13 @@ SETとOUTのピンへのマッピングは独立して設定される。例え�
 
 #### 3.4.14.3. Assembler Syntax
 
+```
 set <destination>, <value>
+```
 
 where:
 
+<desc>
 ||<destination>||Is one of the destinations specified above.
-
 ||<value>||The value (see Section 3.3.3) to set (valid range 0-31)
+</desc>
