@@ -675,6 +675,46 @@ dd.glossary {
 	font-family: 'Noto Serif JP';
 }
 
+/* desc */
+
+/* opcode */
+.desc {
+	margin-right: 0;
+}
+
+.desc > p {
+	margin-left: 2em;
+}
+
+.desc > .desc-entry {
+	display: grid;
+	grid-template-columns: 7.5rem 1fr;
+	/*margin-right: -10em;*/
+	margin-bottom: 1em;
+	/*margin-left: -15mm;*/
+	background-color: #f0f0f0;
+}
+
+.desc > .desc-entry > .desc-word {
+	grid-column: 1;
+	font-family: 'Noto Sans JP';
+	font-weight: 700;
+	background-color: #c0c0c0;
+	
+}
+
+/*
+.desc > .desc-entry > .body {
+	grid-column: 2;
+	background-color: #d0d0d0;
+}
+*/
+
+.desc > .desc-entry > .body {
+	grid-column: 1 / 3;
+}
+
+
 /* glossary */
 .glossary {
 }
