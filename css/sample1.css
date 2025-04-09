@@ -61,6 +61,7 @@ img {
 
 @page {
     /*size: 177mm 252mm;*/ /*182mm 257mm;*/
+	size: 190mm 270mm;
 	font-size: 10Q;
 	/*marks: crop cross;*/
 	bleed: 3mm;
