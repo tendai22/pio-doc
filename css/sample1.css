@@ -4,8 +4,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
 
 :root {
-	font-size: 12Q;
-	line-height: 17Q;
+	font-size: 14Q;
+	line-height: 18Q;
 	font-family: 'Noto Serif JP';
 	font-weight: 400;
 	/*text-spacing: auto;*/
@@ -61,8 +61,8 @@ img {
 
 @page {
     /*size: 177mm 252mm;*/ /*182mm 257mm;*/
-	size: 190mm 270mm;
-	font-size: 10Q;
+	size: 200mm 270mm;
+	font-size: 14Q;
 	/*marks: crop cross;*/
 	bleed: 3mm;
 	@bottom-center {
@@ -74,12 +74,12 @@ img {
 
 @page :left {
     margin-block: 15mm;
-    margin-inline: 20mm 20.25mm;
+    margin-inline: 15mm 15.25mm;
 }
 
 @page :right {
     margin-block: 15mm;
-    margin-inline: 20.25mm 20mm;
+    margin-inline: 15.25mm 15mm;
 }
 
 @page :first {
