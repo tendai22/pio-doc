@@ -41,6 +41,7 @@ sed '
         s/^||\(..*\)||/ <div class="desc-entry">\
   <span class="word">\1<\/span>\
   <span class="body">/
+        b
     }
     /^<\/directive>/b endenv
     /^<\/desc>/{
@@ -52,5 +53,12 @@ sed '
         s/^.*$/<\/div>/
         b
     }
+    # escape < to &lt;
+    s/</\&lt;/g
+    s/\&lt;br>/<br>/g
+}
+' |sed '/^  <span class="body">/,/  <\/span>/{
+    s/`\([^`][^`]*\)`/<code>\1<\/code>/g
+    s/\*\([^*][^*]*\)\*/<em>\1<\/em>/g
 }
 '
