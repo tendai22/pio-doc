@@ -4,8 +4,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
 
 :root {
-	font-size: 14Q;
-	line-height: 20Q;
+	font-size: 12Q;
+	line-height: 17Q;
 	font-family: 'Noto Serif JP';
 	font-weight: 400;
 	/*text-spacing: auto;*/
@@ -133,8 +133,8 @@ nh1 {
 
 h1 {
 	break-before: recto;
-	font-size: 40Q;
-	line-height: 54Q;
+	font-size: 32Q;
+	line-height: 48Q;
 	/*inline-size: 10em;*/
 	block-size: 2lh;
 	margin-block: 0 12mm;
@@ -149,8 +149,8 @@ h1::before {
 }
 
 h2 {
-	font-size: 24Q;
-	line-height: 32Q;
+	font-size: 20Q;
+	line-height: 28Q;
 	margin-block: 1rlh 0;
 	block-size: 2rlh;
 	margin-break: auto;
@@ -164,8 +164,8 @@ h2::before {
 }
 
 h3 {
-	font-size: 20Q;
-	line-height: 26Q;
+	font-size: 18Q;
+	line-height: 24Q;
 	margin-block: 1rlh 0;
 	block-size: 2rlh;
 	margin-break: auto;
@@ -180,8 +180,8 @@ h3::before {
 
 /* h4 ... no number prefix but same format as h3 */
 h4 {
-	font-size: 20Q;
-	line-height: 26Q;
+	font-size: 16Q;
+	line-height: 24Q;
 	margin-block: 1rlh 0;
 	block-size: 2rlh;
 	margin-break: auto;
@@ -243,8 +243,8 @@ h6:has(+ pre)::before {
 /* table */
 table {
 	border-collapse: collapse;
-	font-size: 12Q;
-	line-height: 1.25em;
+	font-size: 10Q;
+	line-height: 1.1em;
 }
 
 td, th {
@@ -272,7 +272,7 @@ tr:nth-child(even) {
 }
 
 .column h5 {
-	font-size: 15Q;
+	font-size: 12Q;
 	margin-block: 0. 0.5em;
 }
 
@@ -302,8 +302,8 @@ pre {
 	white-space: pre-wrap;
 	line-break: anywhare;
 	text-spacing: none;
-	font-size: 11Q;
-	line-height: 15Q;
+	font-size: 10Q;
+	line-height: 12Q;
 	border: solid 0.3mm #000;
 	padding-block: 3mm;
 	padding-inline: 3mm;
@@ -349,8 +349,8 @@ figcaption {
  */
  .refbody {
 	float: footnote;
-	font-size: 11Q;
-	line-height: 15Q;
+	font-size: 10Q;
+	line-height: 13Q;
 	text-indent: -1em;
 	padding-left: 1em;
 }
@@ -384,8 +384,8 @@ figcaption {
 
 .refer {
 	float: footnote;
-	font-size: 11Q;
-	line-height: 15Q;
+	font-size: 10Q;
+	line-height: 13Q;
 	text-indent: 0;
 }
 
@@ -417,8 +417,8 @@ blockquote {
 /* footnote */
 .notetext {
 	float: footnote;
-	font-size: 11Q;
-	line-height: 15Q;
+	font-size: 10Q;
+	line-height: 13Q;
 	text-indent: 0;
 }
 
@@ -687,7 +687,7 @@ dd.glossary {
 }
 
 .directive > .desc-entry {
-	grid-template-columns: 12rem 1fr;
+	grid-template-columns: 18rem 1fr;
 
 	display: grid;
 	margin-bottom: 1em;

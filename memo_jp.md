@@ -1293,14 +1293,14 @@ You can also browse the pio/ directory in the Pico Examples repository.
 
 ## 3.3. PIOアセンブラPIOASMを使う
 
-Up until now, we have glossed over the details of how the assembly program in our .pio file is translated into a binary program, ready to be loaded into our PIO state machine. Programs that handle this task — translating assembly code into binary — are generally referred to as assemblers, and PIO is no exception in this regard. The SDK includes an assembler for PIO, called pioasm. The SDK handles the details of building this tool for you behind the scenes, and then using it to build your PIO programs, for you to #include from your C or C++ program. pioasm can also be used directly, and has a few features not used by the C++ SDK, such as generating programs suitable for use with the MicroPython PIO library.
+Up until now, we have glossed over the details of how the assembly program in our `.pio` file is translated into a binary program, ready to be loaded into our PIO state machine. Programs that handle this task — translating assembly code into binary — are generally referred to as assemblers, and PIO is no exception in this regard. The SDK includes an assembler for PIO, called pioasm. The SDK handles the details of building this tool for you behind the scenes, and then using it to build your PIO programs, for you to #include from your C or C++ program. pioasm can also be used directly, and has a few features not used by the C++ SDK, such as generating programs suitable for use with the MicroPython PIO library.
 
 
-これまで、.pioファイルのアセンブリプログラムがどのようにバイナリプログラ ムに変換され、PIOステートマシンにロードできるようになるかについて、詳 細を説明してきませんでした。アセンブリ・コードをバイナリに変換するというこの作業を行うプログラムは一般にアセンブラと呼ばれ、この点ではPIOも例外ではありません。SDKには、pioasmと呼ばれるPIO用のアセンブラが含まれています。pioasmは直接使用することも可能で、MicroPython PIOライブラリで使用するのに適したプログラムを生成するなど、C++ SDKでは使用されない機能をいくつか持っています。
+これまで、`.pio` ファイルのアセンブリプログラムがどのようにバイナリプログラムに変換され、PIOステートマシンにロードできるようになるかについて、詳 細を説明してきませんでした。アセンブリ・コードをバイナリに変換するというこの作業を行うプログラムは一般にアセンブラと呼ばれ、この点ではPIOも例外ではありません。SDKには、`pioasm` と呼ばれるPIO用のアセンブラが含まれています。 `pioasm` は直接使用することも可能で、MicroPython PIOライブラリで使用するのに適したプログラムを生成するなど、C++ SDKでは使用されない機能をいくつか持っています。
 
-If you have built the pico-examples repository at any point, you will likely already have a pioasm binary in your build directory, located under build/tools/pioasm/pioasm, which was bootstrapped for you before building any applications that depend on it. If we want a standalone copy of pioasm, perhaps just to explore the available command-line options, we can obtain it as follows (assuming the SDK is extracted at $PICO_SDK_PATH):
+If you have built the `pico-examples` repository at any point, you will likely already have a `pioasm` binary in your build directory, located under `build/tools/pioasm/pioasm`, which was bootstrapped for you before building any applications that depend on it. If we want a standalone copy of `pioasm`, perhaps just to explore the available command-line options, we can obtain it as follows (assuming the SDK is extracted at `$PICO_SDK_PATH`):
 
-pioasmに依存するアプリケーションをビルドする前に、build/tools/pioasm/pioasmの下にあるpioasmバイナリをビルドディレクトリにビルドしているはずです。pioasmのスタンドアロンコピーが欲しい場合、おそらく利用可能なコマンドラインオプションを調べるために、次のようにして入手できます(SDKが$PICO_SDK_PATHに展開されていると仮定します):
+`pioasm`に依存するアプリケーションをビルドする前に、`build/tools/pioasm/pioasm`の下にある`pioasm`バイナリをビルドディレクトリにビルドしているはずです。`pioasm`のスタンドアロンコピーが欲しい場合、おそらく利用可能なコマンドラインオプションを調べるために、次のようにして入手できます(SDKが`$PICO_SDK_PATH`に展開されていると仮定します):
 
 ```
 $ mkdir pioasm_build
@@ -1332,28 +1332,28 @@ usage: pioasm <options> <input> (<output>)
 
 Assemble file of PIO program(s) for use in applications.
 
-<input> the input filename
-<output> the output filename (or filename prefix if the output
-  format produces multiple outputs).
-  if not specified, a single output will be written to stdout
+<input>             the input filename
+<output>            the output filename (or filename prefix if the output
+                        format produces multiple outputs).
+                    if not specified, a single output will be written to stdout
 options:
--o <output_format> select output_format (default 'c-sdk'); available options are:
-  c-sdk
-  C header suitable for use with the Raspberry Pi Pico SDK
-  python
-  Python file suitable for use with MicroPython
-  hex
-  Raw hex output (only valid for single program inputs)
--v <version> specify the default PIO version (0 or 1)
--p <output_param> add a parameter to be passed to the outputter
--?, --help print this help and exit
+-o <output_format>  select output_format (default 'c-sdk'); available options are:
+                    c-sdk
+                        C header suitable for use with the Raspberry Pi Pico SDK
+                    python
+                        Python file suitable for use with MicroPython
+                    hex
+                        Raw hex output (only valid for single program inputs)
+-v <version>        specify the default PIO version (0 or 1)
+-p <output_param>   add a parameter to be passed to the outputter
+-?, --help          print this help and exit
 ```
 
 >  NOTE
-> Within the SDK you do not need to invoke pioasm directly, as the CMake function pico_generate_pio_header(TARGET PIO_FILE) takes care of invoking pioasm and adding the generated header to the include path of the target TARGET for you.
+> Within the SDK you do not need to invoke pioasm directly, as the `CMake` function `pico_generate_pio_header(TARGET PIO_FILE)` takes care of invoking pioasm and adding the generated header to the include path of the target TARGET for you.
 
 >  NOTE
-> なぜなら、CMake関数のpico_generate_pio_header(TARGET PIO_FILE)がpioasmを起動し、生成されたヘッダーをターゲットTARGETのインクルード・パスに追加してくれるからです。
+> なぜなら、`CMake`関数の`pico_generate_pio_header(TARGET PIO_FILE)`がpioasmを起動し、生成されたヘッダーをターゲットTARGETのインクルード・パスに追加してくれるからです。
 
 ### 3.3.2. Directives
 
@@ -1372,11 +1372,11 @@ list of pioasm directives
 
 ||.define ( PUBLIC )<symbol> <value>||<symbol> という名前の整数シンボルを値<value> で定義する(セクション 3.3.3 参照)。この.defineが入力ファイルの最初のプログラムの前に現れる場合、このdefineは全てのプログラムに対してグローバルであり、そうでない場合、このdefineが現れるプログラムに対してローカルである。PUBLICが指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDKの場合、これは次のような形になります:
 
-プログラムシンボルでは `#define <プログラム名>_<シンボル>` の値、グローバルシンボルでは `#define <シンボル>` の値
+プログラムシンボルでは `#define <program_name>_<symbol>` の値、グローバルシンボルでは `#define <symbol> value`
 
-|| .clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point value, but may not currently use arithmetic expressions or defined values. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
+||.clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point value, but may not currently use arithmetic expressions or defined values. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction
 
-|| .clock_div <divider>||このディレクティブが存在する場合、<divider>はプログラムのステートマシンクロックディバイダです。dividerは浮動小数点値ですが、算術式や定義された値を使用することはできません。このディレクティブは、プログラムのデフォルトのステートマシン設定に影響します。この指令はプログラム内で最初の命令
+||.clock_div <divider>||このディレクティブが存在する場合、`<divider>`はプログラムのステートマシンクロックディバイダです。dividerは浮動小数点値ですが、算術式や定義された値を使用することはできません。このディレクティブは、プログラムのデフォルトのステートマシン設定に影響します。この指令はプログラム内で最初の命令より前にある場合のみ有効です。
 
 ||.fifo <fifo_config>||If this directive is present, it is used to specify the FIFO configuration for the program. It affects the default state machine configuration for a program, but also restricts what instructions may be used (for example PUSH makes no sense if there is no IN FIFO configrued).
 
@@ -1396,49 +1396,49 @@ The following values are supported:
 
 This directive is only valid within a program before the first instruction
 
-||.fifo<fifo_config>||このディレクティブがある場合、プログラムの FIFO 設定を指定するために使用されます。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響するだけでなく、使用できる命令も制限します(例えば、IN FIFOが構成されていない場合、PUSHは意味を持ちません)。
+||.fifo <fifo_config>||このディレクティブがある場合、プログラムの FIFO 設定を指定するために使用されます。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響するだけでなく、使用できる命令も制限します(例えば、IN FIFOが構成されていない場合、PUSHは意味を持ちません)。
 
 以下の値がサポートされている:
 
-`txrx`: rx - RXの8つのFIFOエントリすべて。
+`txrx`: 4 FIFO entries for each of TX and RX; this is the default.
+
+`rx` - RXの8つのFIFOエントリすべて。
 
 `tx` - All 8 FIFO entries for TX.
 
 `rx` - All 8 FIFO entries for RX.
 
-`txput` - TXの4つのFIFOエントリ、および `mov rxfifo[index]、isr` (別名 put)の4つのFIFOエントリ。
+`txput` - TXの4つのFIFOエントリ、および `mov rxfifo[index]、isr` (別名 *put*)の4つのFIFOエントリ。
 
 `txget` - TX用の4つのFIFOエントリと、`mov osr, rxfifo[index]` 用の4つのFIFOエントリ。
 
-`putget` - `mov rxfifo[index],isr` (別名put)用の4つのFIFOエントリと、`mov osr, rxfifo[index]`(別名get)用の4つのFIFOエントリ。この値はPIOバージョン0ではサポートされていません。
+`putget` - `mov rxfifo[index],isr` (別名`put`)用の4つのFIFOエントリと、`mov osr, rxfifo[index]`(別名`get`)用の4つのFIFOエントリ。この値はPIOバージョン0ではサポートされていません。
 
 この指令は、最初の命令の前のプログラム内でのみ有効です。
 
-||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq <(next|prev)> set <n>|| This directive configures the source for the `mov , STATUS` .
-One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higer numbered, or lowered numbered PIO instance if `next` or `prev` or specified). Note, that the IRQ option requires PIO version 1.
+||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq <(next|prev)> set <n>||This directive configures the source for the `mov , STATUS`.  One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higer numbered, or lowered numbered PIO instance if `next` or `prev` or specified). Note, that the IRQ option requires PIO version 1.
 
 This directive affects the default state machine configuration for a program.
 
 This directive is only valid within a program before the first instruction
 
-||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq<(next|prev)> set<n>|| このディレクティブは、mov のソースである STATUS を設定します。RXFIFOレベルが値N以下であること、TXFIFOレベルが値N以下であること、またはIRQフラグNがこのPIOインスタンス(nextまたはprevが指定されている場合は、次の上位番号または下位番号のPIOインスタンス)で設定されていることに基づいてステータスを設定するには、3つの構文のいずれかを使用できます。IRQオプションはPIOバージョン1を必要とすることに注意。
+||.mov_status rxfifo < <n><br>.mov_status txfifo < <n><br>.mov_status irq<(next|prev)> set<n>||このディレクティブは、 `mov , STATUS` のソースをを設定します。RXFIFOレベルが値N以下であること、TXFIFOレベルが値N以下であること、またはIRQフラグNがこのPIOインスタンス(nextまたはprevが指定されている場合は、次の上位番号または下位番号のPIOインスタンス)で設定されていることに基づいてステータスを設定するには、3つの構文のいずれかを使用できます。IRQオプションはPIOバージョン1を必要とすることに注意。
 
 このディレクティブは、プログラムのデフォルトのステートマシン構成に影響します。このディレクティブは、プログラム内で最初の命令の前にのみ有効である
 
-||.in <count> (left|right) (auto) (<threshold>)|| If this directive is present, <count> indicates the number of IN bits to be used.  
-'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; <threshold>, if present, specifies the "auto-push" threshold. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction 
+||.in <count> (left|right) (auto) (<threshold>)||If this directive is present, *<count>* indicates the number of IN bits to be used.  'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; *<threshold>*, if present, specifies the "auto-push" threshold. This directive affects the default state machine configuration for a program. This directive is only valid within a program before the first instruction 
 
 When assembling for PIO version 0, count must be 32.
 
-||.in <count> (left|right) (auto) (<threshold>)|| このディレクティブが存在する場合、`<count>` は使用するINビットの数を示す。 『`left`』または『`right`』が指定された場合、ISRのシフト方向を制御する。『`auto`』が指定された場合、「自動プッシュ」を有効にする。`<threshold>` が指定された場合、「自動プッシュ」のしきい値を指定する。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響する。このディレクティブは、プログラム内で最初の命令の前にのみ有効である。 
+||.in <count> (left|right) (auto) (<threshold>)||このディレクティブが存在する場合、`<count>` は使用するINビットの数を示す。 『`left`』または『`right`』が指定された場合、ISRのシフト方向を制御する。『`auto`』が指定された場合、「自動プッシュ」を有効にする。`<threshold>` が指定された場合、「自動プッシュ」のしきい値を指定する。このディレクティブは、プログラムのデフォルトのステートマシン構成に影響する。このディレクティブは、プログラム内で最初の命令の前にのみ有効である。 
 
 PIOバージョン0用にアセンブルする場合、count は 32 でなければならない。
 
-||.program <name>||Start a new program with the name <name>. Note that that name is used in code so should be alphanumeric/underscore not starting with a digit. The program lasts until another .program directive or the end of the source file. PIO instructions are only allowed within a program
+||.program <name>||Start a new program with the name *<name>*. Note that that name is used in code so should be alphanumeric/underscore not starting with a digit. The program lasts until another .program directive or the end of the source file. PIO instructions are only allowed within a program
 
-||.program <name>||新しいプログラムを<name> という名前で開始する。この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の .program 命令かソース・ファイルの終わりまで続きます。PIO命令はプログラムの中でしか許可されません。
+||.program <name>||新しいプログラムを *<name>* という名前で開始する。この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の *.program* 命令かソース・ファイルの終わりまで続きます。PIO命令はプログラムの中でしか許可されません。
 
-||.origin <offset>||Optional directive to specify the PIO instruction memory offset at which the program must load. Most commonly this is used for programs that must load at offset 0, because they use data based JMPs with the (absolute) jmp target being stored in only a few bits. This directive is invalid outside a program
+||.origin <offset>||Optional directive to specify the PIO instruction memory offset at which the program *must* load. Most commonly this is used for programs that must load at offset 0, because they use data based JMPs with the (absolute) jmp target being stored in only a few bits. This directive is invalid outside a program
 
 ||.origin <offset>||プログラムがロードしなければならないPIO命令のメモリオフセットを指定するオプションの命令です。最も一般的には、オフセット 0 でロードしなければならないプログラムに使用されます。これは、データ・ベースの JMP を使用し、(絶対) JMP ターゲットがわずか数ビットに格納されているためです。このディレクティブはプログラムの外では無効である。
 
@@ -1487,9 +1487,8 @@ The following types of values can be used to define integer numbers or branch ta
 整数値や分岐先を定義するために、以下のタイプの値を使用することができる。
 
 Table 5. Values in
-pioasm, i.e. <value>
+pioasm, i.e. &lt;value>
 
-```
 |||
 |---|---|
 |integer|An integer value e.g. 3 or -7
@@ -1498,7 +1497,6 @@ pioasm, i.e. <value>
 |symbol|A value defined by a .define (see pioasm_define)
 |<label>|The instruction offset of the label within the program. This makes most sense when used with a JMP instruction (see Section 3.4.4)
 |( <expression> )|An expression to be evaluated; see expressions. Note that the parentheses are necessary.
-```
 
 ### 3.3.4. Expressions
 
@@ -1507,21 +1505,19 @@ Expressions may be freely used within pioasm values.
 pioasmの値の中では、式を自由に使うことができる。
 
 Table 6. Expressions
-in pioasm i.e. <expression>
+in pioasm i.e. &lt;expression>
 
-```
 |||
 |---|---|
-|<expression> + <expression>|The sum of two expressions
-|<expression> - <expression>|The difference of two expressions
-|<expression> * <expression>|The multiplication of two expressions
-|<expression> / <expression>|The integer division of two expressions
-|- <expression>|The negation of another expression
-|<expression> << <expression>|One expression shifted left by another expression
-|<expression> >> <expression>|One expression shifted right by another expression
-|:: <expression>|The bit reverse of another expression
-|<value>|Any value (see Section 3.3.3)
-```
+|&lt;expression> + &lt;expression>|The sum of two expressions
+|&lt;expression> - &lt;expression>|The difference of two expressions
+|&lt;expression> * &lt;expression>|The multiplication of two expressions
+|&lt;expression> / &lt;expression>|The integer division of two expressions
+|- &lt;expression>|The negation of another expression
+|&lt;expression> &lt;&lt; &lt;expression>|One expression shifted left by another expression
+|&lt;expression> >> &lt;expression>|One expression shifted right by another expression
+|:: &lt;expression>|The bit reverse of another expression
+|&lt;value>|Any value (see Section 3.3.3)
 
 ### 3.3.5. Comments
 
@@ -1570,23 +1566,23 @@ where:
 ||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 3.3.3), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the `.side_set` (see `pioasm_side_set`) directive. If the *<delay_value>* is not present, then the instruction has no delay
 
 ||<instruction>|| 以下のセクションで詳述されるアセンブリ命令である。(セクション3.4参照) 
-||<side_set_value>||命令の開始時にside_setピンに適用する値(セクション3.3.3参照)です。サイド<side_set_value> を介したサイドセット値のルールは、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意してください。.side_setが指定されていない場合、side<side_set_value> 。オプションのサイドセット・ピン数が指定されている場合、side<side_set_value> 。オプションでないサイドセット・ピン数が指定されている場合、side<side_set_value> 。<side_set_value> は、.side_set 指令で指定されたサイドセットビット数に収まらなければならない。
-||<delay_value>||命令が完了した後に遅延させるサイクル数を指定する。delay_valueは値として指定され(セクション3.3.3参照)、一般的には0から31の間(5ビット値)ですが、.side_set(pioasm_side_set参照)指令によってサイドセットが有効になっている場合は、ビット数が減少します。<delay_value>が存在しない場合、その命令は遅延を持たない。
-
+||<side_set_value>||命令の開始時にside_setピンに適用する値(セクション3.3.3参照)です。`side <side_set_value>` を介したサイドセット値のルールは、プログラムの `.side_set` (`pioasm_side_set` 参照) 命令に依存することに注意してください。`.side_set` が指定されていない場合、`side <side_set_value>` は不当です。オプションのサイドセット・ピン数が指定されている場合、`side <side_set_value>` が存在してもかまいません。オプションでないサイドセット・ピン数が指定されている場合、`side <side_set_value>` は必須となります。 *<side_set_value>* は、`.side_set` 指令中で指定されたサイドセットビット数に収まらなければならない。
+||<delay_value>||命令が完了した後に遅延させるサイクル数を指定する。delay_value は値として指定され(セクション3.3.3参照)、一般的には0から31の間(5ビット値)ですが、`.side_set`(`pioasm_side_set` 参照)指令によってサイドセットが有効になっている場合は、ビット数が減少します。 *<delay_value>* が存在しない場合、その命令は遅延を持たない。
 </directive>
 
 >  NOTE
 > pioasm instruction names, keywords and directives are case insensitive; lower case is used in the Assembly Syntax sections below as this is the style used in the SDK.
 
 >  NOTE
+> pioasm の命令名、キーワード、ディレクティブは大文字と小文字が区別されません。 *Assembly Syntax* セクションでは小文字を使います。
+
+
+>  NOTE
 > Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. `out pins, 3` may be written `out pins 3`, and `jmp x-- label` may be written as `jmp x--, label.` The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
 >  NOTE
-> pioasm の命令名、キーワード、ディレクティブは大文字と小文字が区別されません。
+> コンマは *Assembly Syntax* セクションで表れていますが、コンマは完全にオプションです。例えば、`out pins, 3` は `out pins 3` と書くことができ、 `jmp x-- label` は `jmp x--, label` と書くことができます。　 SDKで用いているスタイルなので、以下の *Assembly Syntax* セクションでは最初のスタイルを使用します。
 
-
->  NOTE
-> Commas appear in some Assembly Syntax sections below, but are entirely optional, 例えば、out pins, 3 は out pins 3 と書くことができ、jmp x-- label は jmp x--, label と書くことができます。The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
 ### 3.3.8. 擬似命令
 
@@ -1608,9 +1604,9 @@ Currently pioasm provides one pseudoinstruction, as a convenience:
 
 Text in the PIO file may be passed, unmodified, to the output based on the language generator being used.
 
-For example the following (comment and function) would be included in the generated header when the default c-sdk language generator is used.
+PIOファイル内のテキストは、使用されている言語ジェネレーターに基づいて、変更されずに出力に渡されることがある。
 
-PIOファイル内のテキストは、使用されている言語ジェネレーターに基づ いて、変更されずに出力に渡されることがある。
+For example the following (comment and function) would be included in the generated header when the default c-sdk language generator is used.
 
 たとえば、デフォルトのc-sdk言語ジェネレーターが使用されている場合、生成されるヘッダーには次のようなテキスト(コメントと関数)が含まれる。
 
@@ -1625,14 +1621,6 @@ static inline int some_c_code() {
 
 The general format is
 
-```
-% target {
-pass through contents
-%}
-```
-
-with targets being recognized by a particular language generator (see Section 3.3.10; note that target is usually the language generator name e.g. c-sdk, but could potentially be some_language.some_group if the language generator supports different classes of pass through with different output locations.
-
 通常の書式は、
 
 ```
@@ -1641,11 +1629,13 @@ pass through contents
 %}
 ```
 
-ここで、target は特定の言語ジェネレーターを表します(see Section 3.3.10。 target は通常は言語ジェネレータ名 (例:c-sdk)ですが、その言語ジェネレーターが異なる出力場所を持つ異なるクラスのパススルーに対応している場合は、 some_language.some_group になる可能性もあります。
+with `target`s being recognized by a particular language generator (see Section 3.3.10; note that `target` is usually the language generator name e.g. c-sdk, but could potentially be some_language.some_group if the language generator supports different classes of pass through with different output locations.
+
+ここで、`target` は特定の言語ジェネレーターを表します(see Section 3.3.10。 `target` は通常は言語ジェネレータ名 (例: `c-sdk`)ですが、その言語ジェネレーターが異なる出力場所を持つ異なるクラスのパススルーに対応している場合は、 `some_language.some_group` になる可能性もあります。
 
 This facility allows you to encapsulate both the PIO program and the associated setup required in the same source file.
 
-この機能を使用すると、PIOプログラムと関連するセットアップの両方を同じソース・ファイルにカプセル化することができます。
+この機能を使用すると、PIOプログラムと関連するセットアップの両方を同じソースファイルにカプセル化することができます。
 
 See Section 3.3.10 for a more complete example.
 
@@ -1684,34 +1674,34 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 22
 23 .wrap_target
 24 bitloop:
-25 out x, 1 side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
-26 jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+25      out x, 1        side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
+26      jmp !x do_zero  side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
 27 do_one:
-28 jmp bitloop side 1 [T2 - 1] ; Continue driving high, for a long pulse
+28      jmp bitloop     side 1 [T2 - 1] ; Continue driving high, for a long pulse
 29 do_zero:
-30 nop side 0 [T2 - 1] ; Or drive low, for a short pulse
+30      nop             side 0 [T2 - 1] ; Or drive low, for a short pulse
 31 .wrap
 32
 33 % c-sdk {
 34 #include "hardware/clocks.h"
 35
-36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq,
-  bool rgbw) {
+36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, 
+                    float freq, bool rgbw) {
 37
-38 pio_gpio_init(pio, pin);
-39 pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+38      pio_gpio_init(pio, pin);
+39      pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 40
-41 pio_sm_config c = ws2812_program_get_default_config(offset);
-42 sm_config_set_sideset_pins(&c, pin);
-43 sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
-44 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+41      pio_sm_config c = ws2812_program_get_default_config(offset);
+42      sm_config_set_sideset_pins(&c, pin);
+43      sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
+44      sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 45
-46 int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
-47 float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
-48 sm_config_set_clkdiv(&c, div);
+46      int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
+47      float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+48      sm_config_set_clkdiv(&c, div);
 49
-50 pio_sm_init(pio, sm, offset, &c);
-51 pio_sm_set_enabled(pio, sm, true);
+50      pio_sm_init(pio, sm, offset, &c);
+51      pio_sm_set_enabled(pio, sm, true);
 52 }
 53 %}
 54
@@ -1722,33 +1712,33 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 59 .define public T3 4
 60
 61 .wrap_target
-62 out x, 32
-63 mov pins, !null [T1-1]
-64 mov pins, x [T2-1]
-65 mov pins, null [T3-2]
+62      out x, 32
+63      mov pins, !null [T1-1]
+64      mov pins, x     [T2-1]
+65      mov pins, null  [T3-2]
 66 .wrap
 67
 68 % c-sdk {
 69 #include "hardware/clocks.h"
 70
-71 static inline void ws2812_parallel_program_init(PIO pio, uint sm, uint offset, uint pin_base,
-  uint pin_count, float freq) {
-72 for(uint i=pin_base; i<pin_base+pin_count; i++) {
-73 pio_gpio_init(pio, i);
-74 }
-75 pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true);
+71 static inline void ws2812_parallel_program_init(PIO pio, uint sm, uint offset, 
+                uint pin_base, uint pin_count, float freq) {
+72      for(uint i=pin_base; i<pin_base+pin_count; i++) {
+73          pio_gpio_init(pio, i);
+74      }
+75      pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true);
 76
-77 pio_sm_config c = ws2812_parallel_program_get_default_config(offset);
-78 sm_config_set_out_shift(&c, true, true, 32);
-79 sm_config_set_out_pins(&c, pin_base, pin_count);
-80 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+77      pio_sm_config c = ws2812_parallel_program_get_default_config(offset);
+78      sm_config_set_out_shift(&c, true, true, 32);
+79      sm_config_set_out_pins(&c, pin_base, pin_count);
+80      sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 81
-82 int cycles_per_bit = ws2812_parallel_T1 + ws2812_parallel_T2 + ws2812_parallel_T3;
-83 float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
-84 sm_config_set_clkdiv(&c, div);
+82      int cycles_per_bit = ws2812_parallel_T1 + ws2812_parallel_T2 + ws2812_parallel_T3;
+83      float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+84      sm_config_set_clkdiv(&c, div);
 85
-86 pio_sm_init(pio, sm, offset, &c);
-87 pio_sm_set_enabled(pio, sm, true);
+86      pio_sm_init(pio, sm, offset, &c);
+87      pio_sm_set_enabled(pio, sm, true);
 88 }
 89 %}
 ```
@@ -1795,46 +1785,46 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
  21 #define ws2812_T3 4
  22
  23 static const uint16_t ws2812_program_instructions[] = {
- 24 // .wrap_target
- 25 0x6321, // 0: out x, 1 side 0 [3]
- 26 0x1223, // 1: jmp !x, 3 side 1 [2]
- 27 0x1200, // 2: jmp 0 side 1 [2]
- 28 0xa242, // 3: nop side 0 [2]
- 29 // .wrap
+ 24             // .wrap_target
+ 25     0x6321, // 0: out x, 1 side 0 [3]
+ 26     0x1223, // 1: jmp !x, 3 side 1 [2]
+ 27     0x1200, // 2: jmp 0 side 1 [2]
+ 28     0xa242, // 3: nop side 0 [2]
+ 29             // .wrap
  30 };
  31
  32 #if !PICO_NO_HARDWARE
  33 static const struct pio_program ws2812_program = {
- 34 .instructions = ws2812_program_instructions,
- 35 .length = 4,
- 36 .origin = -1,
- 37 .pio_version = ws2812_pio_version,
+ 34     .instructions = ws2812_program_instructions,
+ 35     .length = 4,
+ 36     .origin = -1,
+ 37     .pio_version = ws2812_pio_version,
  38 #if PICO_PIO_VERSION > 0
- 39 .used_gpio_ranges = 0x0
+ 39     .used_gpio_ranges = 0x0
  40 #endif
  41 };
  42
  43 static inline pio_sm_config ws2812_program_get_default_config(uint offset) {
- 44 pio_sm_config c = pio_get_default_sm_config();
- 45 sm_config_set_wrap(&c, offset + ws2812_wrap_target, offset + ws2812_wrap);
- 46 sm_config_set_sideset(&c, 1, false, false);
- 47 return c;
+ 44     pio_sm_config c = pio_get_default_sm_config();
+ 45     sm_config_set_wrap(&c, offset + ws2812_wrap_target, offset + ws2812_wrap);
+ 46     sm_config_set_sideset(&c, 1, false, false);
+ 47     return c;
  48 }
  49
  50 #include "hardware/clocks.h"
- 51 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq,
-  bool rgbw) {
- 52 pio_gpio_init(pio, pin);
- 53 pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
- 54 pio_sm_config c = ws2812_program_get_default_config(offset);
- 55 sm_config_set_sideset_pins(&c, pin);
- 56 sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
- 57 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
- 58 int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
- 59 float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
- 60 sm_config_set_clkdiv(&c, div);
- 61 pio_sm_init(pio, sm, offset, &c);
- 62 pio_sm_set_enabled(pio, sm, true);
+ 51 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, 
+                    float freq, bool rgbw) {
+ 52     pio_gpio_init(pio, pin);
+ 53     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+ 54     pio_sm_config c = ws2812_program_get_default_config(offset);
+ 55     sm_config_set_sideset_pins(&c, pin);
+ 56     sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
+ 57     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+ 58     int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
+ 59     float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+ 60     sm_config_set_clkdiv(&c, div);
+ 61     pio_sm_init(pio, sm, offset, &c);
+ 62     pio_sm_set_enabled(pio, sm, true);
  63 }
  64
  65 #endif
@@ -1852,48 +1842,48 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
  77 #define ws2812_parallel_T3 4
  78
  79 static const uint16_t ws2812_parallel_program_instructions[] = {
- 80 // .wrap_target
- 81 0x6020, // 0: out x, 32
- 82 0xa20b, // 1: mov pins, ~null [2]
- 83 0xa201, // 2: mov pins, x [2]
- 84 0xa203, // 3: mov pins, null [2]
- 85 // .wrap
+ 80             // .wrap_target
+ 81     0x6020, // 0: out x, 32
+ 82     0xa20b, // 1: mov pins, ~null [2]
+ 83     0xa201, // 2: mov pins, x [2]
+ 84     0xa203, // 3: mov pins, null [2]
+ 85             //    .wrap
  86 };
  87
  88 #if !PICO_NO_HARDWARE
  89 static const struct pio_program ws2812_parallel_program = {
- 90 .instructions = ws2812_parallel_program_instructions,
- 91 .length = 4,
- 92 .origin = -1,
- 93 .pio_version = ws2812_parallel_pio_version,
+ 90     .instructions = ws2812_parallel_program_instructions,
+ 91     .length = 4,
+ 92     .origin = -1,
+ 93     .pio_version = ws2812_parallel_pio_version,
  94 #if PICO_PIO_VERSION > 0
- 95 .used_gpio_ranges = 0x0
+ 95     .used_gpio_ranges = 0x0
  96 #endif
  97 };
  98
  99 static inline pio_sm_config ws2812_parallel_program_get_default_config(uint offset) {
-100 pio_sm_config c = pio_get_default_sm_config();
-101 sm_config_set_wrap(&c, offset + ws2812_parallel_wrap_target, offset +
-  ws2812_parallel_wrap);
-102 return c;
+100     pio_sm_config c = pio_get_default_sm_config();
+101     sm_config_set_wrap(&c, offset + ws2812_parallel_wrap_target, offset + 
+                ws2812_parallel_wrap);
+102     return c;
 103 }
 104
 105 #include "hardware/clocks.h"
-106 static inline void ws2812_parallel_program_init(PIO pio, uint sm, uint offset, uint
-  pin_base, uint pin_count, float freq) {
-107 for(uint i=pin_base; i<pin_base+pin_count; i++) {
-108 pio_gpio_init(pio, i);
-109 }
-110 pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true);
-111 pio_sm_config c = ws2812_parallel_program_get_default_config(offset);
-112 sm_config_set_out_shift(&c, true, true, 32);
-113 sm_config_set_out_pins(&c, pin_base, pin_count);
-114 sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-115 int cycles_per_bit = ws2812_parallel_T1 + ws2812_parallel_T2 + ws2812_parallel_T3;
-116 float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
-117 sm_config_set_clkdiv(&c, div);
-118 pio_sm_init(pio, sm, offset, &c);
-119 pio_sm_set_enabled(pio, sm, true);
+106 static inline void ws2812_parallel_program_init(PIO pio, uint sm, uint offset, 
+                            uint pin_base, uint pin_count, float freq) {
+107     for(uint i=pin_base; i<pin_base+pin_count; i++) {
+108         pio_gpio_init(pio, i);
+109     }
+110     pio_sm_set_consecutive_pindirs(pio, sm, pin_base, pin_count, true);
+111     pio_sm_config c = ws2812_parallel_program_get_default_config(offset);
+112     sm_config_set_out_shift(&c, true, true, 32);
+113     sm_config_set_out_pins(&c, pin_base, pin_count);
+114     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+115     int cycles_per_bit = ws2812_parallel_T1 + ws2812_parallel_T2 + ws2812_parallel_T3;
+116     float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+117     sm_config_set_clkdiv(&c, div);
+118     pio_sm_init(pio, sm, offset, &c);
+119     pio_sm_set_enabled(pio, sm, true);
 120 }
 121
 122 #endif
@@ -1939,14 +1929,14 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 14
 15 @rp2.asm_pio(sideset_init=pico.PIO.OUT_HIGH, out_init=pico.PIO.OUT_HIGH, out_shiftdir=1)
 16 def ws2812():
-17 wrap_target()
-18 label("0")
-19 out(x, 1) .side(0) [3] # 0
-20 jmp(not_x, "3") .side(1) [2] # 1
-21 jmp("0") .side(1) [2] # 2
-22 label("3")
-23 nop() .side(0) [2] # 3
-24 wrap()
+17      wrap_target()
+18      label("0")
+19      out(x, 1)               .side(0) [3] # 0
+20      jmp(not_x, "3")         .side(1) [2] # 1
+21      jmp("0")                .side(1) [2] # 2
+22      label("3")
+23      nop()               .side(0) [2] # 3
+24      wrap()
 25
 26
 27
@@ -1960,12 +1950,12 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 35
 36 @rp2.asm_pio()
 37 def ws2812_parallel():
-38 wrap_target()
-39 out(x, 32) # 0
-40 mov(pins, invert(null)) [2] # 1
-41 mov(pins, x) [2] # 2
-42 mov(pins, null) [2] # 3
-43 wrap()
+38      wrap_target()
+39      out(x, 32) # 0
+40      mov(pins, invert(null))     [2] # 1
+41      mov(pins, x)                [2] # 2
+42      mov(pins, null)             [2] # 3
+43      wrap()
 ```
 
 #### 3.3.10.3. hex
@@ -1989,11 +1979,11 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squa
  6 .pio_version 0 // only requires PIO version 0
  7
  8 .program squarewave
- 9 set pindirs, 1 ; Set pin to output
+ 9      set pindirs, 1 ; Set pin to output
 10 again:
-11 set pins, 1 [1] ; Drive pin high and then delay for one cycle
-12 set pins, 0 ; Drive pin low
-13 jmp again ; Set PC to label `again`
+11      set pins, 1 [1]     ; Drive pin high and then delay for one cycle
+12      set pins, 0         ; Drive pin low
+13      jmp again           ; Set PC to label `again`
 ```
 
 The hex output produces:
@@ -2012,18 +2002,14 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squa
 >  NOTE
 > This section refers in places to concepts and pieces of hardware discussed in the RP2350 Datasheet. You are encouraged to read the PIO chapter of the datasheet to get the full context for what these instructions do.
 
-The following sections document instruction behaviour on both PIO version 0 (RP2040) and PIO version 1 (RP2350).
-
-When no version restrictions are mentioned, this means the behaviour applies to both versions. PIO version 1 is strictly additive over version 0, so some features may be indicated as version-1-only, but none are version-0-only.
+The following sections document instruction behaviour on both PIO version 0 (RP2040) and PIO version 1 (RP2350).  When no version restrictions are mentioned, this means the behaviour applies to both versions. PIO version 1 is strictly additive over version 0, so some features may be indicated as version-1-only, but none are version-0-only.
 
 For documentation specific to a particular PIO version, see the device datasheet for a device equipped with that version.
 
 >  注意
 > このセクションは、RP2350 データシートで説明されている概念やハードウェアに言及しています。データシートの PIO の章を読んで、これらの命令で何ができるかを理解することを推奨します。
 
-以下のセクションでは、PIO バージョン 0(RP2040)と PIO バージョン 1(RP2350)の両方における命令の動作について説明します。
-
-バージョンの制限がない場合は、両方のバージョンに適用されます。PIO version 1はversion 0に対して厳密には加算型であるため、version-1専用と記載されているものがあっても、version-0専用と記載されているものはありません。
+以下のセクションでは、PIO バージョン 0(RP2040)と PIO バージョン 1(RP2350)の両方における命令の動作について説明します。バージョンの制限がない場合は、両方のバージョンに適用されます。PIO version 1はversion 0に対して厳密には追加物であるため、version-1専用と記載されているものがあっても、version-0専用と記載されているものはありません。
 
 特定のPIOバージョンに特化した文書については、そのバージョンを搭載したデバイスのデータシートを参照してください。
 
@@ -2033,54 +2019,24 @@ PIO instructions are 16 bits long, and have the following encoding:
 
 PIO命令は16ビット長で、以下のエンコーディングを持ちます:
 
-Table 7. PIO
-instruction encoding
+Table 7. PIO instruction encoding
 
 <img src="img/Bit3_4_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-JMP 0 0 0 Delay/side-set Condition Address
-WAIT 0 0 1 Delay/side-set Pol Source Index
-IN 0 1 0 Delay/side-set Source Bit count
-OUT 0 1 1 Delay/side-set Destination Bit count
-PUSH
-1 0 0 Delay/side-set 0 IfF Blk 0 0 0 0 0
-PULL 1 0 0 Delay/side-set 1 IfE Blk 0 0 0 0 0
-MOV 1 0 1 Delay/side-set Destination Op Source
-IRQ 1 1 0 Delay/side-set 0 Clr Wait Index
-SET 1 1 1 Delay/side-set Destination Data
-```
 
 ### 3.4.2. Encoding (version 1, RP2350)
 
 PIO instructions are 16 bits long, and have the following encoding:
 
-Table 8. PIO
-instruction encoding
+Table 8. PIO instruction encoding
 
 <img src="img/Bit3_4_2.png"/>
 
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-JMP 0 0 0 Delay/side-set Condition Address
-WAIT 0 0 1 Delay/side-set Pol Source Index
-IN 0 1 0 Delay/side-set Source Bit count
-OUT 0 1 1 Delay/side-set Destination Bit count
-PUSH 1 0 0 Delay/side-set 0 IfF Blk 0 0 0 0 0
-MOV 1 0 0 Delay/side-set 0 0 0 1 IdxI 0 Index
-PULL 1 0 0 Delay/side-set 1 IfE Blk 0 0 0 0 0
-MOV 1 0 0 Delay/side-set 1 0 0 1 IdxI 0 Index
-MOV 1 0 1 Delay/side-set Destination Op Source
-IRQ 1 1 0 Delay/side-set 0 Clr Wait IdxMode Index
-SET 1 1 1 Delay/side-set Destination Data
-```
 
 ### 3.4.3. Summary
 
 All PIO instructions execute in one clock cycle.
 
-The Delay/side-set field is present in all instructions. Its exact use is configured for each state machine by PINCTRL_SIDESET_COUNT:
+The `Delay/side-set` field is present in all instructions. Its exact use is configured for each state machine by `PINCTRL_SIDESET_COUNT`:
 
 * Up to 5 MSBs encode a side-set operation, which optionally asserts a constant value onto some GPIOs, concurrently with main instruction execution logic
 
@@ -2088,7 +2044,11 @@ The Delay/side-set field is present in all instructions. Its exact use is config
 
 すべてのPIO命令は1クロックサイクルで実行される。
 
-Delay/side-setフィールドは全ての命令に存在する。その正確な使用方法は、PINCTRL_SIDESET_COUNTによって各ステートマシンに設定されます:
+`Delay/side-set` フィールドは全ての命令に存在する。その正確な使用方法は、 `PINCTRL_SIDESET_COUNT` によって各ステートマシンに設定されます:
+
+* Up to 5 MSBs encode a side-set operation, which optionally asserts a constant value onto some GPIOs, concurrently with main instruction execution logic
+
+* 上位 5 MSB がサイドセット操作をエンコードし、メイン命令実行ロジックと同時に、オプションでいくつかのGPIOに定数値をアサートする。
 
 * 残りのLSB(最大5)は、この命令と次の命令の間に挿入されるアイドル・サイクル数をエンコードします。
 
@@ -2098,62 +2058,54 @@ Delay/side-setフィールドは全ての命令に存在する。その正確な
 
 <img src="img/Bit3_4_4_1.png"/>
 
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-JMP 0 0 0 Delay/side-set Condition Address
-```
 
 #### 3.4.4.2. Operation
 
-Set program counter to Address if Condition is true, otherwise no operation.
+Set program counter to `Address` if `Condition` is true, otherwise no operation.
 
-Delay cycles on a JMP always take effect, whether Condition is true or false, and they take place after Condition is evaluated and the program counter is updated.
+Delay cycles on a `JMP` always take effect, whether `Condition` is true or false, and they take place after `Condition` is evaluated and the program counter is updated.
+
+`Condition` が真の場合、プログラム・カウンタを `Address` に設定する。
+
+`JMP` の遅延サイクルは、 `Condition` が true であろうと false であろうと常に有効であり、 `Condition` が評価され、プログラム・カウンタが更新された後に実行される。
 
 * Condition:
 
     + 000: (no condition): Always
-    + 001: !X: scratch X zero   
-    + 010: X--: scratch X non-zero, prior to decrement   
-    + 011: !Y: scratch Y zero   
-    + 100: Y--: scratch Y non-zero, prior to decrement   
-    + 101: X!=Y: scratch X not equal scratch Y   
-    + 110: PIN: branch on input pin   
-    + 111: !OSRE: output shift register not empty
+    + 001: `!X`: scratch X zero   
+    + 010: `X--`: scratch X non-zero, prior to decrement   
+    + 011: `!Y`: scratch Y zero   
+    + 100: `Y--`: scratch Y non-zero, prior to decrement   
+    + 101: `X!=Y`: scratch X not equal scratch Y   
+    + 110: `PIN`: branch on input pin   
+    + 111: `!OSRE`: output shift register not empty
 
 * Address: Instruction address to jump to. In the instruction encoding this is an absolute address within the PIO instruction memory.
 
-JMP PIN branches on the GPIO selected by EXECCTRL_JMP_PIN, a configuration field which selects one out of the maximum of 32 GPIO inputs visible to a state machine, independently of the state machine’s other input mapping. The branch is taken if the GPIO is high.
+`JMP PIN` branches on the GPIO selected by `EXECCTRL_JMP_PIN`, a configuration field which selects one out of the maximum of 32 GPIO inputs visible to a state machine, independently of the state machine’s other input mapping. The branch is taken if the GPIO is high.
 
-!OSRE compares the bits shifted out since the last PULL with the shift count threshold configured by SHIFTCTRL_PULL_THRESH.
+`!OSRE` compares the bits shifted out since the last `PULL` with the shift count threshold configured by `SHIFTCTRL_PULL_THRESH`.  This is the same threshold used by autopull.
 
-This is the same threshold used by autopull.
-
-コンディションが真の場合、プログラム・カウンタをアドレスに設定する。
-
-JMPの遅延サイクルは、Conditionがtrueであろうとfalseであろうと常に有効であり、Conditionが評価され、プログラム・カウンタが更新された後に実行される。
-
-* コンディション
+* `Condition`:
 
     + 000: (条件なし): 常に
-    + 001: !X: スクラッチ X ゼロ
-    + 010: X--: デクリメント前のスクラッチXがゼロでない
-    + 011: !Y: デクリメント前のスクラッチYがゼロ
-    + 100: Y--: デクリメント前のスクラッチYがゼロでない
-    + 101: X!=Y: スクラッチXがスクラッチYと等しくない
-    + 110: PIN: 入力ピンでの分岐
-    + 111: !OSRE: 出力シフトレジスタが空でない
+    + 001: `!X`: スクラッチ X ゼロ
+    + 010: `X--`: デクリメント前のスクラッチXがゼロでない
+    + 011: `!Y`: デクリメント前のスクラッチYがゼロ
+    + 100: `Y--`: デクリメント前のスクラッチYがゼロでない
+    + 101: `X!=Y`: スクラッチXがスクラッチYと等しくない
+    + 110: `PIN`: 入力ピンでの分岐
+    + 111: `!OSRE`: 出力シフトレジスタが空でない
 
-* アドレス: アドレス:ジャンプ先の命令アドレス。命令エンコーディングでは、これは PIO 命令メモリ内の絶対アドレスです。
+* `Address`: アドレス:ジャンプ先の命令アドレス。命令エンコーディングでは、これは PIO 命令メモリ内の絶対アドレスです。
 
-JMP PINは、EXECCTRL_JMP_PINによって選択されたGPIOで分岐します。このフィールドは、ステートマシンの他の入力マッピングとは別に、ステートマシンに見える最大32個のGPIO入力のうち1つを選択するコンフィギュレーション・フィールドです。GPIOがHighの場合に分岐が行われる。
+`JMP PIN` は、 `EXECCTRL_JMP_PIN` によって選択されたGPIOで分岐します。このフィールドは、ステートマシンの他の入力マッピングとは別に、ステートマシンに見える最大32個のGPIO入力のうち1つを選択するコンフィギュレーション・フィールドです。GPIOがHighの場合に分岐が行われる。
 
-OSRE は、SHIFTCTRL_PULL_THRESH で設定されたシフ ト カウントしきい値と、最後のPULL からシフトアウトされたビッ トを比較します。
+`!OSRE` は、 `SHIFTCTRL_PULL_THRESH` で設定されたシフトカウントしきい値と、最後の `PULL` からシフトアウトされたビットを比較します。これは、 自動PULLで使用されるしきい値と同じです。
 
-これは、 自動PULLで使用されるしきい値と同じです。
+`JMP X--` and `JMP Y--` always decrement scratch register X or Y, respectively. The decrement is not conditional on the current value of the scratch register. The branch is conditioned on the initial value of the register, i.e. before the decrement took place: if the register is initially nonzero, the branch is taken.
 
-JMP X-- and JMP Y-- always decrement scratch register X or Y, respectively. The decrement is not conditional on the current value of the scratch register. The branch is conditioned on the initial value of the register, i.e. before the decrement took place: if the register is initially nonzero, the branch is taken.
-
-JMP X--とJMP Y--は、それぞれ常にスクラッチ・レジスタXまたはYをデクリメントする。このデクリメントには、スクラッチ・レジスタの現在値に対する条件はありません。分岐は、レジスタの初期値、つまりデクリメントが行われる前の値に対して条件付けされます。レジスタの初期値が0でなければ、分岐が行われます。
+`JMP X--` と `JMP Y--` は、それぞれ常にスクラッチ・レジスタXまたはYをデクリメントする。このデクリメントには、スクラッチ・レジスタの現在値に対する条件はありません。分岐は、レジスタの初期値、つまりデクリメントが行われる前の値に対して条件付けされます。レジスタの初期値が0でなければ、分岐が行われます。
 
 #### 3.4.4.3. Assembler Syntax
 
@@ -2165,14 +2117,10 @@ where:
 
 <desc>
 
-||<cond>||Is an optional condition listed above (e.g. !x for scratch X zero). If a condition code is not specified, the branch is always taken
-
-||<target>||Is a program label or value (see Section 3.3.3) representing instruction offset within the program (the first instruction being offset 0). Note that because the PIO JMP instruction uses absolute addresses in the PIO instruction memory, JMPs need to be adjusted based on the program load offset at runtime. This is handled for you when loading a program with the SDK, but care should be taken when encoding JMP instructions for use by OUT EXEC
-
-|||<cond>|| は、上記のオプションの条件です(例えば、スクラッチ X ゼロの場合は !x)。条件コードが指定されない場合、分岐は常に行われます。
-
-||<target>|| プログラム内の命令オフセット(最初の命令はオフセット0)を表すプログラムラベルまたは値(セクション3.3.3参照)です。PIO JMP 命令は PIO 命令メモリ内の絶対アドレスを使用するため、JMP は実行時のプログラム・ロード・オフセットに基づいて調整する必要があることに注意してください。これはSDKでプログラムをロードする際に処理されますが、OUT EXECで使用するJMP命令をエンコードする際には注意が必要です。
-
+||<cond>||Is an optional condition listed above (e.g. `!x` for scratch X zero). If a condition code is not specified, the branch is always taken
+||<target>||Is a program label or value (see Section 3.3.3) representing instruction offset within the program (the first instruction being offset 0). Note that because the PIO JMP instruction uses absolute addresses in the PIO instruction memory, JMPs need to be adjusted based on the program load offset at runtime. This is handled for you when loading a program with the SDK, but care should be taken when encoding JMP instructions for use by `OUT EXEC`
+||<cond>|| は、上記のオプションの条件です(例えば、スクラッチ X ゼロの場合は `!x`)。条件コードが指定されない場合、分岐は常に行われます。
+||<target>|| プログラム内の命令オフセット(最初の命令はオフセット0)を表すプログラムラベルまたは値(セクション3.3.3参照)です。PIO JMP 命令は PIO 命令メモリ内の絶対アドレスを使用するため、JMP は実行時のプログラム・ロード・オフセットに基づいて調整する必要があることに注意してください。これはSDKでプログラムをロードする際に処理されますが、 `OUT EXEC` で使用するJMP命令をエンコードする際には注意が必要です。
 </desc>
 
 ### 3.4.5. WAIT
@@ -2180,11 +2128,6 @@ where:
 #### 3.4.5.1. Encoding
 
 <img src="img/Bit3_4_5_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-WAIT 0 0 1 Delay/side-set Pol Source Index
-```
 
 #### 3.4.5.2. Operation
 
@@ -2199,14 +2142,14 @@ Like all stalling instructions, delay cycles begin after the instruction complet
 
 * Source: what to wait on. Values are:
 
-    + 00: GPIO: System GPIO input selected by Index. This is an absolute GPIO index, and is not affected by the state machine’s input IO mapping.
-    + 01: PIN: Input pin selected by Index. This state machine’s input IO mapping is applied first, and then Index selects which of the mapped bits to wait on. In other words, the pin is selected by adding Index to the PINCTRL_IN_BASE configuration, modulo 32.
-    + 10: IRQ: PIO IRQ flag selected by Index   
-    + 11: (version 1 and above) JMPPIN: wait on the pin indexed by the PINCTRL_JMP_PIN configuration, plus an Index in the range 0-3, all modulo 32. Other values of Index are reserved.
+    + 00: `GPIO`: System GPIO input selected by `Index`. This is an absolute GPIO index, and is not affected by the state machine’s input IO mapping.
+    + 01: `PIN`: Input pin selected by `Index`. This state machine’s input IO mapping is applied first, and then `Index` selects which of the mapped bits to wait on. In other words, the pin is selected by adding `Index` to the `PINCTRL_IN_BASE` configuration, modulo 32.
+    + 10: `IRQ`: PIO IRQ flag selected by `Index`   
+    + 11: (version 1 and above) `JMPPIN`: wait on the pin indexed by the `PINCTRL_JMP_PIN` configuration, plus an Index in the range 0-3, all modulo 32. Other values of Index are reserved.
 
 * Index: which pin or bit to check.
 
-WAIT x IRQ behaves slightly differently from other WAIT sources:
+`WAIT x IRQ` behaves slightly differently from other `WAIT` sources:
 
 * If Polarity is 1, the selected IRQ flag is cleared by the state machine upon the wait condition being met.
 
