@@ -60,5 +60,6 @@ sed '
 ' |sed '/^  <span class="body">/,/  <\/span>/{
     s/`\([^`][^`]*\)`/<code>\1<\/code>/g
     s/\*\([^*][^*]*\)\*/<em>\1<\/em>/g
+    s/\$\$\([^$][^$]*\)\$\$/<span data-math-typeset="true">\\(\1\\)<\/span>/g
 }
 '
