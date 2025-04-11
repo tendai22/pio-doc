@@ -161,14 +161,14 @@ Before getting into all of the fine details of the PIO assembly language, we sho
 PIOアセンブリ言語の細部に入る前に、小さいけれども完全なアプリケーションを見てみましょう:
 
 1. Loads a program into a PIO’s instruction memory 
-
-2. Sets up a PIO state machine to run the program 3. Interacts with the state machine once it is running.
+2. Sets up a PIO state machine to run the program 
+3. Interacts with the state machine once it is running.
 
 (和約)
 
 1. プログラムをPIOの命令メモリにロードする 
-
-2. プログラムを実行するためにPIOステートマシンをセットアップする 3. ステートマシンが実行されると、そのステートマシンと対話する。
+2. プログラムを実行するためにPIOステートマシンをセットアップする 
+3. ステートマシンが実行されると、そのステートマシンと対話する。
 
 The main ingredients in this recipe are:
 
@@ -2149,31 +2149,25 @@ Like all stalling instructions, delay cycles begin after the instruction complet
 
 * Index: which pin or bit to check.
 
-`WAIT x IRQ` behaves slightly differently from other `WAIT` sources:
-
-* If Polarity is 1, the selected IRQ flag is cleared by the state machine upon the wait condition being met.
-
 何らかの条件が満たされるまでストールする。
 
 すべてのストール命令と同様に、遅延サイクルは命令が完了した後に開始する。つまり、遅延サイクルが存在する場合は、待機条件が満たされるまでカウントは開始されません。
 
-* 極性:
+* `Polarity`:
+  + 1: 1 を待つ。
+  + 0: 0 を待つ。
 
-  +
- + 0: 0 を待つ。
-
-* ソース: 何を待つのか。値は次のとおり:
-
-    + 00: GPIO: システムGPIO入力をIndexで選択。これは絶対的なGPIOインデックスであり、ステート・マシンの入力IOマッピングの影響を受けない。
-    + 01: PIN: インデックスで選択された入力ピン。このステート・マシンの入力IOマッピングが最初に適用され、次にIndexがマッピングされたビットのどれで待機するかを選択する。言い換えると、ピンは、PINCTRL_IN_BASE構成にIndexを32モジュロ加算することで選択される。
-    + 10: IRQ: PIO IRQフラグがIndexによって選択される
- + 11: (バージョン1以上) JMPPIN: PINCTRL_JMP_PINコンフィギュレーションによってインデックス付けされたピンに、0～3の範囲のIndexを全てモジュロ32で加算した値で待機する。Indexの他の値は予約されています。
+* ソース: 何を待つのかを指定する。値は次のとおり:
+    + 00: `GPIO`: システムGPIO入力を`Index`で選択。これは絶対的なGPIOインデックスであり、ステート・マシンの入力IOマッピングの影響を受けない。
+    + 01: `PIN`: インデックスで選択された入力ピン。このステート・マシンの入力IOマッピングが最初に適用され、次に`Index`がマッピングされたビットのどれで待機するかを選択する。言い換えると、ピンは、 `PINCTRL_IN_BASE` 構成に `Index` を32モジュロ加算することで選択される。
+    + 10: `IRQ`: PIO IRQフラグが `Index` によって選択される
+    + 11: (バージョン1以上) `JMPPIN`: `PINCTRL_JMP_PIN` コンフィギュレーションによってインデックス付けされたピンに、0～3の範囲のIndexを全てモジュロ32で加算した値で待機する。Indexの他の値は予約されています。
 
 * インデックス:どのピンまたはビットをチェックするか。
 
-WAIT x IRQは他のWAITソースと若干異なる動作をします:
+`WAIT x IRQ` behaves slightly differently from other `WAIT` sources:
 
-* 極性が1の場合、待機条件が満たされると、選択されたIRQフラグはステート・マシンによってクリアされる。
+* If Polarity is 1, the selected IRQ flag is cleared by the state machine upon the wait condition being met.
 
 * The flag index is decoded in the same way as the IRQ index field, decoding down from the two MSBs (aligning with the IRQ instruction IdxMode field):
 
@@ -2181,24 +2175,26 @@ WAIT x IRQは他のWAITソースと若干異なる動作をします:
 
   + 01 (version 1 and above) (PREV), the instruction references an IRQ from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0.
 
-  + 10 (REL), the state machine ID (0…3) is added to the IRQ index, by way of modulo-4 addition on the two LSBs.
-
-For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other.
+  + 10 (REL), the state machine ID (0…3) is added to the IRQ index, by way of modulo-4 addition on the two LSBs.  For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other.
 
   + 11 (version 1 and above) (NEXT), the instruction references an IRQ from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
 
-* フラグ・インデックスは IRQ インデックス・フィールドと同じように、2 つの MSB からデコードされる(IRQ 命令 IdxMode フィールドと整列する):
+`WAIT x IRQ` は他の `WAIT` ソースと若干異なる動作をします:
 
-    + 00:3つのLSBは、このPIOブロックのIRQフラグのインデックスに直接使用される。
-    + 01 (バージョン1以上) (PREV), 命令はシステム内の次の下位番号のPIOからIRQを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
-    + 10 (REL)では、ステートマシンID (0...3)が、2つのLSBのモジュロ4加算によってIRQインデックスに加算される。<br><br>例えば、フラグ値『0x11』のステート・マシン2はフラグ3で待機し、フラグ値『0x13』はフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
-    + 11(バージョン1以上)(NEXT)命令は、システム内で次に高い番号のPIOからIRQを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
+* `Polarity` が1の場合、待機条件が満たされると、選択されたIRQフラグはステート・マシンによってクリアされる。
+
+* フラグ・インデックスは `IRQ` インデックス・フィールドと同じように、2 つの MSB からデコードされる(`IRQ` 命令 IdxMode フィールドと整列する):
+
+    + `00`: 3つのLSBは、このPIOブロックのIRQフラグのインデックスに直接使用される。
+    + `01` (バージョン1以上) (`PREV`), 命令はシステム内の次の下位番号のPIOからIRQを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
+    + `10`(`REL`) では、ステートマシンID (0...3)が、2つのLSBのモジュロ4加算によってIRQインデックスに加算される。例えば、フラグ値『0x11』のステート・マシン2はフラグ3で待機し、フラグ値『0x13』はフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
+    + `11`(バージョン1以上)(`NEXT`)命令は、システム内で次に高い番号のPIOからIRQを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
 
 >  CAUTION
-> WAIT 1 IRQ x should not be used with IRQ flags presented to the interrupt controller, to avoid a race condition with a system interrupt handler
+> `WAIT 1 IRQ x` should not be used with IRQ flags presented to the interrupt controller, to avoid a race condition with a system interrupt handler
 
 >  注意
-> WAIT 1 IRQ xは、システム割り込みハンドラとの競合状態を避けるため、割り込みコントローラに提示されるIRQフラグと一緒に使用しないでください。
+> `WAIT 1 IRQ x` は、システム割り込みハンドラとの競合状態を避けるため、割り込みコントローラに提示されるIRQフラグと一緒に使用しないでください。
 
 #### 3.4.5.3. Assembler Syntax
 
@@ -2210,36 +2206,24 @@ wait <polarity> irq <irq_num> ( rel )
 
 where:
 
-<desc>
+<directive>
 
 ||<polarity>||Is a value (see Section 3.3.3) specifying the polarity (either 0 or 1) 
 
 ||<pin_num>||Is a value (see Section 3.3.3) specifying the input pin number (as mapped by the SM input pin mapping) 
-
 ||<gpio_num>||Is a value (see Section 3.3.3) specifying the actual GPIO pin number 
-
 ||<irq_num> ( rel )||Is a value (see Section 3.3.3) specifying The irq number to wait on (0-7). If rel is present, then the actual irq number used is calculating by replacing the low two bits of the irq number (irq_num10) with the low two bits of the sum (irq_num10 + sm_num10) where sm_num10 is the state machine number
-
 ||<polarity>|| 極性(0または1)を指定する値
-
 ||<pin_num>||入力ピン番号(SM入力ピンマッピングによってマッピングされたもの)を指定する値 
-
 ||<gpio_num>||実際のGPIOピン番号を指定する値(セクション3.3.3参照) 
-
-||<irq_num> ( rel )||待機するirq番号(0-7)を指定する値(セクション3.3.3を参照)。relが存在する場合、実際に使用されるirq番号は、irq番号(irq_num10)の下位2ビットを和(irq_num10 + sm_num10)の下位2ビット(sm_num10はステートマシン番号)に置き換えて計算される。
-
-</desc>
+||<irq_num> ( rel )||待機するirq番号(0-7)を指定する値(セクション3.3.3を参照)。relが存在する場合、実際に使用されるirq番号は、irq番号($$irq\_num_{10}$$)の下位2ビットを和($$irq\_num_{10} + sm\_num_{10}$$)の下位2ビット($$sm\_num_{10}$$ はステートマシン番号)に置き換えて計算される。
+</directive>
 
 ### 3.4.6. IN
 
 #### 3.4.6.1. Encoding
 
 <img src="img/Bit3_4_6_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-IN 0 1 0 Delay/side-set Source Bit count
-```
 
 #### 3.4.6.2. Operation
 
@@ -2309,11 +2293,6 @@ where:
 #### 3.4.7.1. Encoding
 
 <img src="img/Bit3_4_7_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-OUT 0 1 1 Delay/side-set Destination Bit count
-```
 
 #### 3.4.7.2. Operation
 
@@ -2387,11 +2366,6 @@ where:
 
 <img src="img/Bit3_4_8_1.png"/>
 
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-PUSH 1 0 0 Delay/side-set 0 IfF Blk 0 0 0 0 0
-```
-
 #### 3.4.8.2. Operation
 
 Push the contents of the ISR into the RX FIFO, as a single 32-bit word. Clear ISR to all-zeroes.
@@ -2439,11 +2413,6 @@ where:
 #### 3.4.9.1. Encoding
 
 <img src="img/Bit3_4_9_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-PULL 1 0 0 Delay/side-set 1 IfE Blk 0 0 0 0 0
-```
 
 #### 3.4.9.2. Operation
 
@@ -2503,11 +2472,6 @@ where:
 
 <img src="img/Bit3_4_10_1.png"/>
 
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-MOV 1 0 0 Delay/side-set 0 0 0 1 IdxI Index
-```
-
 (version 1 and above)
 
 #### 3.4.10.2. Operation
@@ -2558,11 +2522,6 @@ where:
 
 <img src="img/Bit3_4_11_1.png"/>
 
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-MOV 1 0 0 Delay/side-set 1 0 0 1 IdxI Index
-```
-
 (version 1 and above)
 
 #### 3.4.11.2. Operation
@@ -2611,11 +2570,6 @@ where:
 #### 3.4.12.1. Encoding
 
 <img src="img/Bit3_4_12_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-MOV 1 0 1 Delay/side-set Destination Op Source
-```
 
 #### 3.4.12.2. Operation
 
@@ -2694,11 +2648,6 @@ where:
 #### 3.4.13.1. Encoding
 
 <img src="img/Bit3_4_13_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-IRQ 1 1 0 Delay/side-set 0 Clr Wait IdxMode Index
-```
 
 #### 3.4.13.2. Operation
 
@@ -2783,11 +2732,6 @@ where:
 #### 3.4.14.1. Encoding
 
 <img src="img/Bit3_4_14_1.png"/>
-
-```
-Bit: 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-SET 1 1 1 Delay/side-set Destination Data
-```
 
 #### 3.4.14.2. Operation
 
