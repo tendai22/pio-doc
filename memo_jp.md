@@ -185,7 +185,7 @@ The main ingredients in this recipe are:
 * RPシリーズ・マイクロコントローラー・ベースの開発ボードにロードするプログラム・イメージに、これら2つをどのように組み合わせるかを記述したCMakeファイル
 
 >  TIP
-> The code listings in this section are all part of a complete application on GitHub, which you can build and run. Just click the link above each listing to go to the source. In this section we are looking at the pio/hello_pio example in pico-examples. You might choose to build this application and run it, to see what it does, before reading through this section.
+> The code listings in this section are all part of a complete application on GitHub, which you can build and run. Just click the link above each listing to go to the source. In this section we are looking at the `pio/hello_pio` example in `pico-examples`. You might choose to build this application and run it, to see what it does, before reading through this section.
 
 >  TIP
 > このセクションのコード一覧はすべて、GitHubにある完全なアプリケーションの一部であり、ビルドして実行することができます。各リストの上にあるリンクをクリックすると、ソースにジャンプします。このセクションでは `pico-examples` の `pio/hello_pio` の例を見ています。このセクションを読む前に、このアプリケーションをビルドして実行し、その動作を確認することもできます。
@@ -209,15 +209,15 @@ This is our first PIO program listing. It’s written in PIO assembly language.
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/hello_pio/hello.pio Lines 8 - 16
 
 ```
- 8 .program hello
- 9
-10 ; Repeatedly get one word of data from the TX FIFO, stalling when the FIFO is
-11 ; empty. Write the least significant bit to the OUT pin group.
-12
-13 loop:
-14 pull
-15 out pins, 1
-16 jmp loop
+  8 .program hello
+  9
+ 10 ; Repeatedly get one word of data from the TX FIFO, stalling when the FIFO is
+ 11 ; empty. Write the least significant bit to the OUT pin group.
+ 12
+ 13 loop:
+ 14     pull
+ 15     out pins, 1
+ 16     jmp loop
 ```
 
 The pull instruction takes one data item from the transmit FIFO buffer, and places it in the output shift register (OSR).  Data moves from the FIFO to the OSR one word (32 bits) at a time. The OSR is able to shift this data out, one or more bits at a time, to further destinations, using an out instruction.
@@ -245,22 +245,22 @@ Our .pio file also contains a helper function to set up a PIO state machine for 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/hello_pio/hello.pio Lines 19 - 34
 
 ```
-19 static inline void hello_program_init(PIO pio, uint sm, uint offset, uint pin) {
-20 pio_sm_config c = hello_program_get_default_config(offset);
-21
-22 // Map the state machine's OUT pin group to one pin, namely the `pin`
-23 // parameter to this function.
-24 sm_config_set_out_pins(&c, pin, 1);
-25 // Set this pin's GPIO function (connect PIO to the pad)
-26 pio_gpio_init(pio, pin);
-27 // Set the pin direction to output at the PIO
-28 pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
-29
-30 // Load our configuration, and jump to the start of the program
-31 pio_sm_init(pio, sm, offset, &c);
-32 // Set the state machine running
-33 pio_sm_set_enabled(pio, sm, true);
-34 }
+ 19 static inline void hello_program_init(PIO pio, uint sm, uint offset, uint pin) {
+ 20     pio_sm_config c = hello_program_get_default_config(offset);
+ 21
+ 22     // Map the state machine's OUT pin group to one pin, namely the `pin`
+ 23     // parameter to this function.
+ 24     sm_config_set_out_pins(&c, pin, 1);
+ 25     // Set this pin's GPIO function (connect PIO to the pad)
+ 26     pio_gpio_init(pio, pin);
+ 27     // Set the pin direction to output at the PIO
+ 28     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+ 29
+ 30     // Load our configuration, and jump to the start of the program
+ 31     pio_sm_init(pio, sm, offset, &c);
+ 32     // Set the state machine running
+ 33     pio_sm_set_enabled(pio, sm, true);
+ 34 }
 ```
 
 Here the main thing to set up is the GPIO we intend to output our data to. There are three things to consider here:
@@ -279,7 +279,7 @@ Here the main thing to set up is the GPIO we intend to output our data to. There
 
 2. また、GPIOはPIOが制御していることを伝える必要があります(GPIOファンクション・セレクト)
 
-3.ピンを出力のみに使用する場合、PIOが出力イネーブル・ラインをHighにドライブしていることを確認する必要があります。PIO は、例えば `out pindirs` 命令を使用することで、プログラムによってこのラインを上下に駆動することができますが、ここではプログラムを開始する前にこの設定を行います。
+3. ピンを出力のみに使用する場合、PIOが出力イネーブル・ラインをHighにドライブしていることを確認する必要があります。PIO は、例えば `out pindirs` 命令を使用することで、プログラムによってこのラインを上下に駆動することができますが、ここではプログラムを開始する前にこの設定を行います。
 
 #### 3.2.1.2. Cプログラム
 
@@ -318,61 +318,63 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/hell
 26 #ifndef HELLO_PIO_LED_PIN
 27 #warning pio/hello_pio example requires a board with a regular LED
 28 #else
-29 PIO pio;
-30 uint sm;
-31 uint offset;
+29      PIO pio;
+30      uint sm;
+31      uint offset;
 32
-33 setup_default_uart();
+33      setup_default_uart();
 34
-35 // This will find a free pio and state machine for our program and load it for us
-36 // We use pio_claim_free_sm_and_add_program_for_gpio_range so we can address gpios >= 32 if
-  needed and supported by the hardware
-37 bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&hello_program, &pio, &
-  sm, &offset, HELLO_PIO_LED_PIN, 1, true);
-38 hard_assert(success);
+35      // This will find a free pio and state machine for our program and load it for us
+36      // We use pio_claim_free_sm_and_add_program_for_gpio_range so we can address gpios >= 32 if needed and supported by the hardware
+37      bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&hello_program, &pio, &sm, &offset, HELLO_PIO_LED_PIN, 1, true);
+38      hard_assert(success);
 39
-40 // Configure it to run our program, and start it, using the
-41 // helper function we included in our .pio file.
-42 printf("Using gpio %d\n", HELLO_PIO_LED_PIN);
-43 hello_program_init(pio, sm, offset, HELLO_PIO_LED_PIN);
+40      // Configure it to run our program, and start it, using the
+41      // helper function we included in our .pio file.
+42      printf("Using gpio %d\n", HELLO_PIO_LED_PIN);
+43      hello_program_init(pio, sm, offset, HELLO_PIO_LED_PIN);
 44
-45 // The state machine is now running. Any value we push to its TX FIFO will
-46 // appear on the LED pin.
-47 // press a key to exit
-48 while (getchar_timeout_us(0) == PICO_ERROR_TIMEOUT) {
-49 // Blink
-50 pio_sm_put_blocking(pio, sm, 1);
-51 sleep_ms(500);
-52 // Blonk
-53 pio_sm_put_blocking(pio, sm, 0);
-54 sleep_ms(500);
-55 }
+45      // The state machine is now running. Any value we push to its TX FIFO will
+46      // appear on the LED pin.
+47      // press a key to exit
+48      while (getchar_timeout_us(0) == PICO_ERROR_TIMEOUT) {
+49          // Blink
+50          pio_sm_put_blocking(pio, sm, 1);
+51          sleep_ms(500);
+52          // Blonk
+53          pio_sm_put_blocking(pio, sm, 0);
+54          sleep_ms(500);
+55      }
 56
-57 // This will free resources and unload our program
-58 pio_remove_program_and_unclaim_sm(&hello_program, pio, sm, offset);
+57      // This will free resources and unload our program
+58      pio_remove_program_and_unclaim_sm(&hello_program, pio, sm, offset);
 59 #endif
 60 }
 ```
 
-You might recall that RP2040 has two PIO blocks, each of them with four state machines (the {chipname_rp2350 has three PIO blocks each with four state machines). Each PIO block has a 32-slot instruction memory which is visible to the four state machines in the block. We need to load our program into this instruction memory before any of our state machines can run the program. The function pio_add_program() finds free space for our program in a given PIO’s instruction memory, and loads it.
+You might recall that RP2040 has two PIO blocks, each of them with four state machines (the {chipname_rp2350 has three PIO blocks each with four state machines). Each PIO block has a 32-slot instruction memory which is visible to the four state machines in the block. We need to load our program into this instruction memory before any of our state machines can run the program. The function `pio_add_program()` finds free space for our program in a given PIO’s instruction memory, and loads it.
 
 RP2040には2つのPIOブロックがあり、それぞれに4つのステートマシンがあることを思い出してほしい(チップ名_rp2350には3つのPIOブロックがあり、それぞれに4つのステートマシンがある)。各PIOブロックには32スロットの命令メモリがあり、ブロック内の4つのステートマシンから見えるようになっている。ステートマシンがプログラムを実行する前に、この命令メモリにプログラムをロードする必要があります。`pio_add_program()` 関数は、指定されたPIOの命令メモリにプログラムをロードするための空き領域を見つけ、ロードします。
 
 > 32 Instructions?
 > 
-> This may not sound like a lot, but the PIO instruction set can be very dense once you fully explore its features. A perfectly serviceable UART transmit program can be implemented in four instructions, as shown in the pio/uart_tx example in pico-examples. There are also a couple of ways for a state machine to execute instructions from other sources — like directly from the FIFOs — which you can read all about in the RP2350 Datasheet.
-
-Once the program is loaded, we find a free state machine and tell it to run our program. There is nothing stopping us from ordering multiple state machines to run the same program. Likewise, we could instruct each state machine to run a different program, provided they all fit into the instruction memory at once.
+> This may not sound like a lot, but the PIO instruction set can be very dense once you fully explore its features. A perfectly serviceable UART transmit program can be implemented in four instructions, as shown in the `pio/uart_tx` example in `pico-examples`. There are also a couple of ways for a state machine to execute instructions from other sources — like directly from the FIFOs — which you can read all about in the RP2350 Datasheet.
 
 > 32命令？
 >
 > これはあまり多くないように聞こえるかもしれませんが、PIOの命令セットは、その機能を十分に探求すると、非常に密になります。`pico-examples` の `pio/uart_tx` の例にあるように、完全に実用的なUART送信プログラムは4命令で実装できます。また、ステートマシンが他のソースから命令を実行する方法もいくつかあります(FIFOから直接実行する方法など)。
 
+Once the program is loaded, we find a free state machine and tell it to run our program. There is nothing stopping us from ordering multiple state machines to run the same program. Likewise, we could instruct each state machine to run a different program, provided they all fit into the instruction memory at once.
+
 プログラムがロードされたら、空いているステートマシンを見つけ、プログラムを実行するように指示する。複数のステート・マシンに同じプログラムを実行させることを妨げるものは何もない。同様に、各ステート・マシンに異なるプログラムを実行するよう指示することも可能で、その場合、すべてのプログラムが一度に命令メモリに収まる必要がある。
 
-We’re configuring this state machine to output its data to the LED on your Pico-series device. If you have already built and run the program, you probably noticed this already! At this point, the state machine is running autonomously. The state machine will immediately stall, because it is waiting for data in the TX FIFO, and we haven’t provided any. The processor can push data directly into the state machine’s TX FIFO using the pio_sm_put_blocking() function. (_blocking because this function stalls the processor when the TX FIFO is full.) Writing a 1 will turn the LED on, and writing a 0 will turn the LED off.
+We’re configuring this state machine to output its data to the LED on your Pico-series device. If you have already built and run the program, you probably noticed this already!
 
-このステートマシンのデータをPicoシリーズデバイスのLEDに出力するように設定します。すでにプログラムをビルドして実行したことがある方は、このことにお気づきでしょう！この時点で、ステートマシンは自律的に動作しています。ステートマシンはTX FIFOのデータを待っているため、すぐにストールします。プロセッサは、`pio_sm_put_blocking()` 関数を使用して、ステートマシンのTX FIFOに直接データをプッシュすることができます。(この関数は、TX FIFOが一杯になるとプロセッサをストールさせるので、名前に `_blocking` が付いています)。1を書き込むとLEDが点灯し、0を書き込むと消灯する。
+At this point, the state machine is running autonomously. The state machine will immediately stall, because it is waiting for data in the TX FIFO, and we haven’t provided any. The processor can push data directly into the state machine’s TX FIFO using the `pio_sm_put_blocking()` function. (`_blocking` because this function stalls the processor when the TX FIFO is full.) Writing a 1 will turn the LED on, and writing a 0 will turn the LED off.
+
+このステートマシンのデータをPicoシリーズデバイスのLEDに出力するように設定します。すでにプログラムをビルドして実行したことがある方は、このことにお気づきでしょう！
+
+この時点で、ステートマシンは自律的に動作しています。ステートマシンはTX FIFOのデータを待っているため、すぐにストールします。プロセッサは、`pio_sm_put_blocking()` 関数を使用して、ステートマシンのTX FIFOに直接データをプッシュすることができます。(この関数は、TX FIFOが一杯になるとプロセッサをストールさせるので、名前に `_blocking` が付いています)。1を書き込むとLEDが点灯し、0を書き込むと消灯する。
 
 #### 3.2.1.3. CMake File
 
@@ -390,15 +392,15 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/hell
  5 target_sources(hello_pio PRIVATE hello.c)
  6
  7 target_link_libraries(hello_pio PRIVATE
- 8 pico_stdlib
- 9 hardware_pio
-10 )
+ 8          pico_stdlib
+ 9          hardware_pio
+10          )
 11
 12 # Pass cmake -DHELLO_PIO_LED_PIN=x, where x is the pin you want to use
 13 if(HELLO_PIO_LED_PIN)
-14 target_compile_definitions(hello_pio PRIVATE
-15 HELLO_PIO_LED_PIN=${HELLO_PIO_LED_PIN}
-16 )
+14          target_compile_definitions(hello_pio PRIVATE
+15                  HELLO_PIO_LED_PIN=${HELLO_PIO_LED_PIN}
+16          )
 17 endif()
 18
 19 pico_add_extra_outputs(hello_pio)
@@ -425,7 +427,7 @@ Assuming you already have pico-examples and the SDK installed on your machine, y
 
 * `pico_add_extra_outputs()`: デフォルトでは、アプリのビルド出力として `.elf` ファイルを取得するだけです。ここでは、USBで接続したPicoシリーズデバイスに直接ドラッグ＆ドロップできる `.uf2` ファイルのような、追加のビルドフォーマットが欲しいことを宣言します。
 
-あなたのマシンに`pico-examples`とSDKがすでにインストールされていると仮定して、以下を実行できます。
+あなたのマシンに`pico-examples`とSDKがすでにインストールされていると仮定して、ビルドするために、以下を実行できます。
 
 ```
 $ mkdir build
@@ -957,9 +959,8 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 121     // We use pio_claim_free_sm_and_add_program_for_gpio_range (for_gpio_range variant)
 122     // so we will get a PIO instance suitable for addressing gpios >= 32 if needed and
   supported by the hardware
-123     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(
-            &ws2812_program, &pio,
-            &sm, &offset, WS2812_PIN, 1, true);
+123     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&ws2812_program, 
+                    &pio, &sm, &offset, WS2812_PIN, 1, true);
 124     hard_assert(success);
 125
 126     ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
@@ -1140,9 +1141,9 @@ We need to provide the DMA channel with an initial read address, an initial writ
 
 DMAチャネルに、初期読み取りアドレス、初期書き込みアドレス、および実行される読み取り/書き込みの合計数(合計バイト数ではない)を提供する必要があります。この時点からDMAは待機し、ステートマシンがデータを生成するのを待っている。データがRX FIFOに現れるとすぐに、DMAは飛びかかり、システム・メモリ内のキャプチャ・バッファにデータを運びます。
 
-As things stand right now, the state machine will immediately go into a 1-cycle loop of in instructions once enabled.  Since the system memory available for capture is quite limited, it would be better for the state machine to wait for some trigger before it starts sampling. Specifically, we are using a `wait pin` instruction to stall the state machine until a certain pin goes high or low, and again we are using one of the `pio_encode_` functions to encode this instruction on-the-fly.
+As things stand right now, the state machine will immediately go into a 1-cycle loop of `in` instructions once enabled.  Since the system memory available for capture is quite limited, it would be better for the state machine to wait for some trigger before it starts sampling. Specifically, we are using a `wait pin` instruction to stall the state machine until a certain pin goes high or low, and again we are using one of the `pio_encode_` functions to encode this instruction on-the-fly.
 
-現状では、ステートマシンはイネーブルになるとすぐにイン命令の1サイクルループに入る。キャプチャに使用できるシステム・メモリはかなり限られているため、ステート・マシンがサンプリングを開始する前に何らかのトリガーを待つ方が良いだろう。具体的には、あるピンがHighまたはLowになるまでステートマシンをストールさせるために `wait pin` 命令を使用します。また、この命令をオンザフライでエンコードするために `pio_encode_` 関数の1つを使用します。
+現状では、ステートマシンはイネーブルになるとすぐに `in` 命令の1サイクルループに入る。キャプチャに使用できるシステム・メモリはかなり限られているため、ステート・マシンがサンプリングを開始する前に何らかのトリガーを待つ方が良いだろう。具体的には、あるピンがHighまたはLowになるまでステートマシンをストールさせるために `wait pin` 命令を使用します。また、この命令をオンザフライでエンコードするために `pio_encode_` 関数の1つを使用します。
 
 `pio_sm_exec` tells the state machine to immediately execute some instruction you give it. This instruction never gets written to the instruction memory, and if the instruction stalls (as it will in this case — a `wait` instruction’s job is to stall) then the state machine will latch the instruction until it completes. With the state machine stalled on the `wait` instruction, we can enable it without being immediately flooded by data.
 
@@ -1283,20 +1284,20 @@ Capture:
 
 ### 3.2.4. Further examples
 
-Hopefully what you have seen so far has given some idea of how PIO applications can be built with the SDK. The RP2350 Datasheet contains many more documented examples, which highlight particular hardware features of PIO, or show how particular hardware interfaces can be implemented.
+Hopefully what you have seen so far has given some idea of how PIO applications can be built with the SDK. The RP2350 Datasheet contains *many* more documented examples, which highlight particular hardware features of PIO, or show how particular hardware interfaces can be implemented.
 
-You can also browse the pio/ directory in the Pico Examples repository.
+You can also browse the `pio/` directory in the Pico Examples repository.
 
 ここまでの説明で、SDK を使って PIO アプリケーションを構築する方法について、ある程度ご理解いただけたと思います。RP2350 Datasheetには、PIOの特定のハードウェア機能を強調したり、特定のハードウェア・インタフェースをどのように実装できるかを示す、より多くの文書化された例が含まれています。
 
-また、Pico Examples リポジトリの pio/ ディレクトリを参照することもできます。
+また、Pico Examples リポジトリの `pio/` ディレクトリを参照することもできます。
 
 ## 3.3. PIOアセンブラPIOASMを使う
 
-Up until now, we have glossed over the details of how the assembly program in our `.pio` file is translated into a binary program, ready to be loaded into our PIO state machine. Programs that handle this task — translating assembly code into binary — are generally referred to as assemblers, and PIO is no exception in this regard. The SDK includes an assembler for PIO, called pioasm. The SDK handles the details of building this tool for you behind the scenes, and then using it to build your PIO programs, for you to #include from your C or C++ program. pioasm can also be used directly, and has a few features not used by the C++ SDK, such as generating programs suitable for use with the MicroPython PIO library.
+Up until now, we have glossed over the details of how the assembly program in our `.pio` file is translated into a binary program, ready to be loaded into our PIO state machine. Programs that handle this task — translating assembly code into binary — are generally referred to as assemblers, and PIO is no exception in this regard. The SDK includes an assembler for PIO, called `pioasm`. The SDK handles the details of building this tool for you behind the scenes, and then using it to build your PIO programs, for you to `#include` from your C or C++ program. `pioasm` can also be used directly, and has a few features not used by the C++ SDK, such as generating programs suitable for use with the MicroPython PIO library.
 
 
-これまで、`.pio` ファイルのアセンブリプログラムがどのようにバイナリプログラムに変換され、PIOステートマシンにロードできるようになるかについて、詳 細を説明してきませんでした。アセンブリ・コードをバイナリに変換するというこの作業を行うプログラムは一般にアセンブラと呼ばれ、この点ではPIOも例外ではありません。SDKには、`pioasm` と呼ばれるPIO用のアセンブラが含まれています。 `pioasm` は直接使用することも可能で、MicroPython PIOライブラリで使用するのに適したプログラムを生成するなど、C++ SDKでは使用されない機能をいくつか持っています。
+これまで、`.pio` ファイルのアセンブリプログラムがどのようにバイナリプログラムに変換され、PIOステートマシンにロードできるようになるかについて、詳細を説明してきませんでした。アセンブリ・コードをバイナリに変換するというこの作業を行うプログラムは一般にアセンブラと呼ばれ、この点ではPIOも例外ではありません。SDKには、`pioasm` と呼ばれるPIO用のアセンブラが含まれています。 `pioasm` は直接使用することも可能で、MicroPython PIOライブラリで使用するのに適したプログラムを生成するなど、C++ SDKでは使用されない機能をいくつか持っています。
 
 If you have built the `pico-examples` repository at any point, you will likely already have a `pioasm` binary in your build directory, located under `build/tools/pioasm/pioasm`, which was bootstrapped for you before building any applications that depend on it. If we want a standalone copy of `pioasm`, perhaps just to explore the available command-line options, we can obtain it as follows (assuming the SDK is extracted at `$PICO_SDK_PATH`):
 
@@ -1612,9 +1613,10 @@ For example the following (comment and function) would be included in the genera
 
 ```
 % c-sdk {
+
 // an inline function (since this is going in a header file)
 static inline int some_c_code() {
-  return 0;
+    return 0;
 }
 %}
 ```
@@ -2135,6 +2137,10 @@ Stall until some condition is met.
 
 Like all stalling instructions, delay cycles begin after the instruction completes. That is, if any delay cycles are present, they do not begin counting until after the wait condition is met.
 
+何らかの条件が満たされるまでストールする。
+
+すべてのストール命令と同様に、遅延サイクルは命令が完了した後に開始する。つまり、遅延サイクルが存在する場合は、待機条件が満たされるまでカウントは開始されません。
+
 * Polarity:
 
   + 1: wait for a 1.
@@ -2149,21 +2155,19 @@ Like all stalling instructions, delay cycles begin after the instruction complet
 
 * Index: which pin or bit to check.
 
-何らかの条件が満たされるまでストールする。
+(和訳)
 
-すべてのストール命令と同様に、遅延サイクルは命令が完了した後に開始する。つまり、遅延サイクルが存在する場合は、待機条件が満たされるまでカウントは開始されません。
-
-* `Polarity`:
+* Polarity:
   + 1: 1 を待つ。
   + 0: 0 を待つ。
 
-* ソース: 何を待つのかを指定する。値は次のとおり:
+* Source: 何を待つのかを指定する。値は次のとおり:
     + 00: `GPIO`: システムGPIO入力を`Index`で選択。これは絶対的なGPIOインデックスであり、ステート・マシンの入力IOマッピングの影響を受けない。
     + 01: `PIN`: インデックスで選択された入力ピン。このステート・マシンの入力IOマッピングが最初に適用され、次に`Index`がマッピングされたビットのどれで待機するかを選択する。言い換えると、ピンは、 `PINCTRL_IN_BASE` 構成に `Index` を32モジュロ加算することで選択される。
     + 10: `IRQ`: PIO IRQフラグが `Index` によって選択される
     + 11: (バージョン1以上) `JMPPIN`: `PINCTRL_JMP_PIN` コンフィギュレーションによってインデックス付けされたピンに、0～3の範囲のIndexを全てモジュロ32で加算した値で待機する。Indexの他の値は予約されています。
 
-* インデックス:どのピンまたはビットをチェックするか。
+* Index: どのピンまたはビットをチェックするか。
 
 `WAIT x IRQ` behaves slightly differently from other `WAIT` sources:
 
@@ -2171,13 +2175,10 @@ Like all stalling instructions, delay cycles begin after the instruction complet
 
 * The flag index is decoded in the same way as the IRQ index field, decoding down from the two MSBs (aligning with the IRQ instruction IdxMode field):
 
-  + 00: the three LSBs are used directly to index the IRQ flags in this PIO block.
-
-  + 01 (version 1 and above) (PREV), the instruction references an IRQ from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0.
-
-  + 10 (REL), the state machine ID (0…3) is added to the IRQ index, by way of modulo-4 addition on the two LSBs.  For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other.
-
-  + 11 (version 1 and above) (NEXT), the instruction references an IRQ from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
+  + `00`: the three LSBs are used directly to index the IRQ flags in this PIO block.
+  + `01` (version 1 and above) (`PREV`), the instruction references an IRQ from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0.
+  + `10` (`REL`), the state machine ID (0…3) is added to the IRQ index, by way of modulo-4 addition on the two LSBs.  For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other.
+  + `11` (version 1 and above) (`NEXT`), the instruction references an IRQ from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
 
 `WAIT x IRQ` は他の `WAIT` ソースと若干異なる動作をします:
 
@@ -2229,24 +2230,22 @@ where:
 
 Shift Bit count bits from Source into the Input Shift Register (ISR). Shift direction is configured for each state machine by SHIFTCTRL_IN_SHIFTDIR. Additionally, increase the input shift count by Bit count, saturating at 32.
 
+ソースから入力シフトレジスタ(ISR) にビットカウントビットをシフトします。シフト方向は、SHIFTCTRL_IN_SHIFTDIR で各ステートマシンに対して設定されます。さらに、入力シフトカウントをBitカウント分増やし、32 で飽和させます。
+
 * Source:
 
-    + 000: PINS   
-    + 001: X (scratch register X)   
-    + 010: Y (scratch register Y)   
-    + 011: NULL (all zeroes)   
+    + 000: `PINS`   
+    + 001: `X` (scratch register X)   
+    + 010: `Y` (scratch register Y)   
+    + 011: `NULL` (all zeroes)   
     + 100: Reserved   
     + 101: Reserved   
-    + 110: ISR   
-    + 111: OSR
+    + 110: `ISR`   
+    + 111: `OSR`
 
-* Bit count: How many bits to shift into the ISR. 1…32 bits, 32 is encoded as 00000.
+* Bit count: How many bits to shift into the ISR. 1…32 bits, 32 is encoded as `00000`.
 
-If automatic push is enabled, IN will also push the ISR contents to the RX FIFO if the push threshold is reached (SHIFTCTRL_PUSH_THRESH). IN still executes in one cycle, whether an automatic push takes place or not. The state machine will stall if the RX FIFO is full when an automatic push occurs. An automatic push clears the ISR contents to all-zeroes, and clears the input shift count.
-
-IN always uses the least significant Bit count bits of the source data. For example, if PINCTRL_IN_BASE is set to 5, the instruction IN PINS, 3 will take the values of pins 5, 6 and 7, and shift these into the ISR. First the ISR is shifted to the left or right to make room for the new input data, then the input data is copied into the gap this leaves. The bit order of the input data is not dependent on the shift direction.
-
-ソースから入力シフトレジスタ(ISR) にビットカウントビットをシフトします。シフト方向は、SHIFTCTRL_IN_SHIFTDIR で各ステートマシンに対して設定されます。さらに、入力シフトカウントをBitカウント分増やし、32 で飽和させます。
+(和訳)
 
 * ソース:
     + 000: PINS
@@ -2260,17 +2259,17 @@ IN always uses the least significant Bit count bits of the source data. For exam
 
 * ビット数: ISRに何ビットシフトするか。1...32ビット、32は00000としてエンコードされる。
 
-自動プッシュが有効な場合、プッシュしきい値(SHIFTCTRL_PUSH_THRESH)に達すると、INはISRの内容もRX FIFOにプッシュする。自動プッシュの有無に関わらず、INは1サイクルで実行される。自動プッシュが発生したときにRX FIFOが満杯であれば、ステートマシンはストールする。自動プ ッ シ ュ はISR の内容をクリアしてすべて0 にし、入力シフトカウントをクリアします。
+If automatic push is enabled, `IN` will also push the ISR contents to the RX FIFO if the push threshold is reached (`SHIFTCTRL_PUSH_THRESH`). `IN` still executes in one cycle, whether an automatic push takes place or not. The state machine will stall if the RX FIFO is full when an automatic push occurs. An automatic push clears the ISR contents to all-zeroes, and clears the input shift count.
 
-IN は常にソースデータの最下位ビッ トカウントを使用する。例えば、PINCTRL_IN_BASE が 5 に設定されている場合、IN PINS, 3 命令はピン 5、6、7 の値を取り、これらを ISR にシフトします。最初にISRが左または右にシフトされ、新しい入力データのためのスペースが作られ、次に入力データがこの残されたギャップにコピーされる。入力データのビット順序はシフト方向に依存しない。
+自動プッシュが有効な場合、プッシュしきい値(`SHIFTCTRL_PUSH_THRESH`)に達すると、 `IN` はISRの内容もRX FIFOにプッシュする。自動プッシュの有無に関わらず、 `IN` は1サイクルで実行される。自動プッシュが発生したときにRX FIFOが満杯であれば、ステートマシンはストールする。自動プッシュ は ISR の内容をクリアしてすべて0 にし、入力シフトカウントをクリアします。
 
-NULL can be used for shifting the ISR’s contents. For example, UARTs receive the LSB first, so must shift to the right.
+`IN` always uses the least significant `Bit count` bits of the source data. For example, if `PINCTRL_IN_BASE` is set to 5, the instruction `IN PINS,`3` will take the values of pins 5, 6 and 7, and shift these into the ISR. First the ISR is shifted to the left or right to make room for the new input data, then the input data is copied into the gap this leaves. The bit order of the input data is not dependent on the shift direction.
 
-After 8 IN PINS, 1 instructions, the input serial data will occupy bits 31…24 of the ISR. An IN NULL, 24 instruction will shift in 24 zero bits, aligning the input data at ISR bits 7…0. Alternatively, the processor or DMA could perform a byte read from FIFO address + 3, which would take bits 31…24 of the FIFO contents.
+`IN` は常にソースデータの最下位ビットカウントを使用する。例えば、 `PINCTRL_IN_BASE` が 5 に設定されている場合、命令 `IN PINS, 3` はピン 5、6、7 の値を取り、これらを ISR にシフトします。最初にISRが左または右にシフトされ、新しい入力データのためのスペースが作られ、次に入力データがこの残されたギャップにコピーされる。入力データのビット順序はシフト方向に依存しない。
 
-NULL は、ISR の内容のシフトに使用できます。例えば、UART は LSB を最初に受信するため、右にシフトする必要があります。
+`NULL` can be used for shifting the ISR’s contents. For example, UARTs receive the LSB first, so must shift to the right.  After 8 `IN PINS, 1` instructions, the input serial data will occupy bits 31…24 of the ISR. An `IN NULL, 24` instruction will shift in 24 zero bits, aligning the input data at ISR bits 7…0. Alternatively, the processor or DMA could perform a byte read from FIFO address + 3, which would take bits 31…24 of the FIFO contents.
 
-8 回の IN PINS, 1 命令の後、入力シリアル・データは ISR のビット 31 ～ 24 を占めます。IN NULL, 24命令では、24個のゼロビットがシフトされ、入力データはISRのビット7...0に整列される。別の方法として、プロセッサまたはDMAは、FIFOアドレス+3からバイト読み出しを実行することができ、これはFIFO内容のビット31～24を使用する。
+`NULL` は、ISR の内容のシフトに使用できます。例えば、UART は LSB を最初に受信するため、右にシフトする必要があります。 `IN PINS, 1` 命令を 8 回実行した後、入力シリアル・データは ISR のビット 31 ～ 24 を占めます。`IN NULL, 24` 命令では、24個のゼロビットがシフトされ、入力データはISRのビット7...0に整列される。別の方法として、プロセッサまたはDMAは、FIFOアドレス+3からバイト読み出しを実行することができ、これはFIFO内容のビット31～24を使用する。
 
 #### 3.4.6.3. Assembler Syntax
 
@@ -2298,6 +2297,8 @@ where:
 
 Shift Bit count bits out of the Output Shift Register (OSR), and write those bits to Destination. Additionally, increase the output shift count by Bit count, saturating at 32.
 
+出力シフト・レジスタ(OSR)からビット・カウント・ビットをシフ トし、それらのビットをデスティネーションに書き込む。さらに、出力シフト・カウントをビット・カウントずつ増やし、32で飽和させる。
+
 * Destination:
 
     + 000: PINS   
@@ -2317,34 +2318,32 @@ PINS and PINDIRS use the OUT pin mapping.
 
 If automatic pull is enabled, the OSR is automatically refilled from the TX FIFO if the pull threshold, SHIFTCTRL_PULL_THRESH, is reached. The output shift count is simultaneously cleared to 0. In this case, the OUT will stall if the TX FIFO is empty, but otherwise still executes in one cycle.
 
-出力シフト・レジスタ(OSR)からビット・カウント・ビットをシフ トし、それらのビットをデスティネーションに書き込む。さらに、出力シフト・カウントをビット・カウントずつ増やし、32で飽和させる。
+* Destination:
 
-* デスティネーション
+    + 000: `PINS`
+    + 001: `X` (スクラッチ・レジスタX)
+    + 010: `Y` (スクラッチレジスタY)
+    + 011: `NULL` (データ破棄)
+    + 100: ``PINDIRS``
+    + 101: `PC`
+    + 110: `ISR` (ISRシフトカウンタも`Bit count`に設定)
+    + 111: `EXEC` (OSRシフトデータを命令として実行)
 
-    + 000: PINS
- + 001: X(スクラッチ・レジスタX)
- + 010: Y (スクラッチレジスタY)
- + 011: NULL (データ破棄)
- + 100: PINDIRS
- + 101: PC
- + 110: ISR (ISRシフトカウンタもBitカウントに設定)
- + 111: EXEC(OSRシフトデータを命令として実行)
+* Bit count: OSRから何ビットシフトアウトさせるか。1...32ビット、32は `00000` とエンコードされる。
 
-* ビット数:OSRから何ビットシフトアウトさせるか。1...32ビット、32は00000とエンコードされる。
+32ビットの値が `Destination` に書き込まれます。`Bit count` の下位ビットがOSRから出力され、残りは0です。この値は、 `SHIFTCTRL_OUT_SHIFTDIR` が右の場合はOSRの最下位ビット、それ以外の場合は最上位ビットになります。
 
-32ビットの値がDestinationに書き込まれます。Bitカウントの下位ビットがOSRから出力され、残りは0です。この値は、SHIFTCTRL_OUT_SHIFTDIRが右の場合はOSRの最下位ビット、それ以外の場合は最上位ビットになります。
+`PINS` と `PINDIRS` は OUT ピン・マッピングを使用します。
 
-PINSとPINDIRSはOUTピン・マッピングを使用します。
+自動プルが有効な場合、 プルのしきい値(`SHIFTCTRL_PULL_THRESH`) に達すると 、 TX FIFO から自動的に OSR が補充されます。この場合、TX FIFO が空であれば `OUT` はストールするが、そうでなければ1サイクルで実行される。
 
-自動プルが有効な場合、 プルのしきい値(SHIFTCTRL_PULL_THRESH) に達す る と 、 TX FIFO か ら 自動的にOSR が補充 さ れます。この場合、TX FIFOが空であればOUTはストールするが、そうでなければ1サイクルで実行される。
+`OUT EXEC` allows instructions to be included inline in the FIFO datastream. The OUT itself executes on one cycle, and the instruction from the OSR is executed on the next cycle. There are no restrictions on the types of instructions which can be executed by this mechanism. Delay cycles on the initial OUT are ignored, but the executee may insert delay cycles as normal.
 
-OUT EXEC allows instructions to be included inline in the FIFO datastream. The OUT itself executes on one cycle, and the instruction from the OSR is executed on the next cycle. There are no restrictions on the types of instructions which can be executed by this mechanism. Delay cycles on the initial OUT are ignored, but the executee may insert delay cycles as normal.
+`OUT EXEC` では、FIFOデータストリームにインラインで命令を含めることができる。 `OUT` 自体は1サイクルで実行され、OSRからの命令は次のサイクルで実行される。このメカニズムで実行できる命令の種類に制限はない。最初の `OUT` の遅延サイクルは無視されるが、実行者は通常通り遅延サイクルを挿入することができる。
 
-OUT PC behaves as an unconditional jump to an address shifted out from the OSR.
+`OUT PC` behaves as an unconditional jump to an address shifted out from the OSR.
 
-OUT EXECでは、FIFOデータストリームにインラインで命令を含めることができる。OUT自体は1サイクルで実行され、OSRからの命令は次のサイクルで実行される。このメカニズムで実行できる命令の種類に制限はない。最初のOUTの遅延サイクルは無視されるが、実行者は通常通り遅延サイクルを挿入することができる。
-
-OUT PCはOSRからシフトアウトされたアドレスへの無条件ジャンプとして動作する。
+`OUT PC` はOSRからシフトアウトされたアドレスへの無条件ジャンプとして動作する。
 
 #### 3.4.7.3. Assembler Syntax
 
@@ -2370,23 +2369,25 @@ where:
 
 Push the contents of the ISR into the RX FIFO, as a single 32-bit word. Clear ISR to all-zeroes.
 
-* IfFull: If 1, do nothing unless the total input shift count has reached its threshold, SHIFTCTRL_PUSH_THRESH (the same as for autopush).
-
-* Block: If 1, stall execution if RX FIFO is full.
-
-PUSH IFFULL helps to make programs more compact, like autopush. It is useful in cases where the IN would stall at an inappropriate time if autopush were enabled, e.g. if the state machine is asserting some external control signal at this point.
-
-The PIO assembler sets the Block bit by default. If the Block bit is not set, the PUSH does not stall on a full RX FIFO, instead continuing immediately to the next instruction. The FIFO state and contents are unchanged when this happens. The ISR is still cleared to all-zeroes, and the FDEBUG_RXSTALL flag is set (the same as a blocking PUSH or autopush to a full RX FIFO) to indicate data was lost.
-
 ISRの内容を1つの32ビット・ワードとしてRX FIFOにプッシュする。ISRをゼロクリアする。
+
+* `IfFull`: If 1, do nothing unless the total input shift count has reached its threshold, `SHIFTCTRL_PUSH_THRESH` (the same as for autopush).
+
+* `Block`: If 1, stall execution if RX FIFO is full.
+
+(和訳)
 
 * IfFull: 1の場合、総入力シフト数がしきい値SHIFTCTRL_PUSH_THRESHに達しない限り何もしない(自動プッシュの場合と同じ)。
 
-* ブロック: ブロック:1 の場合、RX FIFO が満杯になると実行を停止する。
+* Block: 1 の場合、RX FIFO が満杯になると実行を停止する。
 
-PUSH IFFULL は、オートプッシュのようにプログラムをよりコンパクトにするのに役立つ。オートプッシュを有効にすると、INが不適切なタイミングでストールしてしまうような場合、例えば、ステートマシンがこの時点で何らかの外部制御信号をアサートしているような場合に有用である。
+`PUSH IFFULL` helps to make programs more compact, like autopush. It is useful in cases where the `IN` would stall at an inappropriate time if autopush were enabled, e.g. if the state machine is asserting some external control signal at this point.
 
-PIO アセンブラはデフォルトで Block ビットを設定する。Block ビットが設定されていない場合、PUSH は RX FIFO が満杯でもストールせず、すぐに次の命令に進みます。この場合、FIFO の状態と内容は変更されない。ISR はゼロクリアされ、データが失われたことを示す FDEBUG_RXSTALL フラグがセットされる(満杯の RX FIFO に対するブロッキング PUSH または自動 PUSH と同じ)。
+`PUSH IFFULL` は、オートプッシュのようにプログラムをよりコンパクトにするのに役立つ。オートプッシュを有効にすると、 `IN` が不適切なタイミングでストールしてしまうような場合、例えば、ステートマシンがこの時点で何らかの外部制御信号をアサートしているような場合に有用である。
+
+The PIO assembler sets the `Block` bit by default. If the `Block` bit is not set, the `PUSH` does not stall on a full RX FIFO, instead continuing immediately to the next instruction. The FIFO state and contents are unchanged when this happens. The ISR is still cleared to all-zeroes, and the `FDEBUG_RXSTALL` flag is set (the same as a blocking `PUSH` or autopush to a full RX FIFO) to indicate data was lost.
+
+PIO アセンブラはデフォルトで `Block` ビットを設定する。 `Block` ビットが設定されていない場合、 `PUSH` は RX FIFO が満杯でもストールせず、すぐに次の命令に進みます。この場合、FIFO の状態と内容は変更されない。ISR はゼロクリアされ、データが失われたことを示す `FDEBUG_RXSTALL` フラグがセットされる(満杯の RX FIFO に対するブロッキング `PUSH` または自動プッシュと同じ)。
 
 #### 3.4.8.3. Assembler Syntax
 
@@ -2400,12 +2401,12 @@ where:
 
 <desc>
 
-||iffull||Is equivalent to IfFull == 1 above. i.e. the default if this is not specified is IfFull == 0
-||block||Is equivalent to Block == 1 above. This is the default if neither block nor noblock are specified
-||noblock||Is equivalent to Block == 0 above.
-||iffull||は上記のIfFull==1と等価です。つまり、これが指定されない場合のデフォルトはIfFull==0
-||block||は上記のBlock==1と等価です。これは、blockもnoblockも指定されていない場合のデフォルトである
-||noblock||上記のBlock == 0と等価である。
+||iffull||Is equivalent to `IfFull == 1` above. i.e. the default if this is not specified is `IfFull == 0`.
+||block||Is equivalent to `Block == 1` above. This is the default if neither block nor noblock are specified.
+||noblock||Is equivalent to `Block == 0` above.
+||iffull||は上記の `IfFull == 1` と等価です。つまり、これが指定されない場合のデフォルトは `IfFull==0`
+||block||は上記の `Block == 1` と等価です。これは、 *block* も *noblock* も指定されていない場合のデフォルトである
+||noblock||上記の `Block == 0` と等価である。
 </desc>
 
 ### 3.4.9. PULL
@@ -2418,33 +2419,35 @@ where:
 
 Load a 32-bit word from the TX FIFO into the OSR.
 
-* IfEmpty: If 1, do nothing unless the total output shift count has reached its threshold, SHIFTCTRL_PULL_THRESH (the same as for autopull).
-
-* Block: If 1, stall if TX FIFO is empty. If 0, pulling from an empty FIFO copies scratch X to OSR.
-
-Some peripherals (UART, SPI…) should halt when no data is available, and pick it up as it comes in; others (I2S) should clock continuously, and it is better to output placeholder or repeated data than to stop clocking. This can be achieved with the Block parameter.
-
-A nonblocking PULL on an empty FIFO has the same effect as MOV OSR, X. The program can either preload scratch register X with a suitable default, or execute a MOV X, OSR after each PULL NOBLOCK, so that the last valid FIFO word will be recycled until new data is available.
-
-PULL IFEMPTY is useful if an OUT with autopull would stall in an inappropriate location when the TX FIFO is empty. For example, a UART transmitter should not stall immediately after asserting the start bit. IfEmpty permits some of the same program simplifications as autopull, but the stall occurs at a controlled point in the program.
-
 TX FIFOからOSRに32ビット・ワードをロードする。
 
-* 空の場合: の場合、 出力シ フ ト カ ウ ン ト の合計が し き い値 (SHIFTCTRL_PULL_THRESH)(オートプルの場合と同じ)に達 し ない限 り 、 何も し ません。
+* `IfEmpty`: If 1, do nothing unless the total output shift count has reached its threshold, `SHIFTCTRL_PULL_THRESH` (the same as for autopull).
 
-* ブロック: ブロック:1の場合、TX FIFOが空の場合にストールする。0 の場合、空の FIFO からプルするとスクラッチ X が OSR にコピーされる。
+* `Block`: If 1, stall if TX FIFO is empty. If 0, pulling from an empty FIFO copies scratch X to OSR.
 
-いくつかのペリフェラル(UART、SPI...)は、データが利用可能でないときに停止し、データが入ってきたときにそれを拾うべきである。こ れは Block パ ラ メ ー タ で実現で き る 。
+(和訳)
 
-プ ロ グ ラ ムは、 ス ク ラッチ レジスタ X を適切なデフ ォ ル ト でプ リ ロ ー ド す る か、 ま たは PULL NOBLOCK のたびに MOV X, OSR を実行す る こ と で、 最後の有効な FIFO ワー ド が、 新 し いデー タ が利用可能にな る ま で リ サ イ ク ル さ れます。
+* `IfEmpty`: 1 の場合、 出力シフトカウントの合計がしきい値 (SHIFTCTRL_PULL_THRESH)(オートプルの場合と同じ)に達しない限り、何もしません。
 
-PULL IFEMPTY は、TX FIFO が空になったときに、オートプル付きの OUT が不適切な位置でストールする場合に便利です。た と えば、UART トランスミッタは、スタート・ビットをアサートした直後にストールしてはならない。IfEmptyを使用すると、オートプルと同じようにプログラムを簡略化できますが、ストールはプログラム内の制御されたポイントで発生します。
+* `Block`: 1 の場合、TX FIFOが空の場合にストールする。0 の場合、空の FIFO からプルするとスクラッチ X が OSR にコピーされる。
+
+Some peripherals (UART, SPI…) should halt when no data is available, and pick it up as it comes in; others (I2S) should clock continuously, and it is better to output placeholder or repeated data than to stop clocking. This can be achieved with the `Block` parameter.
+
+いくつかのペリフェラル(UART、SPI...)は、データが利用可能でないときに停止し、データが入ってきたときにそれを拾うべきである。これは `Block` パラメータで実現できる 。
+
+A nonblocking `PULL` on an empty FIFO has the same effect as `MOV OSR, X`. The program can either preload scratch register X with a suitable default, or execute a `MOV X, OSR` after each `PULL NOBLOCK`, so that the last valid FIFO word will be recycled until new data is available.
+
+FIFO が空のときの非ブロッキング `PULL` は、`MOV OSR, X` と同じ効果を持つ。プログラムは、スクラッチレジスタ X を適切なデフォルトでプリロードするか、または `PULL NOBLOCK` のたびに `MOV X, OSR` を実行することで、 最後の有効な FIFO ワードが、新しいデータが利用可能になるまでリサイクルされます。
+
+`PULL IFEMPTY` is useful if an `OUT` with autopull would stall in an inappropriate location when the TX FIFO is empty. For example, a UART transmitter should not stall immediately after asserting the start bit. `IfEmpty` permits some of the same program simplifications as autopull, but the stall occurs at a controlled point in the program.
+
+`PULL IFEMPTY` は、TX FIFO が空になったときに、オートプル付きの OUT が不適切な位置でストールする場合に便利です。たとえば、UART トランスミッタは、スタート・ビットをアサートした直後にストールしてはならない。 `IfEmpty` を使用すると、オートプルと同じようにプログラムを簡略化できますが、ストールはプログラム内の制御されたポイントで発生します。
 
 >  NOTE
-> When autopull is enabled, any PULL instruction is a no-op when the OSR is full, so that the PULL instruction behaves as a barrier. OUT NULL, 32 can be used to explicitly discard the OSR contents. See the RP2350 Datasheet for more detail on autopull.
+> When autopull is enabled, any `PULL` instruction is a no-op when the OSR is full, so that the `PULL` instruction behaves as a barrier. `OUT NULL, 32` can be used to explicitly discard the OSR contents. See the RP2350 Datasheet for more detail on autopull.
 
 >  注意
-> オートプルが有効な場合、OSRが一杯になるとPULL命令はノーオ プとなり、PULL命令はバリアとして動作する。OUT NULL, 32 を使用すると、OSR の内容を明示的に破棄できる。オートプルの詳細については、RP2350 データシートを参照してください。
+> オートプルが有効な場合、OSRが一杯になると `PULL` 命令は no-op となり、 `PULL` 命令はバリアとして動作する。 `OUT NULL, 32` を使用すると、OSR の内容を明示的に破棄できる。オートプルの詳細については、RP2350 データシートを参照してください。
 
 #### 3.4.9.3. Assembler Syntax
 
@@ -2458,12 +2461,12 @@ where:
 
 <desc>
 
-||ifempty||Is equivalent to IfEmpty == 1 above. i.e. the default if this is not specified is IfEmpty == 0
-||block||Is equivalent to Block == 1 above. This is the default if neither block nor noblock are specified
-||noblock||Is equivalent to Block == 0 above.
-||ifempty||は上記のIfEmpty==1と等価です。つまり、これが指定されない場合のデフォルトはIfEmpty==0
-||block||は上記のBlock==1と等価です。これは、
-||noblock||上記のBlock == 0と同じです。
+||ifempty||Is equivalent to `IfEmpty == 1` above. i.e. the default if this is not specified is `IfEmpty == 0`.
+||block||Is equivalent to `Block == 1` above. This is the default if neither block nor noblock are specified
+||noblock||Is equivalent to `Block == 0` above.
+||ifempty||は上記の `IfEmpty == 1` と等価です。つまり、これが指定されない場合のデフォルトは`IfEmpty == 0`
+||block||は上記の `Block == 1` と等価です。これは、
+||noblock||上記の `Block == 0` と同じです。
 </desc>
 
 ### 3.4.10. MOV (to RX)
@@ -2476,24 +2479,24 @@ where:
 
 #### 3.4.10.2. Operation
 
-Write the ISR to a selected RX FIFO entry. The state machine can write the RX FIFO entries in any order, indexed either by the Y register, or an immediate Index in the instruction. Requires the SHIFTCTRL_FJOIN_RX_PUT configuration field to be set, otherwise its operation is undefined. The FIFO configuration can be specified for the program via the .fifo directive (see pioasm_fifo).
+Write the ISR to a selected RX FIFO entry. The state machine can write the RX FIFO entries in any order, indexed either by the Y register, or an immediate Index in the instruction. Requires the `SHIFTCTRL_FJOIN_RX_PUT` configuration field to be set, otherwise its operation is undefined. The FIFO configuration can be specified for the program via the `.fifo` directive (see `pioasm_fifo`).
+
+選択した RX FIFO エントリに ISR を書き込む。ステートマシンは、Y レジスタまたは命令内の即時インデックスによってインデックス付けされたRX FIFO エントリを任意の順序で書き込むことができます。 `SHIFTCTRL_FJOIN_RX_PUT` 設定フィールドが設定されている必要があります。FIFOコンフィギュレーションは、`.fifo` ディレクティブ(`pioasm_fifo` を参照)を介してプログラムに指定することができます。
 
 If IdxI (index by immediate) is set, the RX FIFO’s registers are indexed by the two least-significant bits of the Index operand. Otherwise, they are indexed by the two least-significant bits of the Y register. When IdxI is clear, all nonzero values of Index are reserved encodings, and their operation is undefined.
 
-When only SHIFTCTRL_FJOIN_RX_PUT is set (in SM0_SHIFTCTRL through SM3_SHIFTCTRL), the system can also read the RX FIFO registers with random access via RXF0_PUTGET0 through RXF0_PUTGET3 (where RXFx indicates which state machine’s FIFO is being accessed). In this state, the FIFO register storage is repurposed as status registers, which the state machine can update at any time and the system can read at any time. For example, a quadrature decoder program could maintain the current step count in a status register at all times, rather than pushing to the RX FIFO and potentially blocking.
-
-選択した RX FIFO エントリに ISR を書き込む。ステート マシンは、Y レジスタまたは命令内の即時インデッ クスによってインデックス付けされたRX FIFO エントリを任意の順序で書き込むことができます。SHIFTCTRL_FJOIN_RX_PUT 設定フ ィ ール ド が設定 さ れてい る 必要があ り ます。FIFOコンフィギュレーションは、.fifoディレクティブ(pioasm_fifoを参照)を介してプログラムに指定することができます。
-
 IdxI(即値によるインデックス)が設定されている場合、RX FIFOのレジスタはIndexオペランドの最下位ビット2つによってインデックス付けされます。そうでない場合は、Yレジスタの最下位ビット2つによってインデックスが付けられます。IdxIがクリアされている場合、Indexの0以外の値は全て予約エンコーディングであり、その動作は未定義である。
 
-SHIFTCTRL_FJOIN_RX_PUTのみが設定されている場合(SM0_SHIFTCTRL～SM3_SHIFTCTRL内)、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介してランダムアクセスでRX FIFOレジスタを読み出すこともできる。この状態では、FIFOレジスタ・ストレージはステータス・レジスタとして再利用され、ステート・マシンはいつでも更新でき、システムはいつでも読み出すことができます。例えば、矩形波デコーダ・プログラムでは、RX FIFOにプッシュしてブロックするのではなく、ステータス・レジスタに現在のステップ・カウントを常に保持することができます。
+When only `SHIFTCTRL_FJOIN_RX_PUT` is set (in `SM0_SHIFTCTRL` through `SM3_SHIFTCTRL`), the system can also read the RX FIFO registers with random access via `RXF0_PUTGET0` through `RXF0_PUTGET3` (where RXFx indicates which state machine’s FIFO is being accessed). In this state, the FIFO register storage is repurposed as status registers, which the state machine can update at any time and the system can read at any time. For example, a quadrature decoder program could maintain the current step count in a status register at all times, rather than pushing to the RX FIFO and potentially blocking.
 
-When both SHIFTCTRL_FJOIN_RX_PUT and SHIFTCTRL_FJOIN_RX_GET are set, the system can no longer access the RX FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
+`SHIFTCTRL_FJOIN_RX_PUT` のみが設定されている場合(`SM0_SHIFTCTRL` ～ `SM3_SHIFTCTRL` 内)、システムは `RXF0_PUTGET0` ～ `RXF0_PUTGET3`(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介してランダムアクセスでRX FIFOレジスタを読み出すこともできる。この状態では、FIFOレジスタ・ストレージはステータス・レジスタとして再利用され、ステート・マシンはいつでも更新でき、システムはいつでも読み出すことができます。例えば、矩形波デコーダ・プログラムでは、RX FIFOにプッシュしてブロックするのではなく、ステータス・レジスタに現在のステップ・カウントを常に保持することができます。
+
+When both `SHIFTCTRL_FJOIN_RX_PUT` and `SHIFTCTRL_FJOIN_RX_GET` are set, the system can no longer access the RX FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
+
+`SHIFTCTRL_FJOIN_RX_PUT` と `SHIFTCTRL_FJOIN_RX_GET` の両方が設定されると、システムは RX FIFO ストレージ・レジスタにアクセスできなくなりますが、ステートマシンはレジスタを任意の順序で PUT/GET できるようになり、追加のスクラッチ・ストレージとして使用できるようになります。
 
 >  NOTE
 > The RX FIFO storage registers have only a single read port and write port, and access through each port is assigned to only one of (system, state machine) at any time.
-
-SHIFTCTRL_FJOIN_RX_PUTとSHIFTCTRL_FJOIN_RX_GETの両方が設定されると、システムはRX FIFOストレージ・レジスタにアクセスできなくなりますが、ステートマシンはレジスタを任意の順序でPUT/GETできるようになり、追加のスクラッチ・ストレージとして使用できるようになります。
 
 >  注意
 > RX FIFOストレージ・レジスタには、1つの読み取りポートと書き込みポートのみがあり、各ポートを介したアクセスは、常に(システム、ステートマシン)のうちの1つのみに割り当てられます。
@@ -2511,7 +2514,7 @@ where:
 
 ||y|| Is the literal token "y", indicating the RX FIFO entry is indexed by the Y register
 ||<index>||Is a value (see Section 3.3.3) specifying the RX FIFO entry to write (valid range 0-3)
-||y|| リテラルトークン "y "で、RX FIFOエントリがYレジスタでインデックス付けされていることを示す
+||y|| リテラルトークン "y" で、RX FIFOエントリがYレジスタでインデックス付けされていることを示す
 ||<index>|| 書き込むRX FIFOエントリを指定する値(セクション3.3.3を参照)(有効範囲は0～3)。
 
 </desc>
@@ -2526,21 +2529,21 @@ where:
 
 #### 3.4.11.2. Operation
 
-Read the selected RX FIFO entry into the OSR. The PIO state machine can read the FIFO entries in any order, indexed either by the Y register, or an immediate Index in the instruction. Requires the SHIFTCTRL_FJOIN_RX_GET configuration field to be set, otherwise its operation is undefined.
+Read the selected RX FIFO entry into the OSR. The PIO state machine can read the FIFO entries in any order, indexed either by the Y register, or an immediate Index in the instruction. Requires the `SHIFTCTRL_FJOIN_RX_GET` configuration field to be set, otherwise its operation is undefined.
+
+選択された RX FIFO エントリを OSR に読み込む。PIO ステートマシンは、Y レジスタまたは命令内の即時インデックスをインデックスとして、 任意の順序でFIFO エントリを読み出すことができます。`SHIFTCTRL_FJOIN_RX_GET` 設定フィールドが設定されている必要があり、そうでなければ動作は未定義です。
 
 If IdxI (index by immediate) is set, the RX FIFO’s registers are indexed by the two least-significant bits of the Index operand. Otherwise, they are indexed by the two least-significant bits of the Y register. When IdxI is clear, all nonzero values of Index are reserved encodings, and their operation is undefined.
 
-When only SHIFTCTRL_FJOIN_RX_GET is set, the system can also write the RX FIFO registers with random access via RXF0_PUTGET0 through RXF0_PUTGET3 (where RXFx indicates which state machine’s FIFO is being accessed). In this state, the RX FIFO register storage is repurposed as additional configuration registers, which the system can update at any time and the state machine can read at any time. For example, a UART TX program might use these registers to configure the number of data bits, or the presence of an additional stop bit.
-
-When both SHIFTCTRL_FJOIN_RX_PUT and SHIFTCTRL_FJOIN_RX_GET are set, the system can no longer access the RX FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
-
-選択された RX FIFO エントリを OSR に読み込む。PIO ステートマシンは、Y レジスタまたは命令内の即時インデックスをインデックスとして、 任意の順序でFIFO エントリを読み出すことができます。設定フィールドが設定されている必要があり、そうでなければ動作は未定義です。
-
 IdxI(即時インデックス)が設定されている場合、RX FIFOのレジスタはIndexオペランドの最下位ビット2つによってインデックス付けされます。そうでない場合は、Yレジスタの最下位ビット2つによってインデックスが付けられます。IdxIがクリアされている場合、Indexの0以外の値は全て予約エンコードであり、その動作は未定義である。
 
-SHIFTCTRL_FJOIN_RX_GETのみが設定されている場合、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。こ の ス テー ト では、RX FIFO レジスタ ストレージは追加のコンフィギュレーションレジスタとして再利用され、システムはこれらをいつでも更新でき、ステートマシンはこれらをいつでも読み出しできます。例えば、UART TX プログラムはこれらのレジスタを使用してデータ・ビット数や追加ストップ・ビットの有無を設定することができます。
+When only `SHIFTCTRL_FJOIN_RX_GET` is set, the system can also write the RX FIFO registers with random access via `RXF0_PUTGET0` through `RXF0_PUTGET3` (where RXFx indicates which state machine’s FIFO is being accessed). In this state, the RX FIFO register storage is repurposed as additional configuration registers, which the system can update at any time and the state machine can read at any time. For example, a UART TX program might use these registers to configure the number of data bits, or the presence of an additional stop bit.
 
-SHIFTCTRL_FJOIN_RX_PUTとSHIFTCTRL_FJOIN_RX_GETの両方が設定されると、システムはRX FIFOストレージ・レジスタにアクセスできなくなります。
+`SHIFTCTRL_FJOIN_RX_GET` のみが設定されている場合、システムは `RXF0_PUTGET0` ～ `RXF0_PUTGET3` (ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。こ の ス テー ト では、RX FIFO レジスタ ストレージは追加のコンフィギュレーションレジスタとして再利用され、システムはこれらをいつでも更新でき、ステートマシンはこれらをいつでも読み出しできます。例えば、UART TX プログラムはこれらのレジスタを使用してデータ・ビット数や追加ストップ・ビットの有無を設定することができます。
+
+When both `SHIFTCTRL_FJOIN_RX_PUT` and `SHIFTCTRL_FJOIN_RX_GET` are set, the system can no longer access the RX FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
+
+`SHIFTCTRL_FJOIN_RX_PUT` と `SHIFTCTRL_FJOIN_RX_GET` の両方が設定されると、システムはRX FIFOストレージ・レジスタにアクセスできなくなります。
 
 >  NOTE
 > The RX FIFO storage registers have only a single read port and write port, and access through each port is assigned to only one of (system, state machine) at any time.
@@ -2573,18 +2576,18 @@ where:
 
 #### 3.4.12.2. Operation
 
-Copy data from Source to Destination.
+Copy data from `Source` to `Destination`.
 
 * Destination:
 
-    + 000: PINS (Uses same pin mapping as OUT)   
-    + 001: X (Scratch register X)   
-    + 010: Y (Scratch register Y)   
-    + 011: (version 1 and above) PINDIRS (Uses same pin mapping as OUT)   
-    + 100: EXEC (Execute data as instruction)   
-    + 101: PC   
-    + 110: ISR (Input shift counter is reset to 0 by this operation, i.e. empty)   
-    + 111: OSR (Output shift counter is reset to 0 by this operation, i.e. full)
+    + 000: `PINS` (Uses same pin mapping as `OUT`)   
+    + 001: `X` (Scratch register X)   
+    + 010: `Y` (Scratch register Y)   
+    + 011: (version 1 and above) `PINDIRS` (Uses same pin mapping as `OUT`)   
+    + 100: `EXEC` (Execute data as instruction)   
+    + 101: `PC`   
+    + 110: `ISR` (Input shift counter is reset to 0 by this operation, i.e. empty)   
+    + 111: `OSR` (Output shift counter is reset to 0 by this operation, i.e. full)
 
 * Operation:
 
@@ -2595,34 +2598,30 @@ Copy data from Source to Destination.
 
 * Source:
 
-    + 000: PINS (Uses same pin mapping as IN)   
-    + 001: X   
-    + 010: Y   
-    + 011: NULL   
+    + 000: `PINS` (Uses same pin mapping as `IN`)   
+    + 001: `X`   
+    + 010: ``Y``   
+    + 011: `NULL`   
     + 100: Reserved   
-    + 101: STATUS   
-    + 110: ISR   
-    + 111: OSR
+    + 101: `STATUS`   
+    + 110: `ISR`   
+    + 111: `OSR`
 
-MOV PC causes an unconditional jump. MOV EXEC has the same behaviour as OUT EXEC (Section 3.4.7), and allows register contents to be executed as an instruction. The MOV itself executes in 1 cycle, and the instruction in Source on the next cycle. Delay cycles on MOV EXEC are ignored, but the executee may insert delay cycles as normal.
+`MOV PC` causes an unconditional jump. `MOV EXEC` has the same behaviour as `OUT EXEC` (Section 3.4.7), and allows register contents to be executed as an instruction. The `MOV` itself executes in 1 cycle, and the instruction in `Source` on the next cycle. Delay cycles on `MOV EXEC` are ignored, but the executee may insert delay cycles as normal.
 
-The STATUS source has a value of all-ones or all-zeroes, depending on some state machine status such as FIFO full/empty, configured by EXECCTRL_STATUS_SEL.
+MOV PC は無条件ジャンプを引き起こす。 `MOV EXEC` は `OUT EXEC`(セクション 3.4.7)と同じ動作をし、レジスタの内容を命令として実行することができる。MOV 自体は 1 サイクルで実行され、ソース内の命令は次のサイクルで実行される。`MOV EXEC` の遅延サイクルは無視されるが、実行者は通常通り遅延サイクルを挿入することができる。
 
-MOV can manipulate the transferred data in limited ways, specified by the Operation argument. Invert sets each bit in Destination to the logical NOT of the corresponding bit in Source, i.e. 1 bits become 0 bits, and vice versa. Bit reverse sets each bit n in Destination to bit 31 - n in Source, assuming the bits are numbered 0 to 31.
+The `STATUS` source has a value of all-ones or all-zeroes, depending on some state machine status such as FIFO full/empty, configured by `EXECCTRL_STATUS_SEL`.
 
-MOV dst, PINS reads pins using the IN pin mapping, and writes the full 32-bit value to the destination without masking.
+`STATUS` ソースは、 `EXECCTRL_STATUS_SEL` で設定された FIFO のフル/エンプティなどのステー ト・マシンの状態に応じて、オール 1 またはオール 0 の値を持つ。
 
-The LSB of the read value is the pin indicated by PINCTRL_IN_BASE, and each successive bit comes from a highernumbered pin, wrapping after 31.
+`MOV` can manipulate the transferred data in limited ways, specified by the `Operation` argument. Invert sets each bit in `Destination` to the logical NOT of the corresponding bit in `Source`, i.e. 1 bits become 0 bits, and vice versa. Bit reverse sets each bit n in Destination to bit 31 - n in `Source`, assuming the bits are numbered 0 to 31.
 
-MOV PC は無条件ジャンプを引き起こす。MOV EXEC は OUT EXEC(セクション 3.4.7)と同じ動作をし、レジスタの内容を命令として実行することができる。MOV 自体は 1 サイクルで実行され、ソース内の命令は次のサイクルで実行される。MOV EXEC の遅延サイクルは無視されるが、実行者は通常通り遅延サイクルを挿入することができる。
+`MOV` は、 `Operation` 引数で指定された限られた方法で転送データを操作することができる。すなわち、1ビットは0ビットになり、逆も同様です。ビット反転は、 `Destination` の各ビット n を `Source` のビット 31-n に設定する。
 
-STATUS ソースは、EXECCTRL_STATUS_SEL で設定された FIFO のフル/エンプティなどのステー ト・マシンの状態に応じて、オール 1 またはオール 0 の値を持つ。
+`MOV dst, PINS` reads pins using the `IN` pin mapping, and writes the full 32-bit value to the destination without masking.  The LSB of the read value is the pin indicated by `PINCTRL_IN_BASE`, and each successive bit comes from a higher-numbered pin, wrapping after 31.
 
-MOVは、Operation引数で指定された限られた方法で転送データを操作することができる。すなわち、1ビットは0ビットになり、逆も同様です。ビット反転は、デスティネーションの各ビットnをソースのビット31-nに設定する。
-
-MOV dst、PINSはINピンマッピングを使用してピンを読み出し、マスキングなしで32ビット値をデスティネーションに書き込みます。
-
-読み出し値のLSBはPINCTRL_IN_BASEで示されるピンです。
+`MOV dst、PINS` は `IN` ピンマッピングを使用してピンを読み出し、マスキングなしで32ビット値をデスティネーションに書き込みます。読み出し値のLSBは `PINCTRL_IN_BASE` で示されるピンです。そのあとのビットは高位の番号(31 より大きい数はラッピングされます)のピンから来ます。
 
 #### 3.4.12.3. Assembler Syntax
 
@@ -2636,9 +2635,9 @@ where:
 ||<destination>||Is one of the destinations specified above.
 ||<op>||If present, is:
 
-! or ~ for NOT (Note: this is always a bitwise NOT)
+`!` or `~` for NOT (Note: this is always a bitwise NOT)
 
-:: for bit reverse
+`::` for bit reverse
 
 ||<source>||Is one of the sources specified above.
 </desc>
@@ -2651,51 +2650,53 @@ where:
 
 #### 3.4.13.2. Operation
 
-Set or clear the IRQ flag selected by Index argument. 
+Set or clear the IRQ flag selected by `Index` argument. 
 
-* Clear: if 1, clear the flag selected by Index, instead of raising it. If Clear is set, the Wait bit has no effect. 
-* Wait: if 1, halt until the raised flag is lowered again, e.g. if a system interrupt handler has acknowledged the flag. 
-* Index: specifies an IRQ index from 0-7. This IRQ flag will be set/cleared depending on the Clear bit. 
-* IdxMode: modify the behaviour if the Index field, either modifying the index, or indexing IRQ flags from a different PIO block: 
+引数 `Index` で選択されたIRQフラグをセットまたはクリアする。
 
-    + 00: the three LSBs are used directly to index the IRQ flags in this PIO block. 
-    + 01 (version 1 and above) (PREV): the instruction references an IRQ flag from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0. 
-    + 10 (REL): the state machine ID (0…3) is added to the IRQ flag index, by way of modulo-4 addition on the two LSBs. For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other. 
-    + 11 (version 1 and above) (NEXT): the instruction references an IRQ flag from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
+* `Clear`: if 1, clear the flag selected by `Index`, instead of raising it. If `Clear` is set, the `Wait` bit has no effect. 
+* `Wait`: if 1, halt until the raised flag is lowered again, e.g. if a system interrupt handler has acknowledged the flag. 
+* `Index`: specifies an IRQ index from 0-7. This IRQ flag will be set/cleared depending on the Clear bit. 
+* `IdxMode`: modify the behaviour if the Index field, either modifying the index, or indexing IRQ flags from a different PIO block: 
 
-On PIO version 0, IRQ flags 4-7 are visible only to the state machines; IRQ flags 0-3 can be routed out to system level interrupts, on either of the PIO’s two external interrupt request lines, configured by IRQ0_INTE and IRQ1_INTE. PIO version 1 lifts this limitation and allows all eight flags to assert system interrupts.
+    + `00`: the three LSBs are used directly to index the IRQ flags in this PIO block. 
+    + `01` (version 1 and above) (`PREV`): the instruction references an IRQ flag from the next-lower-numbered PIO in the system, wrapping to the highest-numbered PIO if this is PIO0. 
+    + `10` (`REL`): the state machine ID (0…3) is added to the IRQ flag index, by way of modulo-4 addition on the two LSBs. For example, state machine 2 with a flag value of '0x11' will wait on flag 3, and a flag value of '0x13' will wait on flag 1. This allows multiple state machines running the same program to synchronise with each other. 
+    + `11` (version 1 and above) (`NEXT`): the instruction references an IRQ flag from the next-higher-numbered PIO in the system, wrapping to PIO0 if this is the highest-numbered PIO.
+
+(和訳)
+
+* `Clear`: 1の場合、Indexで選択されたフラグを立てる代わりにクリアする。 `Clear` が設定されている場合、 `Wait` ビットは何の効果もない。
+* `Wait`: 1の場合、システム割り込みハンドラがフラグを確認した場合など、フラグが下がるまで停止する。
+* `Index`: 0～7 の IRQ インデックスを指定します。このIRQフラグは `Clear` ビットに依存してセット/クリアされる。
+* `IdxMode`:インデックス・フィールドの動作を変更します。インデックスを変更するか、別のPIOブロックからIRQフラグのインデックスを作成します。
+
+    + `00`: 3つのLSBは、このPIOブロックのIRQフラグのインデックスを作成するために直接使用されます。
+    + `01` (バージョン1以上) (`PREV`): 命令は、システム内の次の下位番号のPIOからIRQフラグを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
+    + `10` (`REL`): ステートマシンID (0～3)が、2つのLSBのモジュロ4加算によってIRQフラグ・インデックスに追加される。例えば、フラグ値が『0x11』のステート・マシン2はフラグ3で待機し、フラグ値が『0x13』のステート・マシンはフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
+    + `11` (バージョン1以上) (`NEXT`): 命令は、システム内で次に高い番号のPIOからIRQフラグを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
+
+On PIO version 0, IRQ flags 4-7 are visible only to the state machines; IRQ flags 0-3 can be routed out to system level interrupts, on either of the PIO’s two external interrupt request lines, configured by `IRQ0_INTE` and `IRQ1_INTE`. PIO version 1 lifts this limitation and allows all eight flags to assert system interrupts.
+
+PIOバージョン0では、IRQフラグ4～7はステート・マシンにしか見えません。IRQフラグ0～3は、 `IRQ0_INTE` と `IRQ1_INTE` で設定されたPIOの2つの外部割り込み要求ラインのいずれかで、システム・レベルの割り込みにルーティングできます。PIOバージョン1では、この制限が解除され、8つのフラグすべてがシステム割り込みをアサートできるようになりました。
 
 The modulo addition mode allows relative addressing of 'IRQ' and 'WAIT' instructions, for synchronising state machines which are running the same program. Bit 2 (the third LSB) is unaffected by this addition.
 
-引数Indexで選択されたIRQフラグをセットまたはクリアする。
-
-* Clear: 1の場合、Indexで選択されたフラグを立てる代わりにクリアする。Clearが設定されている場合、Waitビットは何の効果もない。
-* Wait: 1の場合、システム割り込みハンドラがフラグを確認した場合など、フラグが 下がるまで停止する。
-* Index: 0～7 の IRQ インデックスを指定します。このIRQフラグはClearビットに依存してセット/クリアされる。
-* IdxMode:インデックス・フィールドの動作を変更します。インデックスを変更するか、別のPIOブロックからIRQフラグのインデックスを作成します。
-
-    + 00:3つのLSBは、このPIOブロックのIRQフラグのインデックスを作成するために直接使用されます。
-    + 01 (バージョン1以上) (PREV): 命令は、システム内の次の下位番号のPIOからIRQフラグを参照し、これがPIO0の場合は最上位番号のPIOに折り返す。
-    + 10 (REL): ステートマシンID (0～3)が、2つのLSBのモジュロ4加算によってIRQフラグ・インデックスに追加される。例えば、フラグ値が『0x11』のステート・マシン2はフラグ3で待機し、フラグ値が『0x13』のステート・マシンはフラグ1で待機する。これにより、同じプログラムを実行している複数のステートマシンが互いに同期することができる。
-    + 11 (バージョン1以上) (NEXT): 命令は、システム内で次に高い番号のPIOからIRQフラグを参照し、これが最も高い番号のPIOであればPIO0に折り返す。
-
-PIOバージョン0では、IRQフラグ4～7はステート・マシンにしか見えません。IRQフラグ0～3は、IRQ0_INTEとIRQ1_INTEで設定されたPIOの2つの外部割り込み要求ラインのいずれかで、システム・レベルの割り込みにルーティングできます。PIOバージョン1では、この制限が解除され、8つのフラグすべてがシステム割り込みをアサートできるようになりました。
-
 モジュロ加算モードは、「IRQ」と「WAIT」命令の相対アドレッシングを可能にし、同じプログラムを実行しているステートマシンを同期させます。ビット2(3番目のLSB)はこの加算の影響を受けない。
 
-The modulo addition mode (REL) allows relative addressing of 'IRQ' and 'WAIT' instructions, for synchronising state machines which are running the same program. Bit 2 (the third LSB) is unaffected by this addition.
+The modulo addition mode (`REL`) allows relative addressing of 'IRQ' and 'WAIT' instructions, for synchronising state machines which are running the same program. Bit 2 (the third LSB) is unaffected by this addition.
 
-The NEXT/PREV modes (version 1 and above) can be used to synchronise between state machines in different PIO blocks.
+モジュロ加算モード(`REL`)は、同じプログラムを実行しているステートマシンを同期させるため に、「IRQ」と「WAIT」命令の相対アドレッシングを可能にする。ビット2(3番目のLSB)はこの加算の影響を受けない。
 
-If these state machines' clocks are divided, their clock dividers must be the same, and must have been synchronised by writing CTRL.NEXTPREV_CLKDIV_RESTART in addition to the relevant NEXT_PIO_MASK/PREV_PIO_MASK bits. Note that the cross-PIO connection is severed between PIOs with different accessibility to Non-secure code, as per ACCESSCTRL.
+The `NEXT`/`PREV` modes (version 1 and above) can be used to synchronise between state machines in different PIO blocks.
 
-If Wait is set, Delay cycles do not begin until after the wait period elapses.
+`NEXT`/`PREV` モード(バージョン1以上)は、異なるPIOブロック内のステートマシン間の同期に使用できる。
 
-モジュロ加算モード(REL)は、同じプログラムを実行しているステートマシンを同期させるため に、「IRQ」と「WAIT」命令の相対アドレッシングを可能にする。ビット2(3番目のLSB)はこの加算の影響を受けない。
+If these state machines' clocks are divided, their clock dividers must be the same, and must have been synchronised by writing `CTRL.NEXTPREV_CLKDIV_RESTART` in addition to the relevant NEXT_PIO_MASK/PREV_PIO_MASK bits. Note that the cross-PIO connection is severed between PIOs with different accessibility to Non-secure code, as per ACCESSCTRL.
 
-NEXT/PREVモード(バージョン1以上)は、異なるPIOブロック内のステートマシン間の同期に使用できる。
+これらのステートマシンのクロックが分周されている場合、それらのクロック分周器は同じでなければならず、関連する NEXT_PIO_MASK/PREV_PIO_MASK ビットに加えて `CTRL.NEXTPREV_CLKDIV_RESTART` を書き込むことによって同期されなければならない。クロスPIO接続は、 ACCESSCTRL に従って、非セキュアコードへのアクセス性が異なるPIO間で切断されることに注意。
 
-これらのステートマシンのクロックが分周されている場合、それらのクロック分周器は同じでなければならず、関連するNEXT_PIO_MASK/PREV_PIO_MASKビットに加えてCTRL.NEXTPREV_CLKDIV_RESTARTを書き込むことによって同期されなければならない。クロスPIO接続は、ACCESSCTRLに従って、非セキュアコードへのアクセス性が異なるPIO間で切断されることに注意。
+If `Wait` is set, `Delay` cycles do not begin until after the wait period elapses.
 
 Waitが設定されている場合、Delayサイクルは待機期間が経過するまで開始されない。
 
@@ -2737,43 +2738,43 @@ where:
 
 Write immediate value Data to Destination.
 
+Destination にイミディエイト値 Data を書き込む。
+
 * Destination:
 
-    + 000: PINS   
-    + 001: X (scratch register X) 5 LSBs are set to Data, all others cleared to 0.
-    + 010: Y (scratch register Y) 5 LSBs are set to Data, all others cleared to 0.
+    + 000: `PINS`   
+    + 001: `X` (scratch register X) 5 LSBs are set to `Data`, all others cleared to 0.
+    + 010: Y (scratch register Y) 5 LSBs are set to `Data`, all others cleared to 0.
     + 011: Reserved   
-    + 100: PINDIRS   
+    + 100: `PINDIRS`   
     + 101: Reserved   
     + 110: Reserved   
     + 111: Reserved
 
 * Data: 5-bit immediate value to drive to pins or register.
 
-This can be used to assert control signals such as a clock or chip select, or to initialise loop counters. As Data is 5 bits in size, scratch registers can be SET to values from 0-31, which is sufficient for a 32-iteration loop.
+(和訳)
 
-The mapping of SET and OUT onto pins is configured independently. They may be mapped to distinct locations, for example if one pin is to be used as a clock signal, and another for data. They may also be overlapping ranges of pins: a UART transmitter might use SET to assert start and stop bits, and OUT instructions to shift out FIFO data to the same pins.
+* Destination:
 
-Write immediate value Data to Destination.
-
-ディスティネーションにイミディエイト値 Data を書き込む。
-
-* ディスティネーション:
-
-    + 000: PINS   
-    + 001: X (scratch register X) 5 LSBs are set to Data, all others cleared to 0.
-    + 010: Y (scratch register Y) 5 LSBs are set to Data, all others cleared to 0.
+    + 000: `PINS`   
+    + 001: `X` (scratch register X) 5 LSBs are set to `Data`, all others cleared to 0.
+    + 010: `Y` (scratch register Y) 5 LSBs are set to `Data`, all others cleared to 0.
     + 011: Reserved   
-    + 100: PINDIRS   
+    + 100: `PINDIRS`   
     + 101: Reserved   
     + 110: Reserved   
     + 111: Reserved
 
-* データ: データ:ピンまたはレジスタにドライブする5ビットの即時値。
+* Data: データ:ピンまたはレジスタにドライブする5ビットの即時値。
 
-クロックやチップ・セレクトなどの制御信号のアサートや、ループ・カウンターの初期化に使用できる。Dataは5ビットなので、スクラッチ・レジスタを0～31の値にSETすることができ、これは32回繰り返しのループには十分です。
+This can be used to assert control signals such as a clock or chip select, or to initialise loop counters. As `Data` is 5 bits in size, scratch registers can be `SET` to values from 0-31, which is sufficient for a 32-iteration loop.
 
-SETとOUTのピンへのマッピングは独立して設定される。例えば、1つのピンをクロック信号として使用し、もう1つのピンをデータ信号として使用する場合、これらのピンを別々の場所にマッピングすることができます。UARTトランスミッタは、SETを使用してスタートビットとストップビットをアサートし、OUT命令を使用してFIFOデータを同じピンにシフトアウトする。
+クロックやチップ・セレクトなどの制御信号のアサートや、ループ・カウンターの初期化に使用できる。 `Data` は5ビットなので、スクラッチ・レジスタを0～31の値に `SET` することができ、これは32回繰り返しのループには十分です。
+
+The mapping of `SET` and `OUT` onto pins is configured independently. They may be mapped to distinct locations, for example if one pin is to be used as a clock signal, and another for data. They may also be overlapping ranges of pins: a UART transmitter might use `SET` to assert start and stop bits, and `OUT` instructions to shift out FIFO data to the same pins.
+
+`SET` と `OUT` のピンへのマッピングは独立して設定される。例えば、1つのピンをクロック信号として使用し、もう1つのピンをデータ信号として使用する場合、これらのピンを別々の場所にマッピングすることができます。UARTトランスミッタは、 `SET` を使用してスタートビットとストップビットをアサートし、 `OUT` 命令を使用してFIFOデータを同じピンにシフトアウトする。
 
 #### 3.4.14.3. Assembler Syntax
 

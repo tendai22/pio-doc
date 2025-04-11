@@ -10,6 +10,6 @@ module.exports = {
     ],
     workspaceDir: 'work',
     output: [
-        "pic-doc.pdf"
+        "pio-doc.pdf"
     ],
 };
