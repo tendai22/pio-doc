@@ -1389,7 +1389,7 @@ Note that a MOV from the OSR is undefined whilst autopull is enabled; you will r
 If  you  do  need  to  read  the  OSR  contents,  you  should  perform  an  explicit  PULL  of  some  kind.  The  nondeterminism described above is the cost of the hardware managing pulls automatically. When autopull is enabled, the behaviour of PULL is altered: it becomes a no-op if the OSR is full. This is to avoid a race condition against the system DMA. It behaves as a fence: either an autopull has already taken place, in which case the PULL has no effect, or the program will stall on the PULL until data becomes available in the FIFO.
 
 PULL does not require similar behaviour, because autopush does not have the same nondeterminism.
-||||----------
+
 ||||### 11.5.5. Clock Dividers
 
 PIO  runs  off  the  system  clock,  but  this  is  too  fast  for  many  interfaces,  and  the  number  of  Delay  cycles  which  can  be inserted  is  limited.  Some  devices,  such  as  UART,  require  the  signalling  rate  to  be  precisely  controlled  and  varied,  and ideally  multiple  state  machines  can  be  varied  independently  while  running  identical  programs.  Each  state  machine  is equipped with a clock divider, for this purpose.
@@ -1402,59 +1402,34 @@ The  clock  dividers  are  16-bit  integer,  8-bit  fractional,  with  first-ord
 
 If the clock divisor is set to 1, the state machine runs on every cycle, i.e. full speed:
 
-System Clock
+<figure>
+<img src="img/fig50.png"/>
+<figcaption>
+Figure 50. State machine operation with a clock divisor of 1. Once the state machine is enabled via the CTRL register, its clock enable is asserted on every cycle.
+</figcaption>
+</figure>
 
-CLKDIV_INT
+In general, an integer clock divisor of n will cause the state machine to run 1 cycle in every n, giving an effective clock speed of $$f_{sys} / n$$.
 
-CLKDIV_FRAC
+<figure>
+<img src="img/fig51.png"/>
+<figcaption>
+Figure 51. Integer clock divisors yield a periodic clock enable.
 
-CTRL_SM_ENABLE
+The clock divider repeatedly counts down from n, and emits an enable pulse when it reaches 1.
+</figcaption>
+</figure>
 
-Clock Enable
+Fractional division will maintain a steady state division rate of $$n + f / 256$$, where n and f are the integer and fractional fields of this state machine's CLKDIV register. It does this by selectively extending some division periods from  cycles to $$n + 1$$.
 
-<codeblock>||||1
-||||1
-</codeblock>
+<figure>
+<img src="img/fig52.png"/>
+<ficcaption>
+Figure 52. Fractional clock division with an average divisor of 2.5.  The clock divider maintains a running total of the fractional value from each division period, and every time this value wraps through 1, the integer divisor is increased by one for the next division period.
+</figcaption>
+</figure>
 
-</codeblock>
-
-.0 In general, an integer clock divisor of n will cause the state machine to run 1 cycle in every n, giving an effective clock speed of .
-
-System Clock
-
-CLKDIV_INT
-
-CLKDIV_FRAC
-
-CTRL_SM_ENABLE
-
-Clock Enable
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-.0 Fractional division will maintain a steady state division rate of , where n and f are the integer and fractional fields of this state machine's CLKDIV register. It does this by selectively extending some division periods from  cycles to .
-
-System Clock
-
-CLKDIV_INT
-
-CLKDIV_FRAC
-
-CTRL_SM_ENABLE
-
-Clock Enable
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-.5 For small  n, the jitter introduced by a fractional divider may be unacceptable. However, for larger values, this effect is much less apparent.
+For small  n, the jitter introduced by a fractional divider may be unacceptable. However, for larger values, this effect is much less apparent.
 
 ===== NOTE For  fast  asynchronous  serial,  it  is  recommended  to  use  even  divisions  or  multiples  of  1  Mbaud  where  possible, rather than the traditional multiples of 300, to avoid unnecessary jitter.
 
@@ -1462,68 +1437,38 @@ Clock Enable
 
 Internally, PIO has a 32-bit register for the output levels of each GPIO it can drive, and another register for the output enables  (Hi/Lo-Z).  On  every  system  clock  cycle,  each  state  machine  can  write  to  some  or  all  of  the  GPIOs  in  each  of these registers.
 
-Figure 50. State machine operation with a clock divisor of 1. Once the state machine is enabled via the CTRL register, its clock enable is asserted on every cycle.
-
-Figure 51. Integer clock divisors yield a periodic clock enable.
-
-The clock divider repeatedly counts down from n, and emits an enable pulse when it reaches 1.
-
-Figure 52. Fractional clock division with an average divisor of 2.5.
-
-The clock divider
-
-maintains a running
-
-total of the fractional
-
-value from each
-
-division period, and
-
-every time this value
-
-wraps through 1, the
-
-integer divisor is
-
-increased by one for
-
-the next division
-
-period.
-||||----------
+<figure>
+<img src="img/fig53.png"/>
+<figcaption>
 Figure 53. The state machine has two independent output channels, one shared by OUT/SET, and another used by side- set (which can happen at any time). Three independent mappings (first GPIO, number of GPIOs) control which GPIOs OUT, SET and side-set are directed to. Input data is rotated according to which GPIO is mapped to the LSB of the IN data.
+</figcaption>
+</figure>
 
 The write data and write masks for the output level and output enable registers come from the following sources:
 
 ||||* An OUT instruction writes to up to 32 bits. Depending on the instruction's Destination field, this is applied to either
 pins or pindirs. The least-significant bit of OUT data is mapped to PINCTRL_OUT_BASE, and this mapping continues for PINCTRL_OUT_COUNT bits, wrapping after GPIO31.
-
-||||* A SET instruction writes up to 5 bits. Depending on the instruction's Destination field, this is applied to either pins or
-
-pindirs. The least-significant bit of SET data is mapped to PINCTRL_SET_BASE, and this mapping continues for PINCTRL_SET_COUNT bits, wrapping after GPIO31.
-
-||||* A side-set operation writes up to 5 bits. Depending on the register field EXECCTRL_SIDE_PINDIR, this is applied to either
-
-pins or pindirs. The least-significant bit of side-set data is mapped to PINCTRL_SIDESET_BASE, continuing for PINCTRL_SIDESET_COUNT pins, minus one if EXECCTRL_SIDE_EN is set.
+||||* A SET instruction writes up to 5 bits. Depending on the instruction's Destination field, this is applied to either pins or pindirs. The least-significant bit of SET data is mapped to PINCTRL_SET_BASE, and this mapping continues for PINCTRL_SET_COUNT bits, wrapping after GPIO31.
+||||* A side-set operation writes up to 5 bits. Depending on the register field EXECCTRL_SIDE_PINDIR, this is applied to either pins or pindirs. The least-significant bit of side-set data is mapped to PINCTRL_SIDESET_BASE, continuing for PINCTRL_SIDESET_COUNT pins, minus one if EXECCTRL_SIDE_EN is set.
 
 Each  OUT/SET/side-set operation writes to a contiguous range of pins, but each of these ranges is independently sized and  positioned  in  the  32-bit  GPIO  space.  This  is  sufficiently  flexible  for  many  applications.  For  example,  if  one  state machine is implementing some interface such as an SPI on a group of pins, another state machine can run the same program, mapped to a different group of pins, and provide a second SPI interface.
 
-On any given clock cycle, the state machine may perform an OUT or a SET, and may simultaneously perform a side-set.
-
-The pin mapping logic generates a 32-bit write mask and write data bus for the output level and output enable registers, based on this request, and the pin mapping configuration.
+On any given clock cycle, the state machine may perform an OUT or a SET, and may simultaneously perform a side-set.  The pin mapping logic generates a 32-bit write mask and write data bus for the output level and output enable registers, based on this request, and the pin mapping configuration.
 
 If a side-set overlaps with an OUT/SET performed by that state machine on the same cycle, the side-set takes precedence in the overlapping region.
 
 ||||#### 11.5.6.1. Output Priority
 
+<figure>
+<img src="img/fig54.png"/>
+<figcaption>
 Figure 54. Per-GPIO priority select of write masks from each state machine. Each GPIO considers level and direction writes from each of the four state machines, and applies the value from the highest-numbered state machine.
+</figcaption>
+</figure>
 
 Each  state  machine  may  assert  an  OUT/SET  and  a  side-set  through  its  pin  mapping  hardware  on  each  cycle.  This generates 32 bits of write data and write mask for the GPIO output level and output enable registers, from each state machine.
 
-For each GPIO, PIO collates the writes from all four state machines, and applies the write from the highest-numbered
-||||----------
-state machine. This occurs separately for output levels and output values --- it is possible for a state machine to change both the level and direction of the same pin on the same cycle (e.g. via simultaneous SET and side-set), or for one state machine to change a GPIO's direction while another changes that GPIO's level. If no state machine asserts a write to a GPIO's level or direction, the value does not change.
+For each GPIO, PIO collates the writes from all four state machines, and applies the write from the highest-numbered state machine. This occurs separately for output levels and output values --- it is possible for a state machine to change both the level and direction of the same pin on the same cycle (e.g. via simultaneous SET and side-set), or for one state machine to change a GPIO's direction while another changes that GPIO's level. If no state machine asserts a write to a GPIO's level or direction, the value does not change.
 
 ||||#### 11.5.6.2. Input Mapping
 
@@ -1549,19 +1494,15 @@ Besides the instruction memory, state machines can execute instructions from 3 o
 ||||* OUT EXEC which executes data shifted out from the OSR
 ||||* The SMx_INSTR control registers, to which the system can write instructions for immediate execution
 
-<codeblock>|||| 1 .program exec_example
+<codeblock>
 |||| 1 .program exec_example
- 2
-
-<codeblock>|||| 3 hang:
+|||| 2
 |||| 3 hang:
 |||| 4     jmp hang
 |||| 5 execute:
 |||| 6     out exec, 32
 |||| 7     jmp execute
- 8
-
-<codeblock>|||| 9 .program instructions_to_push
+|||| 8
 |||| 9 .program instructions_to_push
 ||||10
 ||||11     out x, 32
@@ -1569,23 +1510,16 @@ Besides the instruction memory, state machines can execute instructions from 3 o
 ||||13     push
 </codeblock>
 
-||||----------
-<codeblock>|||| 1 #include "tb.h" // TODO this is built against existing sw tree, so that we get printf etc
+<codeblock>
 |||| 1 #include "tb.h" // TODO this is built against existing sw tree, so that we get printf etc
- 2
-
-<codeblock>|||| 3 #include "platform.h"
+|||| 2
 |||| 3 #include "platform.h"
 |||| 4 #include "pio_regs.h"
 |||| 5 #include "system.h"
 |||| 6 #include "hardware.h"
- 7
-
-<codeblock>|||| 8 #include "exec_example.pio.h"
+|||| 7
 |||| 8 #include "exec_example.pio.h"
- 9
-
-<codeblock>||||10 int main()
+|||| 9
 ||||10 int main()
 ||||11 {
 ||||12     tb_init();
@@ -1621,19 +1555,15 @@ Besides the instruction memory, state machines can execute instructions from 3 o
 Here we load an example program into the state machine, which does two things:
 
 ||||* Enters an infinite loop
-||||* Enters a loop which repeatedly pulls 32 bits of data from the TX FIFO, and executes the lower 16 bits as an
+||||* Enters a loop which repeatedly pulls 32 bits of data from the TX FIFO, and executes the lower 16 bits as an instruction 
 
-instruction The  C  program  sets  the  state  machine  running,  at  which  point  it  enters  the  hang  loop.  While  the  state  machine  is  still running, the C program forces in a jmp instruction, which causes the state machine to break out of the loop.
+The  C  program  sets  the  state  machine  running,  at  which  point  it  enters  the  hang  loop.  While  the  state  machine  is  still running, the C program forces in a jmp instruction, which causes the state machine to break out of the loop.
 
 When  an  instruction  is  written  to  the  INSTR  register,  the  state  machine  immediately  decodes  and  executes  that instruction, rather than the instruction it would have fetched from the PIO's instruction memory. The program counter does not advance, so on the next cycle (assuming the instruction forced into the INSTR interface did not stall) the state machine continues to execute its current program from the point where it left off, unless the written instruction itself manipulated PC.
 
 Delay  cycles  are  ignored  on  instructions  written  to  the  INSTR  register,  and  execute  immediately,  ignoring  the  state machine clock divider. This interface is provided for performing initial setup and effecting control flow changes, so it executes instructions in a timely manner, no matter how the state machine is configured.
 
-Instructions written to the INSTR register are permitted to stall, in which case the state machine will latch this instruction
-
-internally until it completes. This is signified by the EXECCTRL_EXEC_STALLED flag. This can be cleared by restarting the state
-||||----------
-machine, or writing a NOP to INSTR.
+Instructions written to the INSTR register are permitted to stall, in which case the state machine will latch this instruction internally until it completes. This is signified by the EXECCTRL_EXEC_STALLED flag. This can be cleared by restarting the state machine, or writing a NOP to INSTR.
 
 In the second phase of the example state machine program, the OUT EXEC instruction is used. The OUT itself occupies one execution  cycle,  and  the  instruction  which  the  OUT  executes  is  on  the  next  execution  cycle.  Note  that  one  of  the instructions we execute is also an OUT --- the state machine is only capable of executing one OUT instruction on any given cycle.
 
@@ -1651,29 +1581,18 @@ These examples illustrate some of PIO's hardware features, by implementing commo
 
 ||||### 11.6.1. Duplex SPI
 
-||||## 11.6. Examples
+<figure>
+<img src="img/fig55.png"/>
+<figcaption>
+Figure 55. In SPI, a host and device exchange data over a bidirectional pair of serial data lines, synchronous with a clock (SCK). Two flags, CPOL and CPHA, specify the clock's behaviour.  CPOL is the idle state of the clock: 0 for low, 1 for high. The clock pulses a number of times, transferring one bit in each direction per pulse, but always returns to its idle state. CPHA determines on which edge of the clock data is captured: 0 for leading edge, and 1 for trailing edge. The arrows in the figure show the clock edge where data is captured by both the host and device.
+</figcaption>
+</figure>
 
-<codeblock>||||912
-||||912
-</codeblock>
-
-RP2350 Datasheet Figure 55. In SPI, a host and device exchange data over a bidirectional pair of serial data lines, synchronous with a clock (SCK). Two flags, CPOL and CPHA, specify the clock's behaviour.
-
-CPOL is the idle state
-
-of the clock: 0 for low,
-
-<codeblock>||||1 for high. The clock
-||||1 for high. The clock
-</codeblock>
-
-</codeblock>
-
-pulses a number of times, transferring one bit in each direction per pulse, but always returns to its idle state. CPHA determines on which edge of the clock data is captured: 0 for leading edge, and 1 for trailing edge. The arrows in the figure show the clock edge SPI is a common serial interface with a twisty history. The following program implements full-duplex (i.e. transferring data in both directions simultaneously) SPI, with a CPHA parameter of 0.
+SPI is a common serial interface with a twisty history. The following program implements full-duplex (i.e. transferring data in both directions simultaneously) SPI, with a CPHA parameter of 0.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/spi.pio Lines 14 - 32
 
-<codeblock>||||14 .program spi_cpha0
+<codeblock>
 ||||14 .program spi_cpha0
 ||||15 .side_set 1
 ||||16
@@ -1681,17 +1600,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 ||||18 ; - SCK is side-set pin 0
 ||||19 ; - MOSI is OUT pin 0
 ||||20 ; - MISO is IN pin 0
-</codeblock>
-
-where data is captured
-
-<codeblock>||||21 ;
 ||||21 ;
-</codeblock>
-
-by both the host and device.
-
-<codeblock>||||22 ; Autopush and autopull must be enabled, and the serial frame size is set by
 ||||22 ; Autopush and autopull must be enabled, and the serial frame size is set by
 ||||23 ; configuring the push/pull threshold. Shift left/right is fine, but you must
 ||||24 ; justify the data yourself. This is done most conveniently for frame sizes of
@@ -1709,7 +1618,7 @@ This code uses autopush and autopull to continuously stream data from the FIFOs.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/spi.pio Lines 34 - 42
 
-<codeblock>||||34 .program spi_cpha1
+<codeblock>
 ||||34 .program spi_cpha1
 ||||35 .side_set 1
 ||||36
@@ -1721,27 +1630,22 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 ||||42     in pins, 1  side 0     ; Input data, deassert SCK
 </codeblock>
 
-||||----------
 ===== NOTE These programs do not control the chip select line; chip select is often implemented as a software-controlled GPIO, due to wildly different behaviour between different SPI hardware. The full spi.pio source linked above contains some examples how PIO can implement a hardware chip select line.
 
 A C helper function configures the state machine, connects the GPIOs, and sets the state machine running. Note that the  SPI  frame  size --- that  is,  the  number  of  bits  transferred  for  each  FIFO  record --- can  be  programmed  to  any  value from 1 to 32, without modifying the program. Once configured, the state machine is set running.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/spi.pio Lines 46 - 72
 
-<codeblock>||||46 static inline void pio_spi_init(PIO pio, uint sm, uint prog_offs, uint n_bits,
+<codeblock>
 ||||46 static inline void pio_spi_init(PIO pio, uint sm, uint prog_offs, uint n_bits,
 ||||47         float clkdiv, bool cpha, bool cpol, uint pin_sck, uint pin_mosi, uint pin_miso) {
 ||||48     pio_sm_config c = cpha ? spi_cpha1_program_get_default_config(prog_offs) :
    spi_cpha0_program_get_default_config(prog_offs);
-
-<codeblock>||||49     sm_config_set_out_pins(&c, pin_mosi, 1);
 ||||49     sm_config_set_out_pins(&c, pin_mosi, 1);
 ||||50     sm_config_set_in_pins(&c, pin_miso);
 ||||51     sm_config_set_sideset_pins(&c, pin_sck);
 ||||52     // Only support MSB-first in this example code (shift to left, auto push/pull,
    threshold=nbits)
-
-<codeblock>||||53     sm_config_set_out_shift(&c, false, true, n_bits);
 ||||53     sm_config_set_out_shift(&c, false, true, n_bits);
 ||||54     sm_config_set_in_shift(&c, false, true, n_bits);
 ||||55     sm_config_set_clkdiv(&c, clkdiv);
@@ -1750,8 +1654,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 ||||58     pio_sm_set_pins_with_mask(pio, sm, 0, (1u << pin_sck) | (1u << pin_mosi));
 ||||59     pio_sm_set_pindirs_with_mask(pio, sm, (1u << pin_sck) | (1u << pin_mosi), (1u << pin_sck)
    | (1u << pin_mosi) | (1u << pin_miso));
-
-<codeblock>||||60     pio_gpio_init(pio, pin_mosi);
 ||||60     pio_gpio_init(pio, pin_mosi);
 ||||61     pio_gpio_init(pio, pin_miso);
 ||||62     pio_gpio_init(pio, pin_sck);
@@ -1771,11 +1673,9 @@ The state machine will now immediately begin to shift out any data appearing in 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/pio_spi.c Lines 18 - 34
 
-<codeblock>||||18 void __time_critical_func(pio_spi_write8_blocking)(const pio_spi_inst_t *spi, const uint8_t
+<codeblock>
 ||||18 void __time_critical_func(pio_spi_write8_blocking)(const pio_spi_inst_t *spi, const uint8_t
    *src, size_t len) {
-
-<codeblock>||||19     size_t tx_remain = len, rx_remain = len;
 ||||19     size_t tx_remain = len, rx_remain = len;
 ||||20     // Do 8 bit accesses on FIFO, so that write data is byte-replicated. This
 ||||21     // gets us the left-justification for free (for MSB-first shift-out)
@@ -1786,10 +1686,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 ||||26             *txfifo = *src++;
 ||||27             --tx_remain;
 ||||28         }
-</codeblock>
-
-||||----------
-<codeblock>||||29         if (rx_remain && !pio_sm_is_rx_fifo_empty(spi->pio, spi->sm)) {
 ||||29         if (rx_remain && !pio_sm_is_rx_fifo_empty(spi->pio, spi->sm)) {
 ||||30             (void) *rxfifo;
 ||||31             --rx_remain;
@@ -1802,20 +1698,16 @@ Putting  this  all  together,  this  complete  C  program  will  loop  back  som
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/spi_loopback.c
 
-<codeblock>|||| 1 /**
+<codeblock>
 |||| 1 /**
 |||| 2  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 |||| 3  *
 |||| 4  * SPDX-License-Identifier: BSD-3-Clause
 |||| 5  */
- 6
-
-<codeblock>|||| 7 #include <stdlib.h>
+|||| 6
 |||| 7 #include <stdlib.h>
 |||| 8 #include <stdio.h>
- 9
-
-<codeblock>||||10 #include "pico/stdlib.h"
+|||| 9
 ||||10 #include "pico/stdlib.h"
 ||||11 #include "pio_spi.h"
 ||||12
@@ -1857,10 +1749,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 ||||48
 ||||49 int main() {
 ||||50     stdio_init_all();
-</codeblock>
-
-||||----------
-<codeblock>||||51
 ||||51
 ||||52     pio_spi_inst_t spi = {
 ||||53             .pio = pio0,
@@ -1892,33 +1780,20 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 
 ||||### 11.6.2. WS2812 LEDs
 
-Figure 56. WS2812 line format. Wide positive pulse for 1, narrow positive pulse for 0, very long negative pulse for latch enable WS2812 LEDs are driven by a proprietary pulse-width serial format, with a wide positive pulse representing a "1" bit, and narrow positive pulse a "0". Each LED has a serial input and a serial output; LEDs are connected in a chain, with each serial input connected to the previous LED's serial output.
+WS2812 LEDs are driven by a proprietary pulse-width serial format, with a wide positive pulse representing a "1" bit, and narrow positive pulse a "0". Each LED has a serial input and a serial output; LEDs are connected in a chain, with each serial input connected to the previous LED's serial output.
 
-Symbol
-
-Output
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0
-
-0
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
+<figure>
+<img src="img/fig56.png"/>
+<figcaption>
+Figure 56. WS2812 line format. Wide positive pulse for 1, narrow positive pulse for 0, very long negative pulse for latch enable 
+</figcaption>
+</figure>
 
 Latch LEDs consume 24 bits of pixel data, then pass any additional input data on to their output. In this way a single serial burst can individually program the colour of each LED in a chain. A long negative pulse latches the pixel data into the LEDs.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.pio Lines 8 - 31
 
-<codeblock>|||| 8 .program ws2812
+<codeblock>
 |||| 8 .program ws2812
 |||| 9 .side_set 1
 ||||10
@@ -1935,10 +1810,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 ||||21 .lang_opt python out_shiftdir = 1
 ||||22
 ||||23 .wrap_target
-</codeblock>
-
-||||----------
-<codeblock>||||24 bitloop:
 ||||24 bitloop:
 ||||25     out x, 1       side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
 ||||26     jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
@@ -1953,11 +1824,8 @@ This program shifts bits from the OSR into X, and produces a wide or narrow puls
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.pio Lines 36 - 52
 
-<codeblock>||||36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq,
-||||36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq,
-   bool rgbw) {
-
-<codeblock>||||37
+<codeblock>
+||||36 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq, bool rgbw) {
 ||||37
 ||||38     pio_gpio_init(pio, pin);
 ||||39     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
@@ -1980,77 +1848,26 @@ Because the shift is MSB-first, and our pixels aren't a power of two size (so we
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.c Lines 43 - 45
 
-<codeblock>||||43 static inline void put_pixel(PIO pio, uint sm, uint32_t pixel_grb) {
+<codeblock>
 ||||43 static inline void put_pixel(PIO pio, uint sm, uint32_t pixel_grb) {
 ||||44     pio_sm_put_blocking(pio, sm, pixel_grb << 8u);
 ||||45 }
 </codeblock>
 
-To DMA the pixels, we could instead set the autopull threshold to 8 bits, set the DMA transfer size to 8 bits, and write a
+To DMA the pixels, we could instead set the autopull threshold to 8 bits, set the DMA transfer size to 8 bits, and write a byte  at  a  time  into  the  FIFO.  Each  pixel  would  be  3  one-byte  transfers.  Because  of  how  the  bus  fabric  and  DMA  on RP2350  work,  each  byte  the  DMA  transfers  will  appear  replicated  four  times  when  written  to  a  32-bit  IO  register,  so effectively your data is at both ends of the shift register, and you can shift in either direction without worry.
 
-byte  at  a  time  into  the  FIFO.  Each  pixel  would  be  3  one-byte  transfers.  Because  of  how  the  bus  fabric  and  DMA  on
-
-RP2350  work,  each  byte  the  DMA  transfers  will  appear  replicated  four  times  when  written  to  a  32-bit  IO  register,  so
-
-effectively your data is at both ends of the shift register, and you can shift in either direction without worry.
-||||----------
-===== TIP Figure 57. UART serial format. The line is high when idle. The transmitter pulls the line down for one bit period to signify the start of a serial frame (the "start bit"), and a small, fixed number of data bits follows. The line returns to the idle state for at least one bit period (the "stop bit") before the next serial frame can begin.
-
-The WS2812 example is the subject of a tutorial in the Raspberry Pi Pico-series C/C++ SDK document, in the PIO chapter. The tutorial dissects the ws2812 program line by line, traces through how the program executes, and shows wave diagrams of the GPIO output at every point in the program.
+===== TIP The WS2812 example is the subject of a tutorial in the Raspberry Pi Pico-series C/C++ SDK document, in the PIO chapter. The tutorial dissects the ws2812 program line by line, traces through how the program executes, and shows wave diagrams of the GPIO output at every point in the program.
 
 ||||### 11.6.3. UART TX
 
-Bit Clock
+<figure>
+<img src="img/fig57.png"/>
+<figcaption>
+Figure 57. UART serial format. The line is high when idle. The transmitter pulls the line down for one bit period to signify the start of a serial frame (the "start bit"), and a small, fixed number of data bits follows. The line returns to the idle state for at least one bit period (the "stop bit") before the next serial frame can begin.
+</figcaption>
+</figure>
 
-TX
-
-State
-
-0
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-Idle Start Data (LSB first) Stop This  program  implements  the  transmit  component  of  a  universal  asynchronous  receive/transmit  (UART)  serial peripheral. Perhaps it would be more correct to refer to this as a UAT.
+This  program  implements  the  transmit  component  of  a  universal  asynchronous  receive/transmit  (UART)  serial peripheral. Perhaps it would be more correct to refer to this as a UAT.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.pio Lines 8 - 18
 
@@ -2070,17 +1887,20 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 
 As written, it will:
 
-1. Stall with the pin driven high until data appears (noting that side-set takes effect even when the state machine is stalled) 2. Assert a start bit, for 8 SM execution cycles 3. Shift out 8 data bits, each lasting for 8 cycles 4. Return to the idle line state for at least 8 cycles before asserting the next start bit If the state machine's clock divider is configured to run at 8 times the desired baud rate, this program will transmit well- formed UART serial frames, whenever data is pushed to the TX FIFO either by software or the system DMA. To extend the program to cover different frame sizes (different numbers of data bits), the set x, 7 could be replaced with mov x, y, so that the y scratch register becomes a per-SM configuration register for UART frame size.
+1. Stall with the pin driven high until data appears (noting that side-set takes effect even when the state machine is stalled) 
+2. Assert a start bit, for 8 SM execution cycles 
+3. Shift out 8 data bits, each lasting for 8 cycles 
+4. Return to the idle line state for at least 8 cycles before asserting the next start bit 
+
+If the state machine's clock divider is configured to run at 8 times the desired baud rate, this program will transmit well- formed UART serial frames, whenever data is pushed to the TX FIFO either by software or the system DMA. To extend the program to cover different frame sizes (different numbers of data bits), the set x, 7 could be replaced with mov x, y, so that the y scratch register becomes a per-SM configuration register for UART frame size.
 
 The  .pio file in the SDK also contains this function, for configuring the pins and the state machine, once the program has been loaded into the PIO instruction memory:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.pio Lines 24 - 51
 
-<codeblock>||||24 static inline void uart_tx_program_init(PIO pio, uint sm, uint offset, uint pin_tx, uint
+<codeblock>
 ||||24 static inline void uart_tx_program_init(PIO pio, uint sm, uint offset, uint pin_tx, uint
-   baud) {
-
-<codeblock>||||25     // Tell PIO to initially drive output-high on the selected pin, then map PIO
+||||   baud) {
 ||||25     // Tell PIO to initially drive output-high on the selected pin, then map PIO
 ||||26     // onto that pin with the IO muxes.
 ||||27     pio_sm_set_pins_with_mask64(pio, sm, 1ull << pin_tx, 1ull << pin_tx);
@@ -2088,10 +1908,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||29     pio_gpio_init(pio, pin_tx);
 ||||30
 ||||31     pio_sm_config c = uart_tx_program_get_default_config(offset);
-</codeblock>
-
-||||----------
-<codeblock>||||32
 ||||32
 ||||33     // OUT shifts to right, no autopull
 ||||34     sm_config_set_out_shift(&c, true, false, 32);
@@ -2118,7 +1934,7 @@ The  state  machine  is  configured  to  shift  right  in  out  instructions,  b
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.pio Lines 53 - 55
 
-<codeblock>||||53 static inline void uart_tx_program_putc(PIO pio, uint sm, char c) {
+<codeblock>
 ||||53 static inline void uart_tx_program_putc(PIO pio, uint sm, char c) {
 ||||54     pio_sm_put_blocking(pio, sm, (uint32_t)c);
 ||||55 }
@@ -2126,7 +1942,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.pio Lines 57 - 60
 
-<codeblock>||||57 static inline void uart_tx_program_puts(PIO pio, uint sm, const char *s) {
+<codeblock>
 ||||57 static inline void uart_tx_program_puts(PIO pio, uint sm, const char *s) {
 ||||58     while (*s)
 ||||59         uart_tx_program_putc(pio, sm, *s++);
@@ -2137,15 +1953,13 @@ The example program in the SDK will configure one PIO state machine as a UART TX
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.c
 
-<codeblock>|||| 1 /**
+<codeblock>
 |||| 1 /**
 |||| 2  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 |||| 3  *
 |||| 4  * SPDX-License-Identifier: BSD-3-Clause
 |||| 5  */
- 6
-
-<codeblock>|||| 7 #include "pico/stdlib.h"
+|||| 6
 |||| 7 #include "pico/stdlib.h"
 |||| 8 #include "hardware/pio.h"
 |||| 9 #include "uart_tx.pio.h"
@@ -2156,10 +1970,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||14
 ||||15 // Check the pin is compatible with the platform
 ||||16 #error Attempting to use a pin>=32 on a platform that does not support it
-</codeblock>
-
-||||----------
-<codeblock>||||17
 ||||17
 ||||18 int main() {
 ||||19     // This is the same as the default UART baud rate on Pico
@@ -2171,14 +1981,10 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||25
 ||||26     // This will find a free pio and state machine for our program and load it for us
 ||||27     // We use pio_claim_free_sm_and_add_program_for_gpio_range (for_gpio_range variant)
-||||28     // so we will get a PIO instance suitable for addressing gpios >= 32 if needed and
-   supported by the hardware
-
-<codeblock>||||29     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&uart_tx_program, &pio,
+||||28     // so we will get a PIO instance suitable for addressing gpios >= 32 if needed 
+||||and supported by the hardware
 ||||29     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&uart_tx_program, &pio,
-   &sm, &offset, PIO_TX_PIN, 1, true);
-
-<codeblock>||||30     hard_assert(success);
+||||   &sm, &offset, PIO_TX_PIN, 1, true);
 ||||30     hard_assert(success);
 ||||31
 ||||32     uart_tx_program_init(pio, sm, offset, PIO_TX_PIN, SERIAL_BAUD);
@@ -2199,65 +2005,13 @@ With the two PIO instances on RP2350, this could be extended to 8 additional UAR
 
 Recalling Figure 57 showing the format of an 8n1 UART:
 
-Bit Clock
-
-TX
-
-State
-
-0
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-Idle Start Data (LSB first) Stop We can recover the data by waiting for the start bit, sampling 8 times with the correct timing, and pushing the result to the RX FIFO. Below is possibly the shortest program which can do this:
+We can recover the data by waiting for the start bit, sampling 8 times with the correct timing, and pushing the result to the RX FIFO. Below is possibly the shortest program which can do this:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio Lines 8 - 19
 
-<codeblock>|||| 8 .program uart_rx_mini
+<codeblock>
 |||| 8 .program uart_rx_mini
- 9
-
-<codeblock>||||10 ; Minimum viable 8n1 UART receiver. Wait for the start bit, then sample 8 bits
+|||| 9
 ||||10 ; Minimum viable 8n1 UART receiver. Wait for the start bit, then sample 8 bits
 ||||11 ; with the correct timing.
 ||||12 ; IN pin 0 is mapped to the GPIO used as UART RX.
@@ -2270,13 +2024,11 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||19     jmp x-- bitloop [6] ; Each iteration is 8 cycles
 </codeblock>
 
-This works, but it has some annoying characteristics, like repeatedly outputting  NUL characters if the line is stuck low.
-||||----------
-Ideally,  we  would  want  to  drop  data  that  is  not  correctly  framed  by  a  start  and  stop  bit  (and  set  some  sticky  flag  to indicate this has happened), and pause receiving when the line is stuck low for long periods. We can add these to our program, at the cost of a few more instructions.
+This works, but it has some annoying characteristics, like repeatedly outputting  NUL characters if the line is stuck low.  Ideally,  we  would  want  to  drop  data  that  is  not  correctly  framed  by  a  start  and  stop  bit  (and  set  some  sticky  flag  to indicate this has happened), and pause receiving when the line is stuck low for long periods. We can add these to our program, at the cost of a few more instructions.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio Lines 44 - 63
 
-<codeblock>||||44 .program uart_rx
+<codeblock>
 ||||44 .program uart_rx
 ||||45
 ||||46 ; Slightly more fleshed-out 8n1 UART receiver which handles framing errors and
@@ -2325,17 +2077,11 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||85 }
 </codeblock>
 
-To correctly receive data which is sent LSB-first, the ISR is configured to shift to the right. After shifting in 8 bits, this
+To correctly receive data which is sent LSB-first, the ISR is configured to shift to the right. After shifting in 8 bits, this unfortunately leaves our 8 data bits in bits 31:24 of the ISR, with 24 zeroes in the LSBs. One option here is an in null, 24 instruction to shuffle the ISR contents down to 7:0. Another is to read from the FIFO at an offset of 3 bytes, with an 8-bit read, so that the processor's bus hardware (or the DMA's) picks out the relevant byte for free:
 
-unfortunately leaves our 8 data bits in bits 31:24 of the ISR, with 24 zeroes in the LSBs. One option here is an in null, 24
-
-instruction to shuffle the ISR contents down to 7:0. Another is to read from the FIFO at an offset of 3 bytes, with an 8-bit
-
-read, so that the processor's bus hardware (or the DMA's) picks out the relevant byte for free:
-||||----------
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio Lines 87 - 93
 
-<codeblock>||||87 static inline char uart_rx_program_getc(PIO pio, uint sm) {
+<codeblock>
 ||||87 static inline char uart_rx_program_getc(PIO pio, uint sm) {
 ||||88     // 8-bit read from the uppermost byte of the FIFO, as data is left-justified
 ||||89     io_rw_8 *rxfifo_shift = (io_rw_8*)&pio->rxf[sm] + 3;
@@ -2349,19 +2095,15 @@ An example program shows how this UART RX program can be used to receive charact
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.c
 
-<codeblock>|||| 1 /**
+<codeblock>
 |||| 1 /**
 |||| 2  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 |||| 3  *
 |||| 4  * SPDX-License-Identifier: BSD-3-Clause
 |||| 5  */
- 6
-
-<codeblock>|||| 7 #include <stdio.h>
+|||| 6
 |||| 7 #include <stdio.h>
- 8
-
-<codeblock>|||| 9 #include "pico/stdlib.h"
+|||| 8
 |||| 9 #include "pico/stdlib.h"
 ||||10 #include "pico/multicore.h"
 ||||11 #include "hardware/pio.h"
@@ -2395,10 +2137,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||39     // Console output (also a UART, yes it's confusing)
 ||||40     setup_default_uart();
 ||||41     printf("Starting PIO UART RX example\n");
-</codeblock>
-
-||||----------
-<codeblock>||||42
 ||||42
 ||||43     // Set up the hard UART we're going to use to print characters
 ||||44     uart_init(HARD_UART_INST, SERIAL_BAUD);
@@ -2412,9 +2150,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||52     // This will find a free pio and state machine for our program and load it for us
 ||||53     // We use pio_claim_free_sm_and_add_program_for_gpio_range (for_gpio_range variant)
 ||||54     // so we will get a PIO instance suitable for addressing gpios >= 32 if needed and
-   supported by the hardware
-
-<codeblock>||||55     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&uart_rx_program, &pio,
+||||   supported by the hardware
 ||||55     bool success = pio_claim_free_sm_and_add_program_for_gpio_range(&uart_rx_program, &pio,
    &sm, &offset, PIO_RX_PIN, 1, true);
 
@@ -2428,8 +2164,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 ||||62     multicore_launch_core1(core1_main);
 ||||63     const char *text = "Hello, world from PIO! (Plus 2 UARTs and 2 cores, for complex
    reasons)\n";
-
-<codeblock>||||64     multicore_fifo_push_blocking((uint32_t) text);
 ||||64     multicore_fifo_push_blocking((uint32_t) text);
 ||||65
 ||||66     // Echo characters received from PIO to the console
@@ -2449,7 +2183,7 @@ Figure 58. Manchester serial line code. Each data bit is represented by either a
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.pio Lines 8 - 30
 
-<codeblock>|||| 8 .program manchester_tx
+<codeblock>
 |||| 8 .program manchester_tx
 |||| 9 .side_set 1 opt
 ||||10
@@ -2465,10 +2199,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manc
 ||||20 do_1:
 ||||21     nop         side 0 [5] ; Low for 6 cycles (5 delay, +1 for nop)
 ||||22     jmp get_bit side 1 [3] ; High for 4 cycles. 'get_bit' takes another 2 cycles
-</codeblock>
-
-||||----------
-<codeblock>||||23 do_0:
 ||||23 do_0:
 ||||24     nop         side 1 [5] ; Output high for 6 cycles
 ||||25     nop         side 0 [3] ; Output low for 4 cycles
@@ -2483,11 +2213,9 @@ Starting from the label called start, this program shifts one data bit at a time
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.pio Lines 33 - 46
 
-<codeblock>||||33 static inline void manchester_tx_program_init(PIO pio, uint sm, uint offset, uint pin, float
+<codeblock>
 ||||33 static inline void manchester_tx_program_init(PIO pio, uint sm, uint offset, uint pin, float
-   div) {
-
-<codeblock>||||34     pio_sm_set_pins_with_mask(pio, sm, 0, 1u << pin);
+||||   div) {
 ||||34     pio_sm_set_pins_with_mask(pio, sm, 0, 1u << pin);
 ||||35     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 ||||36     pio_gpio_init(pio, pin);
@@ -2507,7 +2235,7 @@ Another state machine can be programmed to recover the original data from the tr
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.pio Lines 49 - 71
 
-<codeblock>||||49 .program manchester_rx
+<codeblock>
 ||||49 .program manchester_rx
 ||||50
 ||||51 ; Assumes line is idle low, first bit is 0
@@ -2530,10 +2258,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manc
 ||||68     wait 1 pin 0       ; Wait for the 0->1 transition - at this point we are 0.5 into the bit
 ||||69     in x, 1 [8]        ; Emit a 1, sleep 3/4 of a bit
 ||||70     jmp pin start_of_0 ; If signal is 0 again, it's another 1 bit otherwise it's a 0
-</codeblock>
-
-||||----------
-<codeblock>||||71 .wrap
 ||||71 .wrap
 </codeblock>
 
@@ -2543,11 +2267,9 @@ This program expects the X and Y registers to be initialised with the values 1 a
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.pio Lines 74 - 94
 
-<codeblock>||||74 static inline void manchester_rx_program_init(PIO pio, uint sm, uint offset, uint pin, float
+<codeblock>
 ||||74 static inline void manchester_rx_program_init(PIO pio, uint sm, uint offset, uint pin, float
-   div) {
-
-<codeblock>||||75     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+||||  div) {
 ||||75     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
 ||||76     pio_gpio_init(pio, pin);
 ||||77
@@ -2574,7 +2296,7 @@ The example C program in the SDK will transmit Manchester serial data from GPIO2
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.c Lines 20 - 43
 
-<codeblock>||||20 int main() {
+<codeblock>
 ||||20 int main() {
 ||||21     stdio_init_all();
 ||||22
@@ -2594,10 +2316,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manc
 ||||36     pio_sm_put_blocking(pio, sm_tx, 0);
 ||||37     pio_sm_put_blocking(pio, sm_tx, 0x0ff0a55a);
 ||||38     pio_sm_put_blocking(pio, sm_tx, 0x12345678);
-</codeblock>
-
-||||----------
-<codeblock>||||39     pio_sm_set_enabled(pio, sm_tx, true);
 ||||39     pio_sm_set_enabled(pio, sm_tx, true);
 ||||40
 ||||41     for (int i = 0; i < 3; ++i)
@@ -2607,17 +2325,16 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manc
 
 ||||### 11.6.6. Differential Manchester (BMC) TX and RX
 
-Figure 59. Differential Manchester serial line code, also known as biphase mark code (BMC). The line transitions at the start of every bit period.
+<figure>
+<img src+"img/fig59.png"/>
+<figcaption>
+Figure 59. Differential Manchester serial line code, also known as biphase mark code (BMC). The line transitions at the start of every bit period.  The presence of a transition in the centre of the bit period signifies a 1 data bit, and the absence, a 0 bit. These encoding rules are the same whether the line has an initial high or low state.
 
-The presence of a The  transmit  program  is  similar  to  the  Manchester  example:  it  repeatedly  shifts  a  bit  from  the  OSR  into  X  (relying  on autopull to refill the OSR in the background), branches, and drives a GPIO up and down based on the value of this bit.
-
-transition in the centre The added complication is that the pattern we drive onto the pin depends not just on the value of the data bit, as with of the bit period signifies a 1 data bit, and the absence, a 0 bit. These encoding rules are the same whether the line has an initial high or low state.
-
-vanilla Manchester encoding, but also on the state the line was left in at the end of the last bit period. This is illustrated in Figure 59, where the pattern is inverted if the line is initially high. To cope with this, there are two copies of the test- and-drive code, one for each initial line state, and these are linked together in the correct order by a sequence of jumps.
+The  transmit  program  is  similar  to  the  Manchester  example:  it  repeatedly  shifts  a  bit  from  the  OSR  into  X  (relying  on autopull to refill the OSR in the background), branches, and drives a GPIO up and down based on the value of this bit.  The added complication is that the pattern we drive onto the pin depends not just on the value of the data bit, as with vanilla Manchester encoding, but also on the state the line was left in at the end of the last bit period. This is illustrated in Figure 59, where the pattern is inverted if the line is initially high. To cope with this, there are two copies of the test- and-drive code, one for each initial line state, and these are linked together in the correct order by a sequence of jumps.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 8 - 35
 
-<codeblock>|||| 8 .program differential_manchester_tx
+<codeblock>
 |||| 8 .program differential_manchester_tx
 |||| 9 .side_set 1 opt
 ||||10
@@ -2648,21 +2365,13 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 ||||35     jmp initial_high         [7] ; the initial line state is flipped!
 </codeblock>
 
-The .pio file also includes a helper function to initialise a state machine for differential Manchester TX, and connect it to
+The .pio file also includes a helper function to initialise a state machine for differential Manchester TX, and connect it to a  chosen  GPIO.  We  arbitrarily  choose  a  32-bit  frame  size  and  LSB-first  serialisation  (shift_to_right  is  true  in sm_config_set_out_shift),  but  as  the  program  operates  on  one  bit  at  a  time,  we  could  change  this  by  reconfiguring  the state machine.
 
-a  chosen  GPIO.  We  arbitrarily  choose  a  32-bit  frame  size  and  LSB-first  serialisation  (shift_to_right  is  true  in
-
-sm_config_set_out_shift),  but  as  the  program  operates  on  one  bit  at  a  time,  we  could  change  this  by  reconfiguring  the
-
-state machine.
-||||----------
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 38 - 53
 
-<codeblock>||||38 static inline void differential_manchester_tx_program_init(PIO pio, uint sm, uint offset,
+<codeblock>
 ||||38 static inline void differential_manchester_tx_program_init(PIO pio, uint sm, uint offset,
-   uint pin, float div) {
-
-<codeblock>||||39     pio_sm_set_pins_with_mask(pio, sm, 0, 1u << pin);
+||||   uint pin, float div) {
 ||||39     pio_sm_set_pins_with_mask(pio, sm, 0, 1u << pin);
 ||||40     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 ||||41     pio_gpio_init(pio, pin);
@@ -2675,9 +2384,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 ||||48     pio_sm_init(pio, sm, offset + differential_manchester_tx_offset_start, &c);
 ||||49
 ||||50     // Execute a blocking pull so that we maintain the initial line state until data is
-   available
-
-<codeblock>||||51     pio_sm_exec(pio, sm, pio_encode_pull(false, true));
+||||   available
 ||||51     pio_sm_exec(pio, sm, pio_encode_pull(false, true));
 ||||52     pio_sm_set_enabled(pio, sm, true);
 ||||53 }
@@ -2686,16 +2393,13 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 The RX program uses the following strategy:
 
 1. Wait until the initial transition at the start of the bit period, so we stay aligned to the transmit clock
-
 2. Then, wait 3/4 of the configured bit period, so that we are centred on the second half-bit-period (see Figure 59)
-
 3. Sample the line at this point to determine whether there are one or two transitions in this bit period
-
 4. Repeat
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 55 - 85
 
-<codeblock>||||55 .program differential_manchester_rx
+<codeblock>
 ||||55 .program differential_manchester_rx
 ||||56
 ||||57 ; Assumes line is idle low
@@ -2726,32 +2430,27 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 ||||82     jmp initial_high
 ||||83 low_1:                  ; Second transition detected (data is `1`)
 ||||84     in x, 1 [1]
-</codeblock>
-
-||||----------
-<codeblock>||||85 .wrap
 ||||85 .wrap
 </codeblock>
 
 This  code  assumes  that  X  and  Y  have  the  values  1  and  0,  respectively.  This  is  arranged  for  by  the  included  C  helper function:
 
-Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 88 - 104  88 static inline void differential_manchester_rx_program_init(PIO pio, uint sm, uint offset,     uint pin, float div) {  89     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 88 - 104  
 
- 90     pio_gpio_init(pio, pin);
-
- 91  92     pio_sm_config c = differential_manchester_rx_program_get_default_config(offset);
-
- 93     sm_config_set_in_pins(&c, pin); // for WAIT  94     sm_config_set_jmp_pin(&c, pin); // for JMP  95     sm_config_set_in_shift(&c, true, true, 32);
-
- 96     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
-
- 97     sm_config_set_clkdiv(&c, div);
-
- 98     pio_sm_init(pio, sm, offset, &c);
-
- 99
-
-<codeblock>||||100     // X and Y are set to 0 and 1, to conveniently emit these to ISR/FIFO.
+<codeblock>
+|||| 88 static inline void differential_manchester_rx_program_init(PIO pio, uint sm, uint offset,     uint pin, float div) {  
+|||| 89     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, false);
+|||| 90     pio_gpio_init(pio, pin);
+|||| 91 
+|||| 92     pio_sm_config c = differential_manchester_rx_program_get_default_config(offset);
+|||| 93     sm_config_set_in_pins(&c, pin); // for WAIT 
+|||| 94     sm_config_set_jmp_pin(&c, pin); // for JMP  
+|||| 95     sm_config_set_in_shift(&c, true, true, 32);
+|||| 96     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+|||| 97     sm_config_set_clkdiv(&c, div);
+|||| 98     pio_sm_init(pio, sm, offset, &c);
+|||| 99
+||||100     // X and Y are set to 0 and 1, to conveniently emit these to ISR/FIFO.
 ||||100     // X and Y are set to 0 and 1, to conveniently emit these to ISR/FIFO.
 ||||101     pio_sm_exec(pio, sm, pio_encode_set(pio_x, 1));
 ||||102     pio_sm_exec(pio, sm, pio_encode_set(pio_y, 0));
@@ -2763,19 +2462,15 @@ All the pieces now exist to loopback some serial data over a wire between two GP
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.c
 
-<codeblock>|||| 1 /**
+<codeblock>
 |||| 1 /**
 |||| 2  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 |||| 3  *
 |||| 4  * SPDX-License-Identifier: BSD-3-Clause
 |||| 5  */
- 6
-
-<codeblock>|||| 7 #include <stdio.h>
+|||| 6
 |||| 7 #include <stdio.h>
- 8
-
-<codeblock>|||| 9 #include "pico/stdlib.h"
+|||| 8
 |||| 9 #include "pico/stdlib.h"
 ||||10 #include "hardware/pio.h"
 ||||11 #include "differential_manchester.pio.h"
@@ -2798,10 +2493,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 ||||28     printf("Transmit program loaded at %d\n", offset_tx);
 ||||29     printf("Receive program loaded at %d\n", offset_rx);
 ||||30
-</codeblock>
-
-||||----------
-<codeblock>||||31     // Configure state machines, set bit rate at 5 Mbps
 ||||31     // Configure state machines, set bit rate at 5 Mbps
 ||||32     differential_manchester_tx_program_init(pio, sm_tx, offset_tx, pin_tx, 125.f / (16 * 5));
 ||||33     differential_manchester_rx_program_init(pio, sm_rx, offset_rx, pin_rx, 125.f / (16 * 5));
@@ -2819,29 +2510,26 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 
 ||||### 11.6.7. I2C
 
-Figure 60. A 1-byte I2C read transfer. In the idle state, both lines float high. The initiator drives SDA low (a Start condition), followed by 7 address bits A6-A0, and a direction bit (Read/nWrite). The target drives SDA low to acknowledge the address (ACK). Data bytes follow. The target serialises data on SDA, clocked out by SCL. Every 9th clock, the initiator pulls SDA low to acknowledge the data, except on the last byte, where it leaves the line high (NAK).
-
-Releasing SDA whilst SCL is high is a Stop condition, returning the bus to idle.
+<figure>
+<img src="img/fig60.png"/>
+<figcaption>
+Figure 60. A 1-byte I2C read transfer. In the idle state, both lines float high. The initiator drives SDA low (a Start condition), followed by 7 address bits A6-A0, and a direction bit (Read/nWrite). The target drives SDA low to acknowledge the address (ACK). Data bytes follow. The target serialises data on SDA, clocked out by SCL. Every 9th clock, the initiator pulls SDA low to acknowledge the data, except on the last byte, where it leaves the line high (NAK).  Releasing SDA whilst SCL is high is a Stop condition, returning the bus to idle.
+</figcaption>
+</figure>
 
 I2C  is  an  ubiquitous  serial  bus  first  described  in  the  Dead  Sea  Scrolls,  and  later  used  by  Philips  Semiconductor.  Two wires with pullup resistors form an open-drain bus, and multiple agents address and signal one another over this bus by driving the bus lines low, or releasing them to be pulled high. It has a number of unusual attributes:
 
 ||||* SCL can be held low at any time, for any duration, by any member of the bus (not necessarily the target or initiator
 of the transfer). This is known as clock stretching. The bus does not advance until all drivers release the clock.
-
-||||* Members of the bus can be a target of one transfer and initiate other transfers (the master/slave roles are not
-
-fixed). However this is poorly supported by most I2C hardware.
-
+||||* Members of the bus can be a target of one transfer and initiate other transfers (the master/slave roles are not fixed). However this is poorly supported by most I2C hardware.
 ||||* SCL is not an edge-sensitive clock, rather SDA must be valid the entire time SCL is high.
-||||* In spite of the transparency of SDA against SCL, transitions of SDA whilst SCL is high are used to mark beginning
-
-and end of transfers (Start/Stop), or a new address phase within one (Restart).
+||||* In spite of the transparency of SDA against SCL, transitions of SDA whilst SCL is high are used to mark beginning and end of transfers (Start/Stop), or a new address phase within one (Restart).
 
 The  PIO  program  listed  below  handles  serialisation,  clock  stretching,  and  checking  of  ACKs  in  the  initiator  role.  It provides a mechanism for escaping PIO instructions in the FIFO datastream, to issue Start/Stop/Restart sequences at appropriate times. Provided no unexpected NAKs are received, this can perform long sequences of I2C transfers from a DMA buffer, without processor intervention.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/i2c.pio Lines 8 - 73
 
-<codeblock>|||| 8 .program i2c
+<codeblock>
 |||| 8 .program i2c
 |||| 9 .side_set 1 opt pindirs
 ||||10
@@ -2860,10 +2548,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 ||||23 ; The "Final" field should be set for the final byte in a transfer.
 ||||24 ; This tells the state machine to ignore a NAK: if this field is not
 ||||25 ; set, then any NAK will cause the state machine to halt and interrupt.
-</codeblock>
-
-||||----------
-<codeblock>||||26 ;
 ||||26 ;
 ||||27 ; Autopull should be enabled, with a threshold of 16.
 ||||28 ; Autopush should be enabled, with a threshold of 8.
@@ -2916,35 +2600,29 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 
 The IO mapping required by the I2C program is quite complex, due to the different ways that the two serial lines must be driven and sampled. One interesting feature is that state machine must drive the output enable high when the output is low, since the bus is open-drain, so the sense of the data is inverted. This could be handled in the PIO program (e.g. mov osr,  ~osr),  but  instead  we  can  use  the  IO  controls  on  RP2350  to  perform  this  inversion  in  the  GPIO  muxes,  saving  an instruction.
 
-Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/i2c.pio Lines 81 - 121  81 static inline void i2c_program_init(PIO pio, uint sm, uint offset, uint pin_sda, uint     pin_scl) {  82     assert(pin_scl == pin_sda + 1);
+Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/i2c.pio Lines 81 - 121 
 
- 83     pio_sm_config c = i2c_program_get_default_config(offset);
-||||----------
- 84  85     // IO mapping  86     sm_config_set_out_pins(&c, pin_sda, 1);
-
- 87     sm_config_set_set_pins(&c, pin_sda, 1);
-
- 88     sm_config_set_in_pins(&c, pin_sda);
-
- 89     sm_config_set_sideset_pins(&c, pin_scl);
-
- 90     sm_config_set_jmp_pin(&c, pin_sda);
-
- 91  92     sm_config_set_out_shift(&c, false, true, 16);
-
- 93     sm_config_set_in_shift(&c, false, true, 8);
-
- 94  95     float div = (float)clock_get_hz(clk_sys) / (32 * 100000);
-
- 96     sm_config_set_clkdiv(&c, div);
-
- 97
-
- 98     // Try to avoid glitching the bus while connecting the IOs. Get things set
-
- 99     // up so that pin is driven down when PIO asserts OE low, and pulled up
-
-<codeblock>||||100     // otherwise.
+<codeblock>
+|||| 81 static inline void i2c_program_init(PIO pio, uint sm, uint offset, uint pin_sda, uint 
+||||     pin_scl) { 
+|||| 82     assert(pin_scl == pin_sda + 1);
+|||| 83     pio_sm_config c = i2c_program_get_default_config(offset);
+|||| 84 
+|||| 85     // IO mapping 
+|||| 86     sm_config_set_out_pins(&c, pin_sda, 1);
+|||| 87     sm_config_set_set_pins(&c, pin_sda, 1);
+|||| 88     sm_config_set_in_pins(&c, pin_sda);
+|||| 89     sm_config_set_sideset_pins(&c, pin_scl);
+|||| 90     sm_config_set_jmp_pin(&c, pin_sda);
+|||| 91 
+|||| 92     sm_config_set_out_shift(&c, false, true, 16);
+|||| 93     sm_config_set_in_shift(&c, false, true, 8);
+|||| 94 
+|||| 95     float div = (float)clock_get_hz(clk_sys) / (32 * 100000);
+|||| 96     sm_config_set_clkdiv(&c, div);
+|||| 97
+|||| 98     // Try to avoid glitching the bus while connecting the IOs. Get things set
+|||| 99     // up so that pin is driven down when PIO asserts OE low, and pulled up
 ||||100     // otherwise.
 ||||101     gpio_pull_up(pin_scl);
 ||||102     gpio_pull_up(pin_sda);
@@ -2960,13 +2638,9 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 ||||112     // Clear IRQ flag before starting, and make sure flag doesn't actually
 ||||113     // assert a system-level interrupt (we're using it as a status flag)
 ||||114     pio_set_irq0_source_enabled(pio, (enum pio_interrupt_source) ((uint) pis_interrupt0 +
-    sm), false);
-
-<codeblock>||||115     pio_set_irq1_source_enabled(pio, (enum pio_interrupt_source) ((uint) pis_interrupt0 +
+||||    sm), false);
 ||||115     pio_set_irq1_source_enabled(pio, (enum pio_interrupt_source) ((uint) pis_interrupt0 +
     sm), false);
-
-<codeblock>||||116     pio_interrupt_clear(pio, sm);
 ||||116     pio_interrupt_clear(pio, sm);
 ||||117
 ||||118     // Configure and start SM
@@ -2979,7 +2653,7 @@ We  can  also  use  the  PIO  assembler  to  generate  a  table  of  instruction
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/i2c.pio Lines 126 - 136
 
-<codeblock>||||126 .program set_scl_sda
+<codeblock>
 ||||126 .program set_scl_sda
 ||||127 .side_set 1 opt
 ||||128
@@ -2993,26 +2667,18 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 ||||136     set pindirs, 1 side 1 [7] ; SCL = 1, SDA = 1
 </codeblock>
 
-The example code does blocking software IO on the state machine's FIFOs, to avoid the extra complexity of setting up
+The example code does blocking software IO on the state machine's FIFOs, to avoid the extra complexity of setting up the system DMA. For example, an I2C start condition is enqueued like so:
 
-the system DMA. For example, an I2C start condition is enqueued like so:
-||||----------
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/pio_i2c.c Lines 69 - 73
 
-<codeblock>||||69 void pio_i2c_start(PIO pio, uint sm) {
+<codeblock>
 ||||69 void pio_i2c_start(PIO pio, uint sm) {
 ||||70     pio_i2c_put_or_err(pio, sm, 1u << PIO_I2C_ICOUNT_LSB); // Escape code for 2 instruction
-   sequence
-
-<codeblock>||||71     pio_i2c_put_or_err(pio, sm, set_scl_sda_program_instructions[I2C_SC1_SD0]);    // We are
+||||   sequence
 ||||71     pio_i2c_put_or_err(pio, sm, set_scl_sda_program_instructions[I2C_SC1_SD0]);    // We are
-   already in idle state, just pull SDA low
-
-<codeblock>||||72     pio_i2c_put_or_err(pio, sm, set_scl_sda_program_instructions[I2C_SC0_SD0]);    // Also
+||||   already in idle state, just pull SDA low
 ||||72     pio_i2c_put_or_err(pio, sm, set_scl_sda_program_instructions[I2C_SC0_SD0]);    // Also
-   pull clock low so we can present data
-
-<codeblock>||||73 }
+||||   pull clock low so we can present data
 ||||73 }
 </codeblock>
 
@@ -3020,7 +2686,7 @@ Because I2C can go wrong at so many points, we need to be able to check the erro
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/pio_i2c.c Lines 15 - 17
 
-<codeblock>||||15 bool pio_i2c_check_error(PIO pio, uint sm) {
+<codeblock>
 ||||15 bool pio_i2c_check_error(PIO pio, uint sm) {
 ||||16     return pio_interrupt_get(pio, sm);
 ||||17 }
@@ -3028,13 +2694,11 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/pio_i2c.c Lines 19 - 23
 
-<codeblock>||||19 void pio_i2c_resume_after_error(PIO pio, uint sm) {
+<codeblock>
 ||||19 void pio_i2c_resume_after_error(PIO pio, uint sm) {
 ||||20     pio_sm_drain_tx_fifo(pio, sm);
 ||||21     pio_sm_exec(pio, sm, (pio->sm[sm].execctrl & PIO_SM0_EXECCTRL_WRAP_BOTTOM_BITS) >>
-   PIO_SM0_EXECCTRL_WRAP_BOTTOM_LSB);
-
-<codeblock>||||22     pio_interrupt_clear(pio, sm);
+||||   PIO_SM0_EXECCTRL_WRAP_BOTTOM_LSB);
 ||||22     pio_interrupt_clear(pio, sm);
 ||||23 }
 </codeblock>
@@ -3043,7 +2707,7 @@ We need some higher-level functions to pass correctly-formatted data though the 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/i2c_bus_scan.c Lines 13 - 42
 
-<codeblock>||||13 int main() {
+<codeblock>
 ||||13 int main() {
 ||||14     stdio_init_all();
 ||||15
@@ -3068,10 +2732,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 ||||34         else
 ||||35             result = pio_i2c_read_blocking(pio, sm, addr, NULL, 0);
 ||||36
-</codeblock>
-
-||||----------
-<codeblock>||||37         printf(result < 0 ? "." : "@");
 ||||37         printf(result < 0 ? "." : "@");
 ||||38         printf(addr % 16 == 15 ? "\n" : "  ");
 ||||39     }
@@ -3082,15 +2742,18 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/i2c/
 
 ||||### 11.6.8. PWM
 
-Figure 61. Pulse width modulation (PWM).
-
-The state machine outputs positive voltage pulses at regular intervals. The width of these pulses is controlled, so that the line is high for some controlled fraction of the time (the duty cycle). One use of this is to smoothly vary the brightness of an LED, by pulsing it faster than human persistence of vision.
+<figure>
+<img src="img/fig61.png"/>
+<figcaption>
+Figure 61. Pulse width modulation (PWM).  The state machine outputs positive voltage pulses at regular intervals. The width of these pulses is controlled, so that the line is high for some controlled fraction of the time (the duty cycle). One use of this is to smoothly vary the brightness of an LED, by pulsing it faster than human persistence of vision.
+</figcaption>
+</figure>
 
 This program repeatedly counts down to 0 with the Y register, whilst comparing the Y count to a pulse width held in the X register. The output is asserted low before counting begins, and asserted high when the value in Y reaches X. Once Y reaches 0, the process repeats, and the output is once more driven low. The fraction of time that the output is high is therefore proportional to the pulse width stored in X.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/pwm.pio Lines 10 - 22
 
-<codeblock>||||10 .program pwm
+<codeblock>
 ||||10 .program pwm
 ||||11 .side_set 1 opt
 ||||12
@@ -3108,24 +2771,18 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/
 
 Often, a PWM can be left at a particular pulse width for thousands of pulses, rather than supplying a new pulse width each time. This example highlights how a non-blocking PULL (Section 11.4.7) can achieve this: if the TX FIFO is empty, a non-blocking PULL will copy X to the OSR. After pulling, the program copies the OSR into X, so that it can be compared to the count value in Y. The net effect is that, if a new duty cycle value has not been supplied through the TX FIFO at the start of this period, the duty cycle from the previous period (which has been copied from X to OSR via the failed PULL, and then back to X via the MOV) is reused, for as many periods as necessary.
 
-Another  useful  technique  shown  here  is  using  the  ISR  as  a  configuration  register,  if  IN  instructions  are  not  required.
-
-System software can load an arbitrary 32-bit value into the ISR (by executing instructions directly on the state machine), and the program will copy this value into Y each time it begins counting. The ISR can be used to configure the range of PWM counting, and the state machine's clock divider controls the rate of counting.
+Another  useful  technique  shown  here  is  using  the  ISR  as  a  configuration  register,  if  IN  instructions  are  not  required.  System software can load an arbitrary 32-bit value into the ISR (by executing instructions directly on the state machine), and the program will copy this value into Y each time it begins counting. The ISR can be used to configure the range of PWM counting, and the state machine's clock divider controls the rate of counting.
 
 To start modulating some pulses, we first need to map the state machine's side-set pins to the GPIO we want to output PWM on, and tell the state machine where the program is loaded in the PIO instruction memory:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/pwm.pio Lines 25 - 31
 
-<codeblock>||||25 static inline void pwm_program_init(PIO pio, uint sm, uint offset, uint pin) {
+<codeblock>
 ||||25 static inline void pwm_program_init(PIO pio, uint sm, uint offset, uint pin) {
 ||||26    pio_gpio_init(pio, pin);
 ||||27    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 ||||28    pio_sm_config c = pwm_program_get_default_config(offset);
 ||||29    sm_config_set_sideset_pins(&c, pin);
-</codeblock>
-
-||||----------
-<codeblock>||||30    pio_sm_init(pio, sm, offset, &c);
 ||||30    pio_sm_init(pio, sm, offset, &c);
 ||||31 }
 </codeblock>
@@ -3134,7 +2791,7 @@ A little footwork is required to load the ISR with the desired counting range:
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/pwm.c Lines 14 - 20
 
-<codeblock>||||14 void pio_pwm_set_period(PIO pio, uint sm, uint32_t period) {
+<codeblock>
 ||||14 void pio_pwm_set_period(PIO pio, uint sm, uint32_t period) {
 ||||15     pio_sm_set_enabled(pio, sm, false);
 ||||16     pio_sm_put_blocking(pio, sm, period);
@@ -3148,7 +2805,7 @@ Once this is done, the state machine can be enabled, and PWM values written dire
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/pwm.c Lines 23 - 25
 
-<codeblock>||||23 void pio_pwm_set_level(PIO pio, uint sm, uint32_t level) {
+<codeblock>
 ||||23 void pio_pwm_set_level(PIO pio, uint sm, uint32_t level) {
 ||||24     pio_sm_put_blocking(pio, sm, level);
 ||||25 }
@@ -3156,7 +2813,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/pwm.c Lines 27 - 51
 
-<codeblock>||||27 int main() {
+<codeblock>
 ||||27 int main() {
 ||||28     stdio_init_all();
 ||||29 #ifndef PICO_DEFAULT_LED_PIN
@@ -3184,21 +2841,17 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/pwm/
 ||||51 }
 </codeblock>
 
-If the TX FIFO is kept topped up with fresh pulse width values, this program will consume a new pulse width for each
+If the TX FIFO is kept topped up with fresh pulse width values, this program will consume a new pulse width for each pulse. Once the FIFO runs dry, the program will again start reusing the most recently supplied value.
 
-pulse. Once the FIFO runs dry, the program will again start reusing the most recently supplied value.
-||||----------
 ||||### 11.6.9. Addition
 
 Although not designed for computation, PIO is quite likely Turing-complete, provided a long enough piece of tape can be found. It is conjectured that it could run DOOM, given a sufficiently high clock speed.
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/addition/addition.pio Lines 7 - 25
 
-<codeblock>|||| 7 .program addition
+<codeblock>
 |||| 7 .program addition
- 8
-
-<codeblock>|||| 9 ; Pop two 32 bit integers from the TX FIFO, add them together, and push the
+|||| 8
 |||| 9 ; Pop two 32 bit integers from the TX FIFO, add them together, and push the
 ||||10 ; result to the TX FIFO. Autopush/pull should be disabled as we're using
 ||||11 ; explicit push and pull instructions.
@@ -3222,20 +2875,16 @@ A full 32-bit addition takes only around one minute at 125 MHz. The program pull
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/addition/addition.c
 
-<codeblock>|||| 1 /**
+<codeblock>
 |||| 1 /**
 |||| 2  * Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
 |||| 3  *
 |||| 4  * SPDX-License-Identifier: BSD-3-Clause
 |||| 5  */
- 6
-
-<codeblock>|||| 7 #include <stdlib.h>
+|||| 6
 |||| 7 #include <stdlib.h>
 |||| 8 #include <stdio.h>
- 9
-
-<codeblock>||||10 #include "pico/stdlib.h"
+|||| 9
 ||||10 #include "pico/stdlib.h"
 ||||11 #include "hardware/pio.h"
 ||||12 #include "addition.pio.h"
@@ -3256,10 +2905,6 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/addi
 ||||27     addition_program_init(pio, sm, offset);
 ||||28
 ||||29     printf("Doing some random additions:\n");
-</codeblock>
-
-||||----------
-<codeblock>||||30     for (int i = 0; i < 10; ++i) {
 ||||30     for (int i = 0; i < 10; ++i) {
 ||||31         uint a = rand() % 100;
 ||||32         uint b = rand() % 100;
@@ -3279,2060 +2924,4 @@ Some of the more experimental example code, such as DPI and SD card support, is 
 ||||## 11.7. List of Registers
 
 The PIO0 and PIO1 registers start at base addresses of  0x50200000 and  0x50300000 respectively (defined as PIO0_BASE Table 980. List of PIO registers and PIO1_BASE in SDK).
-
-Offset Name 0x000 CTRL 0x004 FSTAT 0x008 FDEBUG 0x00c FLEVEL 0x010 TXF0 0x014 TXF1 0x018 TXF2 0x01c TXF3 Info PIO control register FIFO status register FIFO debug register FIFO levels Direct write access to the TX FIFO for this state machine. Each write pushes one word to the FIFO. Attempting to write to a full FIFO has no effect on the FIFO state or contents, and sets the sticky FDEBUG_TXOVER error flag for this FIFO.
-
-Direct write access to the TX FIFO for this state machine. Each write pushes one word to the FIFO. Attempting to write to a full FIFO has no effect on the FIFO state or contents, and sets the sticky FDEBUG_TXOVER error flag for this FIFO.
-
-Direct write access to the TX FIFO for this state machine. Each write pushes one word to the FIFO. Attempting to write to a full FIFO has no effect on the FIFO state or contents, and sets the sticky FDEBUG_TXOVER error flag for this FIFO.
-
-Direct write access to the TX FIFO for this state machine. Each
-
-write pushes one word to the FIFO. Attempting to write to a full
-
-FIFO has no effect on the FIFO state or contents, and sets the
-
-sticky FDEBUG_TXOVER error flag for this FIFO.
-||||----------
-Offset Name 0x020 RXF0 Info Direct read access to the RX FIFO for this state machine. Each read pops one word from the FIFO. Attempting to read from an empty FIFO has no effect on the FIFO state, and sets the sticky FDEBUG_RXUNDER error flag for this FIFO. The data returned to the system on a read from an empty FIFO is undefined.
-
-0x024 RXF1 Direct read access to the RX FIFO for this state machine. Each read pops one word from the FIFO. Attempting to read from an empty FIFO has no effect on the FIFO state, and sets the sticky FDEBUG_RXUNDER error flag for this FIFO. The data returned to the system on a read from an empty FIFO is undefined.
-
-0x028 RXF2 Direct read access to the RX FIFO for this state machine. Each read pops one word from the FIFO. Attempting to read from an empty FIFO has no effect on the FIFO state, and sets the sticky FDEBUG_RXUNDER error flag for this FIFO. The data returned to the system on a read from an empty FIFO is undefined.
-
-0x02c RXF3 Direct read access to the RX FIFO for this state machine. Each 0x030 IRQ read pops one word from the FIFO. Attempting to read from an empty FIFO has no effect on the FIFO state, and sets the sticky FDEBUG_RXUNDER error flag for this FIFO. The data returned to the system on a read from an empty FIFO is undefined.
-
-State machine IRQ flags register. Write 1 to clear. There are eight state machine IRQ flags, which can be set, cleared, and waited on by the state machines. There's no fixed association between flags and state machines --- any state machine can use any flag.
-
-Any of the eight flags can be used for timing synchronisation between state machines, using IRQ and WAIT instructions. Any combination of the eight flags can also routed out to either of the two system-level interrupt requests, alongside FIFO status interrupts --- see e.g. IRQ0_INTE.
-
-0x034 IRQ_FORCE Writing a 1 to each of these bits will forcibly assert the corresponding IRQ. Note this is different to the INTF register:
-
-writing here affects PIO internal state. INTF just asserts the processor-facing IRQ signal for testing ISRs, and is not visible to the state machines.
-
-0x038
-
-INPUT_SYNC_BYPASS
-
-There is a 2-flipflop synchronizer on each GPIO input, which
-
-protects PIO logic from metastabilities. This increases input
-
-delay, and for fast synchronous IO (e.g. SPI) these synchronizers
-
-may need to be bypassed. Each bit in this register corresponds
-
-to one GPIO.
-0 → input is synchronized (default)
-<codeblock>||||1 → synchronizer is bypassed
-||||1 → synchronizer is bypassed
-</codeblock>
-
-</codeblock>
-
-If in doubt, leave this register as all zeroes.
-
-0x03c DBG_PADOUT Read to sample the pad output values PIO is currently driving to the GPIOs. On RP2040 there are 30 GPIOs, so the two most significant bits are hardwired to 0.
-
-0x040
-
-DBG_PADOE
-
-Read to sample the pad output enables (direction) PIO is
-
-currently driving to the GPIOs. On RP2040 there are 30 GPIOs, so
-
-the two most significant bits are hardwired to 0.
-||||----------
-Offset Name Info 0x044 DBG_CFGINFO The PIO hardware has some free parameters that may vary between chip products.
-
-These should be provided in the chip datasheet, but are also exposed here.
-
-0x048
-
-INSTR_MEM0
-
-Write-only access to instruction memory location 0
-
-0x04c
-
-INSTR_MEM1
-
-Write-only access to instruction memory location 1
-
-0x050
-
-INSTR_MEM2
-
-Write-only access to instruction memory location 2
-
-0x054
-
-INSTR_MEM3
-
-Write-only access to instruction memory location 3
-
-0x058
-
-INSTR_MEM4
-
-Write-only access to instruction memory location 4
-
-0x05c
-
-INSTR_MEM5
-
-Write-only access to instruction memory location 5
-
-0x060
-
-INSTR_MEM6
-
-Write-only access to instruction memory location 6
-
-0x064
-
-INSTR_MEM7
-
-Write-only access to instruction memory location 7
-
-0x068
-
-INSTR_MEM8
-
-Write-only access to instruction memory location 8
-
-0x06c
-
-INSTR_MEM9
-
-Write-only access to instruction memory location 9
-
-0x070
-
-INSTR_MEM10
-
-Write-only access to instruction memory location 10
-
-0x074
-
-INSTR_MEM11
-
-Write-only access to instruction memory location 11
-
-0x078
-
-INSTR_MEM12
-
-Write-only access to instruction memory location 12
-
-0x07c
-
-INSTR_MEM13
-
-Write-only access to instruction memory location 13
-
-0x080
-
-INSTR_MEM14
-
-Write-only access to instruction memory location 14
-
-0x084
-
-INSTR_MEM15
-
-Write-only access to instruction memory location 15
-
-0x088
-
-INSTR_MEM16
-
-Write-only access to instruction memory location 16
-
-0x08c
-
-INSTR_MEM17
-
-Write-only access to instruction memory location 17
-
-0x090
-
-INSTR_MEM18
-
-Write-only access to instruction memory location 18
-
-0x094
-
-INSTR_MEM19
-
-Write-only access to instruction memory location 19
-
-0x098
-
-INSTR_MEM20
-
-Write-only access to instruction memory location 20
-
-0x09c
-
-INSTR_MEM21
-
-Write-only access to instruction memory location 21
-
-0x0a0
-
-INSTR_MEM22
-
-Write-only access to instruction memory location 22
-
-0x0a4
-
-INSTR_MEM23
-
-Write-only access to instruction memory location 23
-
-0x0a8
-
-INSTR_MEM24
-
-Write-only access to instruction memory location 24
-
-0x0ac
-
-INSTR_MEM25
-
-Write-only access to instruction memory location 25
-
-0x0b0
-
-INSTR_MEM26
-
-Write-only access to instruction memory location 26
-
-0x0b4
-
-INSTR_MEM27
-
-Write-only access to instruction memory location 27
-
-0x0b8
-
-INSTR_MEM28
-
-Write-only access to instruction memory location 28
-
-0x0bc
-
-INSTR_MEM29
-
-Write-only access to instruction memory location 29
-
-0x0c0
-
-INSTR_MEM30
-
-Write-only access to instruction memory location 30
-
-0x0c4
-
-INSTR_MEM31
-
-Write-only access to instruction memory location 31
-||||----------
-Offset Name Info 0x0c8 SM0_CLKDIV Clock divisor register for state machine 0 Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256) 0x0cc SM0_EXECCTRL Execution/behavioural settings for state machine 0 0x0d0 SM0_SHIFTCTRL Control behaviour of the input/output shift registers for state machine 0 0x0d4 SM0_ADDR Current instruction address of state machine 0 0x0d8 SM0_INSTR Read to see the instruction currently addressed by state machine 0's program counter Write to execute an instruction immediately (including jumps) and then resume execution.
-
-0x0dc SM0_PINCTRL State machine pin control 0x0e0 SM1_CLKDIV Clock divisor register for state machine 1 Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256) 0x0e4 SM1_EXECCTRL Execution/behavioural settings for state machine 1 0x0e8 SM1_SHIFTCTRL Control behaviour of the input/output shift registers for state machine 1 0x0ec SM1_ADDR Current instruction address of state machine 1 0x0f0 SM1_INSTR Read to see the instruction currently addressed by state machine 1's program counter Write to execute an instruction immediately (including jumps) and then resume execution.
-
-0x0f4 SM1_PINCTRL State machine pin control 0x0f8 SM2_CLKDIV Clock divisor register for state machine 2 Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256) 0x0fc SM2_EXECCTRL Execution/behavioural settings for state machine 2 0x100 SM2_SHIFTCTRL Control behaviour of the input/output shift registers for state machine 2 0x104 SM2_ADDR Current instruction address of state machine 2 0x108 SM2_INSTR Read to see the instruction currently addressed by state machine 2's program counter Write to execute an instruction immediately (including jumps) and then resume execution.
-
-0x10c
-
-SM2_PINCTRL
-
-State machine pin control
-
-0x110
-
-SM3_CLKDIV
-
-Clock divisor register for state machine 3
-
-Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256)
-
-0x114
-
-SM3_EXECCTRL
-
-Execution/behavioural settings for state machine 3
-
-0x118
-
-SM3_SHIFTCTRL
-
-Control behaviour of the input/output shift registers for state
-
-machine 3
-
-0x11c
-
-SM3_ADDR
-
-Current instruction address of state machine 3
-
-0x120
-
-SM3_INSTR
-
-Read to see the instruction currently addressed by state machine
-
-3's program counter
-
-Write to execute an instruction immediately (including jumps)
-
-and then resume execution.
-||||----------
-Offset Name Info 0x124 SM3_PINCTRL State machine pin control 0x128 RXF0_PUTGET0 Direct read/write access to entry 0 of SM0's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x12c RXF0_PUTGET1 Direct read/write access to entry 1 of SM0's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x130 RXF0_PUTGET2 Direct read/write access to entry 2 of SM0's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x134 RXF0_PUTGET3 Direct read/write access to entry 3 of SM0's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x138 RXF1_PUTGET0 Direct read/write access to entry 0 of SM1's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x13c RXF1_PUTGET1 Direct read/write access to entry 1 of SM1's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x140 RXF1_PUTGET2 Direct read/write access to entry 2 of SM1's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x144 RXF1_PUTGET3 Direct read/write access to entry 3 of SM1's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x148 RXF2_PUTGET0 Direct read/write access to entry 0 of SM2's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x14c RXF2_PUTGET1 Direct read/write access to entry 1 of SM2's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x150 RXF2_PUTGET2 Direct read/write access to entry 2 of SM2's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x154 RXF2_PUTGET3 Direct read/write access to entry 3 of SM2's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x158 RXF3_PUTGET0 Direct read/write access to entry 0 of SM3's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x15c RXF3_PUTGET1 Direct read/write access to entry 1 of SM3's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x160
-
-RXF3_PUTGET2
-
-Direct read/write access to entry 2 of SM3's RX FIFO, if
-
-SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is
-
-set.
-||||----------
-Offset Name Info 0x164 RXF3_PUTGET3 Direct read/write access to entry 3 of SM3's RX FIFO, if SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-0x168 GPIOBASE Relocate GPIO 0 (from PIO's point of view) in the system GPIO numbering, to access more than 32 GPIOs from PIO.
-
-Only the values 0 and 16 are supported (only bit 4 is writable).
-
-0x16c INTR Raw Interrupts 0x170 IRQ0_INTE Interrupt Enable for irq0 0x174 IRQ0_INTF Interrupt Force for irq0 0x178 IRQ0_INTS Interrupt status after masking & forcing for irq0 0x17c IRQ1_INTE Interrupt Enable for irq1 0x180 IRQ1_INTF Interrupt Force for irq1 0x184 IRQ1_INTS Interrupt status after masking & forcing for irq1 PIO: CTRL Register Offset: 0x000 Description PIO control register Bits Description 31:27 Reserved.
-
-Table 981. CTRL
-
-Register
-
-Type
-
-Reset
-
--
-
--
-
-<codeblock>||||26
-||||26
-</codeblock>
-
-NEXTPREV_CLKDIV_RESTART: Write 1 to restart the clock dividers of state SC 0x0 machines in neighbouring PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the same write.
-
-This is equivalent to writing 1 to the corresponding CLKDIV_RESTART bits in those PIOs' CTRL registers.
-
-<codeblock>||||25
-||||25
-</codeblock>
-
-NEXTPREV_SM_DISABLE: Write 1 to disable state machines in neighbouring SC 0x0 PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the same write.
-
-This is equivalent to clearing the corresponding SM_ENABLE bits in those PIOs' CTRL registers.
-
-<codeblock>||||24
-||||24
-</codeblock>
-
-NEXTPREV_SM_ENABLE: Write 1 to enable state machines in neighbouring SC 0x0 PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the same write.
-
-This is equivalent to setting the corresponding SM_ENABLE bits in those PIOs' CTRL registers.
-
-If both OTHERS_SM_ENABLE and OTHERS_SM_DISABLE are set, the disable
-
-takes precedence.
-||||----------
-Bits Description Type Reset 23:20 NEXT_PIO_MASK: A mask of state machines in the neighbouring higher- SC 0x0 numbered PIO block in the system (or PIO block 0 if this is the highest- numbered PIO block) to which to apply the operations specified by NEXTPREV_CLKDIV_RESTART, NEXTPREV_SM_ENABLE, and NEXTPREV_SM_DISABLE in the same write.
-
-This allows state machines in a neighbouring PIO block to be started/stopped/clock-synced exactly simultaneously with a write to this PIO block's CTRL register.
-
-Note that in a system with two PIOs, NEXT_PIO_MASK and PREV_PIO_MASK actually indicate the same PIO block. In this case the effects are applied cumulatively (as though the masks were OR'd together).
-
-Neighbouring PIO blocks are disconnected (status signals tied to 0 and control signals ignored) if one block is accessible to NonSecure code, and one is not.
-
-19:16 PREV_PIO_MASK: A mask of state machines in the neighbouring lower- SC 0x0 numbered PIO block in the system (or the highest-numbered PIO block if this is PIO block 0) to which to apply the operations specified by OP_CLKDIV_RESTART, OP_ENABLE, OP_DISABLE in the same write.
-
-This allows state machines in a neighbouring PIO block to be started/stopped/clock-synced exactly simultaneously with a write to this PIO block's CTRL register.
-
-Neighbouring PIO blocks are disconnected (status signals tied to 0 and control signals ignored) if one block is accessible to NonSecure code, and one is not.
-
-15:12 Reserved.
-
-11:8 CLKDIV_RESTART: Restart a state machine's clock divider from an initial phase of 0. Clock dividers are free-running, so once started, their output (including fractional jitter) is completely determined by the integer/fractional divisor configured in SMx_CLKDIV. This means that, if multiple clock dividers with the same divisor are restarted simultaneously, by writing multiple 1 bits to this field, the execution clocks of those state machines will run in precise lockstep.
-
-Note that setting/clearing SM_ENABLE does not stop the clock divider from running, so once multiple state machines' clocks are synchronised, it is safe to disable/reenable a state machine, whilst keeping the clock dividers in sync.
-
-Note also that CLKDIV_RESTART can be written to whilst the state machine is running, and this is useful to resynchronise clock dividers after the divisors (SMx_CLKDIV) have been changed on-the-fly.
-
--
-
-SC
-
--
-
-0x0
-||||----------
-Bits 7:4 Description Type Reset SM_RESTART: Write 1 to instantly clear internal SM state which may be SC 0x0 otherwise difficult to access and will affect future execution.
-
-Specifically, the following are cleared: input and output shift counters; the contents of the input shift register; the delay counter; the waiting-on-IRQ state;
-
-any stalled instruction written to SMx_INSTR or run by OUT/MOV EXEC; any pin write left asserted due to OUT_STICKY.
-
-The contents of the output shift register and the X/Y scratch registers are not affected.
-
-3:0 SM_ENABLE: Enable/disable each of the four state machines by writing 1/0 to RW 0x0 each of these four bits. When disabled, a state machine will cease executing instructions, except those written directly to SMx_INSTR by the system.
-
-Multiple bits can be set/cleared at once to run/halt multiple state machines simultaneously.
-
-PIO: FSTAT Register Offset: 0x004 Description FIFO status register Table 982. FSTAT Register Bits Description 31:28 Reserved.
-
-27:24 TXEMPTY: State machine TX FIFO is empty 23:20 Reserved.
-
-19:16 TXFULL: State machine TX FIFO is full 15:12 Reserved.
-
-11:8 RXEMPTY: State machine RX FIFO is empty 7:4 3:0 Reserved.
-
-RXFULL: State machine RX FIFO is full PIO: FDEBUG Register Offset: 0x008 Description FIFO debug register Table 983. FDEBUG Register Bits Description 31:28 Reserved.
-
-Type Reset - RO - RO - RO - RO - 0xf - 0x0 - 0xf - 0x0 Type Reset - - 27:24 TXSTALL: State machine has stalled on empty TX FIFO during a blocking WC 0x0 PULL, or an OUT with autopull enabled. Write 1 to clear.
-
-23:20 Reserved.
-
--
-
--
-||||----------
-Bits Description Type Reset 19:16 TXOVER: TX FIFO overflow (i.e. write-on-full by the system) has occurred.
-
-WC 0x0 Write 1 to clear. Note that write-on-full does not alter the state or contents of the FIFO in any way, but the data that the system attempted to write is dropped, so if this flag is set, your software has quite likely dropped some data on the floor.
-
-15:12 Reserved.
-
-- - 11:8 RXUNDER: RX FIFO underflow (i.e. read-on-empty by the system) has WC 0x0 occurred. Write 1 to clear. Note that read-on-empty does not perturb the state of the FIFO in any way, but the data returned by reading from an empty FIFO is undefined, so this flag generally only becomes set due to some kind of 7:4 3:0 software error.
-
-Reserved.
-
-- - RXSTALL: State machine has stalled on full RX FIFO during a blocking PUSH, WC 0x0 or an IN with autopush enabled. This flag is also set when a nonblocking PUSH to a full FIFO took place, in which case the state machine has dropped data. Write 1 to clear.
-
-PIO: FLEVEL Register Offset: 0x00c Description FIFO levels Table 984. FLEVEL Register Bits Description Type Reset 31:28 27:24 23:20 19:16 15:12 11:8 7:4 3:0 RX3 TX3 RX2 TX2 RX1 TX1 RX0 TX0 RO RO RO RO RO RO RO RO 0x0 0x0 0x0 0x0 0x0 0x0 0x0 0x0 PIO: TXF0, TXF1, TXF2, TXF3 Registers Offsets: 0x010, 0x014, 0x018, 0x01c Table 985. TXF0, TXF1, TXF2, TXF3 Registers Bits Description Type Reset 31:0 Direct write access to the TX FIFO for this state machine. Each write pushes WF 0x00000000 one word to the FIFO. Attempting to write to a full FIFO has no effect on the FIFO state or contents, and sets the sticky FDEBUG_TXOVER error flag for this FIFO.
-
-PIO: RXF0, RXF1, RXF2, RXF3 Registers
-
-Offsets: 0x020, 0x024, 0x028, 0x02c
-||||----------
-Table 986. RXF0, RXF1, RXF2, RXF3 Registers Bits Description Type Reset 31:0 Direct read access to the RX FIFO for this state machine. Each read pops one RF - word from the FIFO. Attempting to read from an empty FIFO has no effect on the FIFO state, and sets the sticky FDEBUG_RXUNDER error flag for this FIFO.
-
-The data returned to the system on a read from an empty FIFO is undefined.
-
-PIO: IRQ Register Offset: 0x030 Bits Description 31:8 Reserved.
-
-Table 987. IRQ Register Type Reset - - 7:0 State machine IRQ flags register. Write 1 to clear. There are eight state WC 0x00 machine IRQ flags, which can be set, cleared, and waited on by the state machines. There's no fixed association between flags and state machines --- any state machine can use any flag.
-
-Any of the eight flags can be used for timing synchronisation between state machines, using IRQ and WAIT instructions. Any combination of the eight flags can also routed out to either of the two system-level interrupt requests, alongside FIFO status interrupts --- see e.g. IRQ0_INTE.
-
-PIO: IRQ_FORCE Register Offset: 0x034 Table 988. IRQ_FORCE Register Bits Description 31:8 Reserved.
-
-Type Reset - - 7:0 Writing a 1 to each of these bits will forcibly assert the corresponding IRQ.
-
-WF 0x00 Note this is different to the INTF register: writing here affects PIO internal state. INTF just asserts the processor-facing IRQ signal for testing ISRs, and is not visible to the state machines.
-
-Table 989.
-
-INPUT_SYNC_BYPASS
-
-Register
-
-PIO: INPUT_SYNC_BYPASS Register
-
-Offset: 0x038
-
-Bits
-
-Description
-
-Type
-
-Reset
-
-31:0
-
-There is a 2-flipflop synchronizer on each GPIO input, which protects PIO logic
-
-RW
-
-0x00000000
-
-from metastabilities. This increases input delay, and for fast synchronous IO
-
-(e.g. SPI) these synchronizers may need to be bypassed. Each bit in this
-
-register corresponds to one GPIO.
-0 → input is synchronized (default)
-<codeblock>||||1 → synchronizer is bypassed
-||||1 → synchronizer is bypassed
-</codeblock>
-
-</codeblock>
-
-If in doubt, leave this register as all zeroes.
-
-PIO: DBG_PADOUT Register
-
-Offset: 0x03c
-||||----------
-Table 990.
-
-DBG_PADOUT Register Bits Description Type Reset 31:0 Read to sample the pad output values PIO is currently driving to the GPIOs. On RO 0x00000000 RP2040 there are 30 GPIOs, so the two most significant bits are hardwired to 0.
-
-PIO: DBG_PADOE Register Offset: 0x040 Table 991.
-
-DBG_PADOE Register Bits Description Type Reset 31:0 Read to sample the pad output enables (direction) PIO is currently driving to RO 0x00000000 the GPIOs. On RP2040 there are 30 GPIOs, so the two most significant bits are hardwired to 0.
-
-PIO: DBG_CFGINFO Register Offset: 0x044 Description The PIO hardware has some free parameters that may vary between chip products.
-
-These should be provided in the chip datasheet, but are also exposed here.
-
-Table 992.
-
-DBG_CFGINFO Register Bits Description 31:28 VERSION: Version of the core PIO hardware.
-
-Type Reset RO 0x1 Enumerated values:
-
-0x0 → V0: Version 0 (RP2040) 0x1 → V1: Version 1 (RP2350) 27:22 Reserved.
-
-21:16 IMEM_SIZE: The size of the instruction memory, measured in units of one instruction 15:12 Reserved.
-
-11:8 SM_COUNT: The number of state machines this PIO instance is equipped 7:6 5:0 with.
-
-Reserved.
-
-FIFO_DEPTH: The depth of the state machine TX/RX FIFOs, measured in words.
-
-Joining fifos via SHIFTCTRL_FJOIN gives one FIFO with double this depth.
-
--
-
-RO
-
--
-
-RO
-
--
-
-RO
-
--
-
--
-
--
-
--
-
--
-
--
-
-PIO: INSTR_MEM0, INSTR_MEM1, …, INSTR_MEM30, INSTR_MEM31 Registers
-
-Offsets: 0x048, 0x04c, …, 0x0c0, 0x0c4
-||||----------
-Table 993.
-
-INSTR_MEM0, INSTR_MEM1, …, INSTR_MEM30, INSTR_MEM31 Registers Table 994.
-
-SM0_CLKDIV, SM1_CLKDIV, SM2_CLKDIV, SM3_CLKDIV Registers Bits Description 31:16 Reserved.
-
-Type Reset - - 15:0 Write-only access to instruction memory location N WO 0x0000 PIO: SM0_CLKDIV, SM1_CLKDIV, SM2_CLKDIV, SM3_CLKDIV Registers Offsets: 0x0c8, 0x0e0, 0x0f8, 0x110 Description Clock divisor register for state machine N Frequency = clock freq / (CLKDIV_INT + CLKDIV_FRAC / 256) Bits Description 31:16 INT: Effective frequency is sysclk/(int + frac/256).
-
-Value of 0 is interpreted as 65536. If INT is 0, FRAC must also be 0.
-
-15:8 FRAC: Fractional part of clock divisor 7:0 Reserved.
-
-Type Reset RW 0x0001 RW 0x00 - - PIO:  SM0_EXECCTRL,  SM1_EXECCTRL,  SM2_EXECCTRL,  SM3_EXECCTRL
-Registers Offsets: 0x0cc, 0x0e4, 0x0fc, 0x114 Description Execution/behavioural settings for state machine N Table 995.
-
-SM0_EXECCTRL,
-
-SM1_EXECCTRL,
-
-SM2_EXECCTRL,
-
-SM3_EXECCTRL
-
-Registers
-
-Bits
-
-<codeblock>||||31
-||||31
-</codeblock>
-
-Description Type Reset EXEC_STALLED: If 1, an instruction written to SMx_INSTR is stalled, and RO 0x0 latched by the state machine. Will clear to 0 once this instruction completes.
-
-<codeblock>||||30
-||||30
-</codeblock>
-
-SIDE_EN: If 1, the MSB of the Delay/Side-set instruction field is used as side- RW 0x0 set enable, rather than a side-set data bit. This allows instructions to perform side-set optionally, rather than on every instruction, but the maximum possible side-set width is reduced from 5 to 4. Note that the value of PINCTRL_SIDESET_COUNT is inclusive of this enable bit.
-
-<codeblock>||||29
-||||29
-</codeblock>
-
-SIDE_PINDIR: If 1, side-set data is asserted to pin directions, instead of pin RW 0x0 values 28:24 JMP_PIN: The GPIO number to use as condition for JMP PIN. Unaffected by RW 0x00 input mapping.
-
-23:19
-
-OUT_EN_SEL: Which data bit to use for inline OUT enable
-
-<codeblock>||||18
-||||18
-</codeblock>
-
-INLINE_OUT_EN: If 1, use a bit of OUT data as an auxiliary write enable
-
-When used in conjunction with OUT_STICKY, writes with an enable of 0 will
-
-deassert the latest pin write. This can create useful masking/override
-
-behaviour
-
-due to the priority ordering of state machine pin writes (SM0 < SM1 < …)
-
-RW
-
-RW
-
-0x00
-
-0x0
-
-<codeblock>||||17
-||||17
-</codeblock>
-
-OUT_STICKY: Continuously assert the most recent OUT/SET to the pins 16:12 WRAP_TOP: After reaching this address, execution is wrapped to wrap_bottom.
-
-If the instruction is a jump, and the jump condition is true, the jump takes
-
-RW
-
-RW
-
-0x0
-
-0x1f
-
-priority.
-||||----------
-Bits Description Type Reset 11:7 WRAP_BOTTOM: After reaching wrap_top, execution is wrapped to this RW 0x00 address.
-
-6:5 STATUS_SEL: Comparison used for the MOV x, STATUS instruction.
-
-RW 0x0 Enumerated values:
-
-0x0 → TXLEVEL: All-ones if TX FIFO level < N, otherwise all-zeroes 0x1 → RXLEVEL: All-ones if RX FIFO level < N, otherwise all-zeroes 0x2 → IRQ: All-ones if the indexed IRQ flag is raised, otherwise all-zeroes 4:0 STATUS_N: Comparison level or IRQ index for the MOV x, STATUS instruction.
-
-RW 0x00 If STATUS_SEL is TXLEVEL or RXLEVEL, then values of STATUS_N greater than the current FIFO depth are reserved, and have undefined behaviour.
-
-Enumerated values:
-
-0x00 → IRQ: Index 0-7 of an IRQ flag in this PIO block 0x08 → IRQ_PREVPIO: Index 0-7 of an IRQ flag in the next lower-numbered PIO block 0x10 → IRQ_NEXTPIO: Index 0-7 of an IRQ flag in the next higher-numbered PIO block PIO:  SM0_SHIFTCTRL,  SM1_SHIFTCTRL,  SM2_SHIFTCTRL,  SM3_SHIFTCTRL
-Registers Offsets: 0x0d0, 0x0e8, 0x100, 0x118 Description Control behaviour of the input/output shift registers for state machine N Table 996.
-
-SM0_SHIFTCTRL,
-
-SM1_SHIFTCTRL,
-
-SM2_SHIFTCTRL,
-
-SM3_SHIFTCTRL
-
-Registers
-
-Bits
-
-<codeblock>||||31
-||||31
-</codeblock>
-
-Description Type Reset FJOIN_RX: When 1, RX FIFO steals the TX FIFO's storage, and becomes twice RW 0x0 as deep.
-
-TX FIFO is disabled as a result (always reads as both full and empty).
-
-FIFOs are flushed when this bit is changed.
-
-<codeblock>||||30
-||||30
-</codeblock>
-
-FJOIN_TX: When 1, TX FIFO steals the RX FIFO's storage, and becomes twice RW 0x0 as deep.
-
-RX FIFO is disabled as a result (always reads as both full and empty).
-
-FIFOs are flushed when this bit is changed.
-
-29:25 PULL_THRESH: Number of bits shifted out of OSR before autopull, or RW 0x00 conditional pull (PULL IFEMPTY), will take place.
-
-Write 0 for value of 32.
-
-24:20 PUSH_THRESH: Number of bits shifted into ISR before autopush, or RW 0x00 conditional push (PUSH IFFULL), will take place.
-
-Write 0 for value of 32.
-
-<codeblock>||||19
-||||19
-||||18
-</codeblock>
-
-OUT_SHIFTDIR: 1 = shift out of output shift register to right. 0 = to left.
-
-RW
-
-IN_SHIFTDIR: 1 = shift input shift register to right (data enters from left). 0 = to
-
-RW
-
-0x1
-
-0x1
-
-left.
-||||----------
-Bits
-
-<codeblock>||||17
-||||17
-</codeblock>
-
-Description Type Reset AUTOPULL: Pull automatically when the output shift register is emptied, i.e. on RW 0x0 or following an OUT instruction which causes the output shift counter to reach or exceed PULL_THRESH.
-
-<codeblock>||||16
-||||16
-</codeblock>
-
-AUTOPUSH: Push automatically when the input shift register is filled, i.e. on an RW 0x0 IN instruction which causes the input shift counter to reach or exceed PUSH_THRESH.
-
-<codeblock>||||15
-||||15
-</codeblock>
-
-FJOIN_RX_PUT: If 1, disable this state machine's RX FIFO, make its storage RW 0x0 available for random write access by the state machine (using the put instruction) and, unless FJOIN_RX_GET is also set, random read access by the processor (through the RXFx_PUTGETy registers).
-
-If FJOIN_RX_PUT and FJOIN_RX_GET are both set, then the RX FIFO's registers can be randomly read/written by the state machine, but are completely inaccessible to the processor.
-
-Setting this bit will clear the FJOIN_TX and FJOIN_RX bits.
-
-<codeblock>||||14
-||||14
-</codeblock>
-
-FJOIN_RX_GET: If 1, disable this state machine's RX FIFO, make its storage RW 0x0 available for random read access by the state machine (using the get instruction) and, unless FJOIN_RX_PUT is also set, random write access by the processor (through the RXFx_PUTGETy registers).
-
-If FJOIN_RX_PUT and FJOIN_RX_GET are both set, then the RX FIFO's registers can be randomly read/written by the state machine, but are completely inaccessible to the processor.
-
-Setting this bit will clear the FJOIN_TX and FJOIN_RX bits.
-
-13:5 Reserved.
-
-- - 4:0 IN_COUNT: Set the number of pins which are not masked to 0 when read by an RW 0x00 IN PINS, WAIT PIN or MOV x, PINS instruction.
-
-For example, an IN_COUNT of 5 means that the 5 LSBs of the IN pin group are visible (bits 4:0), but the remaining 27 MSBs are masked to 0. A count of 32 is encoded with a field value of 0, so the default behaviour is to not perform any masking.
-
-Note this masking is applied in addition to the masking usually performed by the IN instruction. This is mainly useful for the MOV x, PINS instruction, which otherwise has no way of masking pins.
-
-PIO: SM0_ADDR, SM1_ADDR, SM2_ADDR, SM3_ADDR Registers Offsets: 0x0d4, 0x0ec, 0x104, 0x11c Table 997. SM0_ADDR, SM1_ADDR, SM2_ADDR, SM3_ADDR Registers Bits Description 31:5 Reserved.
-
-4:0
-
-Current instruction address of state machine N
-
-Type
-
-Reset
-
--
-
-RO
-
--
-
-0x00
-
-PIO: SM0_INSTR, SM1_INSTR, SM2_INSTR, SM3_INSTR Registers
-
-Offsets: 0x0d8, 0x0f0, 0x108, 0x120
-||||----------
-Table 998.
-
-SM0_INSTR, SM1_INSTR, SM2_INSTR, SM3_INSTR Registers Table 999.
-
-SM0_PINCTRL, SM1_PINCTRL, SM2_PINCTRL, SM3_PINCTRL Registers Bits Description 31:16 Reserved.
-
-15:0 Read to see the instruction currently addressed by state machine N's program RW counter.
-
-Write to execute an instruction immediately (including jumps) and then resume execution.
-
-Type Reset - - - PIO: SM0_PINCTRL, SM1_PINCTRL, SM2_PINCTRL, SM3_PINCTRL Registers Offsets: 0x0dc, 0x0f4, 0x10c, 0x124 Description State machine pin control Bits Description Type Reset 31:29 SIDESET_COUNT: The number of MSBs of the Delay/Side-set instruction field RW 0x0 which are used for side-set. Inclusive of the enable bit, if present. Minimum of 0 (all delay bits, no side-set) and maximum of 5 (all side-set, no delay).
-
-28:26 SET_COUNT: The number of pins asserted by a SET. In the range 0 to 5 RW 0x5 inclusive.
-
-25:20 OUT_COUNT: The number of pins asserted by an OUT PINS, OUT PINDIRS or RW 0x00 MOV PINS instruction. In the range 0 to 32 inclusive.
-
-19:15 IN_BASE: The pin which is mapped to the least-significant bit of a state RW 0x00 machine's IN data bus. Higher-numbered pins are mapped to consecutively more-significant data bits, with a modulo of 32 applied to pin number.
-
-14:10 SIDESET_BASE: The lowest-numbered pin that will be affected by a side-set RW 0x00 operation. The MSBs of an instruction's side-set/delay field (up to 5, determined by SIDESET_COUNT) are used for side-set data, with the remaining LSBs used for delay. The least-significant bit of the side-set portion is the bit written to this pin, with more-significant bits written to higher-numbered pins.
-
-9:5 SET_BASE: The lowest-numbered pin that will be affected by a SET PINS or RW 0x00 SET PINDIRS instruction. The data written to this pin is the least-significant bit of the SET data.
-
-4:0 OUT_BASE: The lowest-numbered pin that will be affected by an OUT PINS, RW 0x00 OUT PINDIRS or MOV PINS instruction. The data written to this pin will always be the least-significant bit of the OUT or MOV data.
-
-PIO: RXF0_PUTGET0 Register Offset: 0x128 Bits Description Type Reset 31:0 Direct read/write access to entry 0 of SM0's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-Table 1000.
-
-RXF0_PUTGET0
-
-Register
-
-PIO: RXF0_PUTGET1 Register
-
-Offset: 0x12c
-||||----------
-Table 1001.
-
-RXF0_PUTGET1 Register Table 1002.
-
-RXF0_PUTGET2 Register Table 1003.
-
-RXF0_PUTGET3 Register Table 1004.
-
-RXF1_PUTGET0 Register Table 1005.
-
-RXF1_PUTGET1 Register Table 1006.
-
-RXF1_PUTGET2 Register Bits Description Type Reset 31:0 Direct read/write access to entry 1 of SM0's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF0_PUTGET2 Register Offset: 0x130 Bits Description Type Reset 31:0 Direct read/write access to entry 2 of SM0's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF0_PUTGET3 Register Offset: 0x134 Bits Description Type Reset 31:0 Direct read/write access to entry 3 of SM0's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF1_PUTGET0 Register Offset: 0x138 Bits Description Type Reset 31:0 Direct read/write access to entry 0 of SM1's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF1_PUTGET1 Register Offset: 0x13c Bits Description Type Reset 31:0 Direct read/write access to entry 1 of SM1's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF1_PUTGET2 Register Offset: 0x140 Bits Description Type Reset 31:0 Direct read/write access to entry 2 of SM1's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF1_PUTGET3 Register
-
-Offset: 0x144
-||||----------
-Table 1007.
-
-RXF1_PUTGET3 Register Table 1008.
-
-RXF2_PUTGET0 Register Table 1009.
-
-RXF2_PUTGET1 Register Table 1010.
-
-RXF2_PUTGET2 Register Table 1011.
-
-RXF2_PUTGET3 Register Table 1012.
-
-RXF3_PUTGET0 Register Bits Description Type Reset 31:0 Direct read/write access to entry 3 of SM1's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF2_PUTGET0 Register Offset: 0x148 Bits Description Type Reset 31:0 Direct read/write access to entry 0 of SM2's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF2_PUTGET1 Register Offset: 0x14c Bits Description Type Reset 31:0 Direct read/write access to entry 1 of SM2's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF2_PUTGET2 Register Offset: 0x150 Bits Description Type Reset 31:0 Direct read/write access to entry 2 of SM2's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF2_PUTGET3 Register Offset: 0x154 Bits Description Type Reset 31:0 Direct read/write access to entry 3 of SM2's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF3_PUTGET0 Register Offset: 0x158 Bits Description Type Reset 31:0 Direct read/write access to entry 0 of SM3's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF3_PUTGET1 Register
-
-Offset: 0x15c
-||||----------
-Table 1013.
-
-RXF3_PUTGET1 Register Table 1014.
-
-RXF3_PUTGET2 Register Table 1015.
-
-RXF3_PUTGET3 Register Bits Description Type Reset 31:0 Direct read/write access to entry 1 of SM3's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF3_PUTGET2 Register Offset: 0x160 Bits Description Type Reset 31:0 Direct read/write access to entry 2 of SM3's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: RXF3_PUTGET3 Register Offset: 0x164 Bits Description Type Reset 31:0 Direct read/write access to entry 3 of SM3's RX FIFO, if RW 0x00000000 SHIFTCTRL_FJOIN_RX_PUT xor SHIFTCTRL_FJOIN_RX_GET is set.
-
-PIO: GPIOBASE Register Table 1016.
-
-GPIOBASE Register Offset: 0x168 Bits Description 31:5 Reserved.
-
-Type
-
-Reset
-
--
-
--
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-Relocate GPIO 0 (from PIO's point of view) in the system GPIO numbering, to RW 0x0 access more than 32 GPIOs from PIO.
-
-Only the values 0 and 16 are supported (only bit 4 is writable).
-
-3:0 Reserved.
-
-- - PIO: INTR Register Offset: 0x16c Description Raw Interrupts Table 1017. INTR Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-SM7
-
-SM6
-
-SM5
-
-SM4
-
-SM3
-
-SM2
-
-SM1
-
-SM0
-
-Type
-
-Reset
-
--
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-||||----------
-Bits
-
-Description
-
-Type
-
-Reset
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0 SM3_TXNFULL SM2_TXNFULL SM1_TXNFULL SM0_TXNFULL SM3_RXNEMPTY SM2_RXNEMPTY SM1_RXNEMPTY SM0_RXNEMPTY PIO: IRQ0_INTE Register Offset: 0x170 Description Interrupt Enable for irq0 Table 1018.
-
-IRQ0_INTE Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0
-
-SM7
-
-SM6
-
-SM5
-
-SM4
-
-SM3
-
-SM2
-
-SM1
-
-SM0
-
-SM3_TXNFULL
-
-SM2_TXNFULL
-
-SM1_TXNFULL
-
-SM0_TXNFULL
-
-SM3_RXNEMPTY
-
-SM2_RXNEMPTY
-
-SM1_RXNEMPTY
-
-SM0_RXNEMPTY
-
-PIO: IRQ0_INTF Register
-
-Offset: 0x174
-
-Description
-
-Interrupt Force for irq0
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-Type
-
-Reset
-
--
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-||||----------
-Table 1019.
-
-IRQ0_INTF Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0 SM7 SM6 SM5 SM4 SM3 SM2 SM1 SM0 SM3_TXNFULL SM2_TXNFULL SM1_TXNFULL SM0_TXNFULL SM3_RXNEMPTY SM2_RXNEMPTY SM1_RXNEMPTY SM0_RXNEMPTY PIO: IRQ0_INTS Register Offset: 0x178 Description Interrupt status after masking & forcing for irq0 Table 1020.
-
-IRQ0_INTS Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-SM7
-
-SM6
-
-SM5
-
-SM4
-
-SM3
-
-SM2
-
-SM1
-
-SM0
-
-SM3_TXNFULL
-
-SM2_TXNFULL
-
-SM1_TXNFULL
-
-SM0_TXNFULL
-
-Type
-
-Reset
-
--
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-Type
-
-Reset
-
--
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-||||----------
-Bits
-
-Description
-
-Type
-
-Reset
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0 SM3_RXNEMPTY SM2_RXNEMPTY SM1_RXNEMPTY SM0_RXNEMPTY PIO: IRQ1_INTE Register Offset: 0x17c Description Interrupt Enable for irq1 Table 1021.
-
-IRQ1_INTE Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0 SM7 SM6 SM5 SM4 SM3 SM2 SM1 SM0 SM3_TXNFULL SM2_TXNFULL SM1_TXNFULL SM0_TXNFULL SM3_RXNEMPTY SM2_RXNEMPTY SM1_RXNEMPTY SM0_RXNEMPTY PIO: IRQ1_INTF Register Offset: 0x180 Description Interrupt Force for irq1 Table 1022.
-
-IRQ1_INTF Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-</codeblock>
-
-SM7
-
-SM6
-
-SM5
-
-RO
-
-RO
-
-RO
-
-RO
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-Type
-
-Reset
-
--
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-Type
-
-Reset
-
--
-
-RW
-
-RW
-
-RW
-
--
-
-0x0
-
-0x0
-
-0x0
-||||----------
-Bits
-
-Description
-
-Type
-
-Reset
-
-<codeblock>||||12
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0 SM4 SM3 SM2 SM1 SM0 SM3_TXNFULL SM2_TXNFULL SM1_TXNFULL SM0_TXNFULL SM3_RXNEMPTY SM2_RXNEMPTY SM1_RXNEMPTY SM0_RXNEMPTY PIO: IRQ1_INTS Register Offset: 0x184 Description Interrupt status after masking & forcing for irq1 Table 1023.
-
-IRQ1_INTS Register Bits Description 31:16 Reserved.
-
-<codeblock>||||15
-||||15
-||||14
-||||13
-||||12
-||||11
-||||10
-||||9
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||8
-||||8
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||7
-||||7
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||6
-||||6
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||5
-||||5
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||4
-||||4
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||3
-||||3
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||2
-||||2
-</codeblock>
-
-</codeblock>
-
-<codeblock>||||1
-||||1
-</codeblock>
-
-</codeblock>
-
-0
-
-SM7
-
-SM6
-
-SM5
-
-SM4
-
-SM3
-
-SM2
-
-SM1
-
-SM0
-
-SM3_TXNFULL
-
-SM2_TXNFULL
-
-SM1_TXNFULL
-
-SM0_TXNFULL
-
-SM3_RXNEMPTY
-
-SM2_RXNEMPTY
-
-SM1_RXNEMPTY
-
-SM0_RXNEMPTY
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-RW
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-Type
-
-Reset
-
--
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
-RO
-
--
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-0x0
-
-||||## 11.7. List of Registers
-
-<codeblock>||||957
-||||957
-</codeblock>
-
-</codeblock>
 

@@ -1,85 +1,90 @@
 #! /bin/sh
-cat "$@" |
-sed '/^11\./{
+#cat r0.md |
+#sed 's/ \(0x[0-9A-Fa-f]\)/\
+#\1/g'
+cat r0.md |
+#sed '
+#/^<register>/,/^<\/register>/b
+#:loop
+#    $b
+#    N
+#    /0x[0-9A-Fa-f][0-9A-Fa-f]*/!b loop
+#    # split one line
+#    s/\(0x[0-9A-Fa-f][0-9A-Fa-f]*\) /\
+#\1/
+#    P
+#:loop
+#' |
+# cut redundant emply lines
+#sed '
+#:loop
+#/^$/!b
+#N
+#s/\n//
+#b loop
+#'
+## <codeblock> canceller
+sed '1,/^<BEGIN>/b
+/^||||--------/d
+/^<codeblock>/,/^<\/codeblock>/{
+    /^<codeblock>|/d
+    s/^||||//
+    /^<\/codeblock>/d  
+}' |sed '1,/^<BEGIN>/b
+/^<\/codeblock/d' |tee x1.log |
+## 0x0b8 line compacter
+sed '/^0x[0-9A-Fa-f]*$/{
     N
     N
     N
     N
-    /RP2350 Datasheet/!b
-    s/\n/>>>/g
-    s/.*/>>>>/
-    p
-    d
-}' |sed '/^$/{
-    N
-    /\n>>>>$/!b
-    N
-    s/.*/----------/p
-    d
-}' |
-# chapter heading
-sed '#
-/^11\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\./s/^/||||##### /
-/^11\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\./s/^/||||#### /
-/^11\.[0-9][0-9]*\.[0-9][0-9]*\./s/^/||||### /
-/^11\.[0-9][0-9]*\./s/^/||||## /
-/^Chapter 11\./s/^/||||# /
-/^[*] /s/^/||||/
-/^  + /s/^/||||/
-/^</s/^/||||/
-/^--------/s/^/||||/
-' |
-# code block marker
-sed '
-    /^ [1-9] /b numline
-    /^[1-9][0-9]*$/b numline
-    /^[1-9][0-9]* /b numline
-    b
-:numline
-    s/^/||||/
-' |
-# sentense compactor
-sed '/^<figure>/,/^<\/figure>/b
-    /^<codeblock>/,/^<\/codeblock>/b
-    /^||||/b
-# beginning of line
-:loop
-    N
-    /\n||||/b nextline
-    /[.:;]\n$/b eos
-    $b eos
-    b loop
-# end of a sentense
-:eos
     s/\n\n/ /g
-    b
-:nextline
-    b
-' | tee x1.log |
-# source code compactor
-sed '
-/^||||[ 1-9][0-9][0-9]*/{
-    N
-    s/\n$//
-    b
 }' |
-sed '
+## PIO register entry formatter
+sed '1,/^<BEGIN>/b
+s/^PIO:/||||## PIO:/
+/^||||## /!s/ PIO:/\
+||||##PIO:/' |
+sed '1,/^<BEGIN>/b
+/^||||## PIO:/{
 :loop
     N
-    s/\n/\\\\\\\\/
-    p
-    s/^.*\\\\\\\\//
-    b loop
-' |
+    /Table /!b loop
+:l2
+    N
+    / 31/!b l2
+    # reformatting heading part
+    s/\n/ /g
+    s/ 31/\
+\
+>>>31/
+    s/^/\
+/
+}' |
 sed '
-## codeblock delimiters
-/^||||[ 1-9].*\\\\\\\\||||[ 1-9]/b
-s/\\\\\\\\||||\([ 1-9]\)/\\\\\\\\\
-<codeblock>||||\1/
-s/\(||||[ 1-9].*\)\\\\\\\\$/\1\\\\\\\\\
-<\/codeblock>\\\\\\\\/
-s/\(||||[ 1-9].*\)\\\\\\\\\([^ 1-9]\)/\1\\\\\\\\\
-<\/codeblock>\\\\\\\\\
-\\\\\\\\\2/
+/^||||## /{
+    s/\(Registers*\) \(Offset\)/\1\
+\
+||||\2/
+    s/ \(Description\)/\
+\
+||||\1/
+}
 ' |tee x2.log |
-sed 's/\\\\.*$//'
+sed '1,/^<BEGIN>/b
+/^>>>31/,/^|||## PIO:/{
+    s/ \([0-9][0-9]*:[0-9][0-9]*\) /\
+>>>\1 /g
+    /^[0-9][0-9]*:[0-9][0-9]*$/{
+        N
+        s/\n/ /
+    }
+    s/^\([0-9][0-9]*:[0-9][0-9]*\) />>>\1 /g
+    /^[0-9][0-9]$/b single
+    /^[0-9]$/{
+        :single
+        N
+        s/\n/ /
+        s/^/>>>/
+    }
+}'
