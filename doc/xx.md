@@ -1,14 +1,14 @@
 ||||Table 981. CTRL  Register 
 
 <bit-table>
->>>31:27  Reserved.   
+>>>31:27  Reserved.   - -
 >>>26  NEXTPREV_CLKDIV_RESTART: Write 1 to restart the clock dividers of state  SC  0x0  machines in neighbouring PIO blocks, as specified by NEXT_PIO_MASK and  PREV_PIO_MASK in the same write.  This is equivalent to writing 1 to the corresponding CLKDIV_RESTART bits in  those PIOs' CTRL registers. 
 >>>25  NEXTPREV_SM_DISABLE: Write 1 to disable state machines in neighbouring  SC  0x0  PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the  same write.  This is equivalent to clearing the corresponding SM_ENABLE bits in those  PIOs' CTRL registers. 
 >>>24  NEXTPREV_SM_ENABLE: Write 1 to enable state machines in neighbouring  SC  0x0  PIO blocks, as specified by NEXT_PIO_MASK and PREV_PIO_MASK in the  same write.  This is equivalent to setting the corresponding SM_ENABLE bits in those PIOs'  CTRL registers.  If both OTHERS_SM_ENABLE and OTHERS_SM_DISABLE are set, the disable  takes precedence.   Bits  Description  Type  Reset 
 >>>23:20  NEXT_PIO_MASK: A mask of state machines in the neighbouring higher-  SC  0x0  numbered PIO block in the system (or PIO block 0 if this is the highest-  numbered PIO block) to which to apply the operations specified by  NEXTPREV_CLKDIV_RESTART, NEXTPREV_SM_ENABLE, and  NEXTPREV_SM_DISABLE in the same write.  This allows state machines in a neighbouring PIO block to be  started/stopped/clock-synced exactly simultaneously with a write to this PIO  block’s CTRL register.  Note that in a system with two PIOs, NEXT_PIO_MASK and PREV_PIO_MASK  actually indicate the same PIO block. In this case the effects are applied  cumulatively (as though the masks were OR’d together).  Neighbouring PIO blocks are disconnected (status signals tied to 0 and  control signals ignored) if one block is accessible to NonSecure code, and one  is not. 
 >>>19:16  PREV_PIO_MASK: A mask of state machines in the neighbouring lower-  SC  0x0  numbered PIO block in the system (or the highest-numbered PIO block if this  is PIO block 0) to which to apply the operations specified by  OP_CLKDIV_RESTART, OP_ENABLE, OP_DISABLE in the same write.  This allows state machines in a neighbouring PIO block to be  started/stopped/clock-synced exactly simultaneously with a write to this PIO  block’s CTRL register.  Neighbouring PIO blocks are disconnected (status signals tied to 0 and  control signals ignored) if one block is accessible to NonSecure code, and one  is not. 
->>>15:12  Reserved. 
->>>11:8  CLKDIV_RESTART: Restart a state machine’s clock divider from an initial  phase of 0. Clock dividers are free-running, so once started, their output  (including fractional jitter) is completely determined by the integer/fractional  divisor configured in SMx_CLKDIV. This means that, if multiple clock dividers  with the same divisor are restarted simultaneously, by writing multiple 1 bits to  this field, the execution clocks of those state machines will run in precise  lockstep.  Note that setting/clearing SM_ENABLE does not stop the clock divider from  running, so once multiple state machines' clocks are synchronised, it is safe to  disable/reenable a state machine, whilst keeping the clock dividers in sync.  Note also that CLKDIV_RESTART can be written to whilst the state machine is  running, and this is useful to resynchronise clock dividers after the divisors  (SMx_CLKDIV) have been changed on-the-fly.  -  SC  -  0x0   Bits 
+>>>15:12  Reserved. - -
+>>>11:8  CLKDIV_RESTART: Restart a state machine’s clock divider from an initial  phase of 0. Clock dividers are free-running, so once started, their output  (including fractional jitter) is completely determined by the integer/fractional  divisor configured in SMx_CLKDIV. This means that, if multiple clock dividers  with the same divisor are restarted simultaneously, by writing multiple 1 bits to  this field, the execution clocks of those state machines will run in precise  lockstep.  Note that setting/clearing SM_ENABLE does not stop the clock divider from  running, so once multiple state machines' clocks are synchronised, it is safe to  disable/reenable a state machine, whilst keeping the clock dividers in sync.  Note also that CLKDIV_RESTART can be written to whilst the state machine is  running, and this is useful to resynchronise clock dividers after the divisors  (SMx_CLKDIV) have been changed on-the-fly. SC 0x0
 >>>7:4  Description  Type  Reset  SM_RESTART: Write 1 to instantly clear internal SM state which may be  SC  0x0  otherwise difficult to access and will affect future execution.  Specifically, the following are cleared: input and output shift counters; the  contents of the input shift register; the delay counter; the waiting-on-IRQ state;  any stalled instruction written to SMx_INSTR or run by OUT/MOV EXEC; any  pin write left asserted due to OUT_STICKY.  The contents of the output shift register and the X/Y scratch registers are not  affected. 
 >>>3:0  SM_ENABLE: Enable/disable each of the four state machines by writing 1/0 to  RW  0x0  each of these four bits. When disabled, a state machine will cease executing  instructions, except those written directly to SMx_INSTR by the system.  Multiple bits can be set/cleared at once to run/halt multiple state machines  simultaneously. 
 </bit-table>
@@ -19,14 +19,14 @@
 ||||Table 982. FSTAT  Register 
 
 <bit-table>
->>>31:28  Reserved. 
->>>27:24  TXEMPTY: State machine TX FIFO is empty 
->>>23:20  Reserved. 
->>>19:16  TXFULL: State machine TX FIFO is full 
->>>15:12  Reserved. 
->>>11:8  RXEMPTY: State machine RX FIFO is empty 
->>>7:4 
->>>3:0  Reserved.  RXFULL: State machine RX FIFO is full 
+>>>31:28  Reserved. - -
+>>>27:24  TXEMPTY: State machine TX FIFO is empty RO 0xf
+>>>23:20  Reserved.  - -
+>>>19:16  TXFULL: State machine TX FIFO is full  RO 0xf
+>>>15:12  Reserved.  - -
+>>>11:8  RXEMPTY: State machine RX FIFO is empty  RO 0xf
+>>>7:4  Reserved.  - -
+>>>3:0 RXFULL: State machine RX FIFO is full RO 0xf 
 </bit-table>
 
 
@@ -35,14 +35,14 @@
 ||||Table 983. FDEBUG  Register 
 
 <bit-table>
->>>31:28  Reserved.  Type  Reset  -  RO  -  RO  -  RO  -  RO  -  0xf  -  0x0  -  0xf  -  0x0  Type  Reset  -  - 
->>>27:24  TXSTALL: State machine has stalled on empty TX FIFO during a blocking  WC  0x0  PULL, or an OUT with autopull enabled. Write 1 to clear. 
->>>23:20  Reserved.  -  -   Bits  Description  Type  Reset 
->>>19:16  TXOVER: TX FIFO overflow (i.e. write-on-full by the system) has occurred.  WC  0x0  Write 1 to clear. Note that write-on-full does not alter the state or contents of  the FIFO in any way, but the data that the system attempted to write is  dropped, so if this flag is set, your software has quite likely dropped some data  on the floor. 
+>>>31:28  Reserved.  -  - 
+>>>27:24  TXSTALL: State machine has stalled on empty TX FIFO during a blocking  WC  0x0  PULL, or an OUT with autopull enabled. Write 1 to clear. WC 0x0
+>>>23:20  Reserved.  -  -
+>>>19:16  TXOVER: TX FIFO overflow (i.e. write-on-full by the system) has occurred.  WC  0x0  Write 1 to clear. Note that write-on-full does not alter the state or contents of  the FIFO in any way, but the data that the system attempted to write is  dropped, so if this flag is set, your software has quite likely dropped some data  on the floor. WC 0x0
 >>>15:12  Reserved.  -  - 
->>>11:8  RXUNDER: RX FIFO underflow (i.e. read-on-empty by the system) has  WC  0x0  occurred. Write 1 to clear. Note that read-on-empty does not perturb the state  of the FIFO in any way, but the data returned by reading from an empty FIFO is  undefined, so this flag generally only becomes set due to some kind of 
->>>7:4 
->>>3:0  software error.  Reserved.  -  -  RXSTALL: State machine has stalled on full RX FIFO during a blocking PUSH,  WC  0x0  or an IN with autopush enabled. This flag is also set when a nonblocking  PUSH to a full FIFO took place, in which case the state machine has dropped  data. Write 1 to clear. 
+>>>11:8  RXUNDER: RX FIFO underflow (i.e. read-on-empty by the system) has  WC  0x0  occurred. Write 1 to clear. Note that read-on-empty does not perturb the state  of the FIFO in any way, but the data returned by reading from an empty FIFO is  undefined, so this flag generally only becomes set due to some kind of software error.  
+>>>7:4 Reserved.  -  -  
+>>>3:0  RXSTALL: State machine has stalled on full RX FIFO during a blocking PUSH,  WC  0x0  or an IN with autopush enabled. This flag is also set when a nonblocking  PUSH to a full FIFO took place, in which case the state machine has dropped  data. Write 1 to clear. 
 </bit-table>
 
 
@@ -51,14 +51,14 @@
 ||||Table 984. FLEVEL  Register 
 
 <bit-table>
->>>31:28 
->>>27:24 
->>>23:20 
->>>19:16 
->>>15:12 
->>>11:8 
->>>7:4 
->>>3:0  RX3  TX3  RX2  TX2  RX1  TX1  RX0  TX0  RO  RO  RO  RO  RO  RO  RO  RO  0x0  0x0  0x0  0x0  0x0  0x0  0x0  0x0 
+>>>31:28 RX3  RO 0x0
+>>>27:24 TX3   RO 0x0
+>>>23:20 RX2   RO 0x0
+>>>19:16 TX2   RO 0x0
+>>>15:12 RX1   RO 0x0
+>>>11:8 TX1   RO 0x0
+>>>7:4 RX0   RO 0x0
+>>>3:0  TX0  RO 0x0
 </bit-table>
 
 
@@ -81,7 +81,7 @@
 ||||Table 987. IRQ  Register 
 
 <bit-table>
->>>31:8  Reserved.   
+>>>31:8  Reserved.   - -
 >>>7:0  State machine IRQ flags register. Write 1 to clear. There are eight state  WC  0x00  machine IRQ flags, which can be set, cleared, and waited on by the state  machines. There’s no fixed association between flags and state  machines — any state machine can use any flag.  Any of the eight flags can be used for timing synchronisation between state  machines, using IRQ and WAIT instructions. Any combination of the eight  flags can also routed out to either of the two system-level interrupt requests,  alongside FIFO status interrupts — see e.g. IRQ0_INTE. 
 </bit-table>
 
@@ -91,8 +91,8 @@
 ||||Table 988. IRQ_FORCE  Register 
 
 <bit-table>
->>>31:8  Reserved.  Type  Reset  -  - 
->>>7:0  Writing a 1 to each of these bits will forcibly assert the corresponding IRQ.  WF  0x00  Note this is different to the INTF register: writing here affects PIO internal  state. INTF just asserts the processor-facing IRQ signal for testing ISRs, and is  not visible to the state machines.  Table 989.  INPUT_SYNC_BYPASS  Register 
+>>>31:8  Reserved. -  - 
+>>>7:0  Writing a 1 to each of these bits will forcibly assert the corresponding IRQ.  WF  0x00  Note this is different to the INTF register: writing here affects PIO internal  state. INTF just asserts the processor-facing IRQ signal for testing ISRs, and is  not visible to the state machines.
 </bit-table>
 
 
@@ -123,12 +123,12 @@
 
 <bit-table>
 >>>31:28  VERSION: Version of the core PIO hardware.  Type  Reset  RO  0x1  Enumerated values:  0x0 → V0: Version 0 (RP2040)  0x1 → V1: Version 1 (RP2350) 
->>>27:22  Reserved. 
->>>21:16  IMEM_SIZE: The size of the instruction memory, measured in units of one  instruction 
->>>15:12  Reserved. 
->>>11:8  SM_COUNT: The number of state machines this PIO instance is equipped 
->>>7:6 
->>>5:0  with.  Reserved.  FIFO_DEPTH: The depth of the state machine TX/RX FIFOs, measured in  words.  Joining fifos via SHIFTCTRL_FJOIN gives one FIFO with double  this depth.  -  RO  -  RO  -  RO  -  -  -  -  -  - 
+>>>27:22  Reserved. - -
+>>>21:16  IMEM_SIZE: The size of the instruction memory, measured in units of one  instruction RO -
+>>>15:12  Reserved. - -
+>>>11:8  SM_COUNT: The number of state machines this PIO instance is equipped RO -
+>>>7:6 Reserved. RO -
+>>>5:0  with.  Reserved.  FIFO_DEPTH: The depth of the state machine TX/RX FIFOs, measured in  words.  Joining fifos via SHIFTCTRL_FJOIN gives one FIFO with double  this depth.  -  RO  - 
 </bit-table>
 
 
@@ -137,7 +137,7 @@
 ||||Table 993.  INSTR_MEM0,  INSTR_MEM1, …,  INSTR_MEM30,  INSTR_MEM31  Registers 
 
 <bit-table>
->>>31:16  Reserved.  Type  Reset  -  - 
+>>>31:16  Reserved.  -  - 
 >>>15:0  Write-only access to instruction memory location N  WO  0x0000 
 </bit-table>
 
@@ -164,8 +164,8 @@
 >>>28:24  JMP_PIN: The GPIO number to use as condition for JMP PIN. Unaffected by input mapping.  RW  0x00  
 >>>23:19  OUT_EN_SEL: Which data bit to use for inline OUT enable RW  0x00  
 >>>18  INLINE_OUT_EN: If 1, use a bit of OUT data as an auxiliary write enable  When used in conjunction with OUT_STICKY, writes with an enable of 0 will  deassert the latest pin write. This can create useful masking/override  behaviour  due to the priority ordering of state machine pin writes (SM0 < SM1 < …)  RW  0x0 
->>>17  OUT_STICKY: Continuously assert the most recent OUT/SET to the pins 
->>>16:12  WRAP_TOP: After reaching this address, execution is wrapped to  wrap_bottom.  If the instruction is a jump, and the jump condition is true, the jump takes  RW  RW  0x0  0x1f  priority.   Bits  Description  Type  Reset 
+>>>17  OUT_STICKY: Continuously assert the most recent OUT/SET to the pins RW 0x0
+>>>16:12  WRAP_TOP: After reaching this address, execution is wrapped to  wrap_bottom.  If the instruction is a jump, and the jump condition is true, the jump takes  RW 0x1f  priority.   Bits  Description  Type  Reset 
 >>>11:7  WRAP_BOTTOM: After reaching wrap_top, execution is wrapped to this  RW  0x00  address. 
 >>>6:5  STATUS_SEL: Comparison used for the MOV x, STATUS instruction.  RW  0x0  Enumerated values:  0x0 → TXLEVEL: All-ones if TX FIFO level < N, otherwise all-zeroes  0x1 → RXLEVEL: All-ones if RX FIFO level < N, otherwise all-zeroes  0x2 → IRQ: All-ones if the indexed IRQ flag is raised, otherwise all-zeroes 
 >>>4:0  STATUS_N: Comparison level or IRQ index for the MOV x, STATUS instruction.  RW  0x00  If STATUS_SEL is TXLEVEL or RXLEVEL, then values of STATUS_N greater  than the current FIFO depth are reserved, and have undefined behaviour.  Enumerated values:  0x00 → IRQ: Index 0-7 of an IRQ flag in this PIO block  0x08 → IRQ_PREVPIO: Index 0-7 of an IRQ flag in the next lower-numbered PIO  block  0x10 → IRQ_NEXTPIO: Index 0-7 of an IRQ flag in the next higher-numbered  PIO block 
@@ -181,8 +181,8 @@
 >>>30  FJOIN_TX: When 1, TX FIFO steals the RX FIFO’s storage, and becomes twice  RW  0x0  as deep.  RX FIFO is disabled as a result (always reads as both full and empty).  FIFOs are flushed when this bit is changed. 
 >>>29:25  PULL_THRESH: Number of bits shifted out of OSR before autopull, or  RW  0x00  conditional pull (PULL IFEMPTY), will take place.  Write 0 for value of 32. 
 >>>24:20  PUSH_THRESH: Number of bits shifted into ISR before autopush, or  RW  0x00  conditional push (PUSH IFFULL), will take place.  Write 0 for value of 32. 
->>>19 OUT_SHIFTDIR: 1 = shift out of output shift register to right. 0 = to left.  RW
->>>18 IN_SHIFTDIR: 1 = shift input shift register to right (data enters from left). 0 = to  RW  0x1  0x1  left.
+>>>19 OUT_SHIFTDIR: 1 = shift out of output shift register to right. 0 = to left.  RW 0x1  
+>>>18 IN_SHIFTDIR: 1 = shift input shift register to right (data enters from left). 0 = to  left. RW  0x1 
 >>>17  Description  Type  Reset  AUTOPULL: Pull automatically when the output shift register is emptied, i.e. on  RW  0x0  or following an OUT instruction which causes the output shift counter to reach  or exceed PULL_THRESH. 
 >>>16  AUTOPUSH: Push automatically when the input shift register is filled, i.e. on an  RW  0x0  IN instruction which causes the input shift counter to reach or exceed  PUSH_THRESH. 
 >>>15  FJOIN_RX_PUT: If 1, disable this state machine’s RX FIFO, make its storage  RW  0x0  available for random write access by the state machine (using the put  instruction) and, unless FJOIN_RX_GET is also set, random read access by the  processor (through the RXFx_PUTGETy registers).  If FJOIN_RX_PUT and FJOIN_RX_GET are both set, then the RX FIFO’s  registers can be randomly read/written by the state machine, but are  completely inaccessible to the processor.  Setting this bit will clear the FJOIN_TX and FJOIN_RX bits. 
@@ -197,8 +197,8 @@
 ||||Table 997. SM0_ADDR,  SM1_ADDR,  SM2_ADDR,  SM3_ADDR Registers
 
 <bit-table>
->>>31:5  Reserved. 
->>>4:0  Current instruction address of state machine N  Type  Reset  -  RO  -  0x00 
+>>>31:5  Reserved. - -
+>>>4:0  Current instruction address of state machine N RO 0x00 
 </bit-table>
 
 
@@ -207,8 +207,8 @@
 ||||Table 998.  SM0_INSTR,  SM1_INSTR,  SM2_INSTR,  SM3_INSTR Registers
 
 <bit-table>
->>>31:16  Reserved. 
->>>15:0  Read to see the instruction currently addressed by state machine N's program  RW  counter.  Write to execute an instruction immediately (including jumps) and then  resume execution.  Type  Reset  -  -  - 
+>>>31:16  Reserved. - -
+>>>15:0  Read to see the instruction currently addressed by state machine N's program  RW  counter.  Write to execute an instruction immediately (including jumps) and then  resume execution. -  -  - 
 </bit-table>
 
 
@@ -221,7 +221,7 @@
 >>>19:15  IN_BASE: The pin which is mapped to the least-significant bit of a state  RW  0x00  machine’s IN data bus. Higher-numbered pins are mapped to consecutively  more-significant data bits, with a modulo of 32 applied to pin number.  
 >>>14:10  SIDESET_BASE: The lowest-numbered pin that will be affected by a side-set  RW  0x00  operation. The MSBs of an instruction’s side-set/delay field (up to 5,  determined by SIDESET_COUNT) are used for side-set data, with the remaining  LSBs used for delay. The least-significant bit of the side-set portion is the bit  written to this pin, with more-significant bits written to higher-numbered pins.  
 >>>9:5  SET_BASE: The lowest-numbered pin that will be affected by a SET PINS or  RW  0x00  SET PINDIRS instruction. The data written to this pin is the least-significant bit  of the SET data. 
->>> 4:0  OUT_BASE: The lowest-numbered pin that will be affected by an OUT PINS,  RW  0x00  OUT PINDIRS or MOV PINS instruction. The data written to this pin will always  be the least-significant bit of the OUT or MOV data.  
+>>>4:0  OUT_BASE: The lowest-numbered pin that will be affected by an OUT PINS,  RW  0x00  OUT PINDIRS or MOV PINS instruction. The data written to this pin will always  be the least-significant bit of the OUT or MOV data.  RW 0x00
 
 ||||## PIO: RXF0_PUTGET0 Register  Offset: 0x128
 
@@ -330,7 +330,7 @@
 ||||Table 1016.  GPIOBASE Register
 
 <bit-table>
->>>31:5  Reserved.  Type  Reset  -  - 
+>>>31:5  Reserved.  -  - 
 >>>4  Relocate GPIO 0 (from PIO’s point of view) in the system GPIO numbering, to  RW  0x0  access more than 32 GPIOs from PIO.  Only the values 0 and 16 are supported (only bit 4 is writable). 
 >>>3:0  Reserved.  -  - 
 </bit-table>
@@ -340,7 +340,7 @@
 ||||Table 1017. INTR  Register 
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7  RO 0x0
 >>>14 SM6  RO 0x0
 >>>13 SM5  RO 0x0
@@ -364,7 +364,7 @@
 ||||Table 1018.  IRQ0_INTE Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RW 0x0
 >>>14 SM6 RW 0x0
 >>>13 SM5 RW 0x0
@@ -388,7 +388,7 @@
 ||||Table 1019.  IRQ0_INTF Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RW 0x0
 >>>14 SM6 RW 0x0
 >>>13 SM5 RW 0x0
@@ -413,7 +413,7 @@
 ||||Table 1020.  IRQ0_INTS Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RO 0x0
 >>>14 SM6 RO 0x0
 >>>13 SM5 RO 0x0
@@ -437,7 +437,7 @@
 ||||Table 1021.  IRQ1_INTE Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RW 0x0
 >>>14 SM6 RW 0x0
 >>>13 SM5 RW 0x0
@@ -461,7 +461,7 @@
 ||||Table 1022.  IRQ1_INTF Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RW 0x0
 >>>14 SM6 RW 0x0
 >>>13 SM5 RW 0x0
@@ -485,7 +485,7 @@
 ||||Table 1023.  IRQ1_INTS Register
 
 <bit-table>
->>>31:16  Reserved. 
+>>>31:16  Reserved. - -
 >>>15 SM7 RO 0x0
 >>>14 SM6 RO 0x0
 >>>13 SM5 RO 0x0
