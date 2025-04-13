@@ -2,12 +2,12 @@
 
 all: pic-datasheet_jp.pdf
 
-XTARGET= pio1_x.md
+XTARGET= pio1_jp_x.md
 #XTARGET= test_x.md
 
 TARGET= $(XTARGET)
 
-TOCSRC=pio1.md
+TOCSRC=pio1_jp.md
 
 SRC=$(TOCSRC)
 
