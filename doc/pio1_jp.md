@@ -220,7 +220,7 @@ The PIO assembler is included with the SDK, and is called pioasm. This program p
 
 For more information, see Section 11.3.
 
-PIOアセンブラはSDKに含まれており、pioasmと呼ばれる。このプログラムはPIOアセンブラの入力テキストファイル(複数のプログラムを含むことができる)を処理し、使用できるようにアセンブルされたプログラムを書き出す。 SDKでは、これらのアセンブルプログラムは定数配列を含むCヘッダーとして出力される。
+PIOアセンブラはSDKに含まれており、pioasmと呼ばれる。このプログラムはPIOアセンブラの入力テキストファイル(複数のプログラムを含むことができる)を処理し、使用できるようにアセンブルされたプログラムを書き出す。 SDKでは、これらのアセンブルプログラムは定数配列を含むCヘッダとして出力される。
 
 詳細については、セクション 11.3 を参照してください。
 
@@ -311,7 +311,7 @@ The last of these is particularly versatile: instructions can be embedded in the
 
 * 特別なコンフィギュレーションレジスタ(SMx INSTR)に書き込まれた命令は即座に実行され、他の実行を一時的に中断します。例えば、SMx INSTR に書き込まれた JMP 命令により、ステートマシンは別の場所から実行を開始します。
 * MOV EXEC 命令を使用して、レジスタから命令を実行できます。
-* OUT EXEC 命令を使用すると、出力シフターから命令を実行できます。
+* OUT EXEC 命令を使用すると、出力シフタから命令を実行できます。
 
 これらのうち、特に汎用性が高いのは、FIFOを通過するデータのストリームに命令を埋め込むことができる点です。 I2Cの例では、通常のデータと一緒にSTOPやRESTARTなどのライン条件を埋め込むためにこれを使用しています。MOVとOUT EXECの場合、MOV/OUT自体は1サイクルで実行され、次のサイクルで実行される。
 
@@ -328,7 +328,7 @@ Each  state  machine  possesses  a  small  number  of  internal  registers.  The
 <figcaption>
 Figure 45. Output Shift Register (OSR). Data is parcelled out 1…32 bits at a time, and unused data is recycled by a bidirectional shifter.  Once empty, the OSR is reloaded from the TX FIFO.
 
-図 45. 出力シフトレジスタ(OSR)。データは一度に1～32ビットずつ分割され、未使用データは双方向シフターによって再利用される。 OSR が空になると、TX FIFO から再ロードされる。
+図 45. 出力シフトレジスタ(OSR)。データは一度に1～32ビットずつ分割され、未使用データは双方向シフタによって再利用される。 OSR が空になると、TX FIFO から再ロードされる。
 </figcaption>
 </figure>
 
@@ -429,7 +429,7 @@ Some  peripherals,  like  UARTs,  must  shift  in  from  the  left  to  get  cor
 * オートプッシュが有効な場合、あるシフトしきい値に達すると、ステートマシンは IN 命令で自動的に ISR をプッシュします。
 * シフト方向は、コンフィギュレーションレジスタを介してプロセッサが設定可能です。
 
-UARTのようないくつかの周辺回路は、正しいビット順序を得るために左からシフトする必要があります。これは特別なヌル入力ソースによって解決され、プログラマーはデータに続いて、ある数のゼロをISRにシフトすることができます。
+UARTのようないくつかの周辺回路は、正しいビット順序を得るために左からシフトする必要があります。これは特別なヌル入力ソースによって解決され、プログラマはデータに続いて、ある数のゼロをISRにシフトすることができます。
 
 #### 11.2.4.2. シフトカウンタ
 
@@ -455,7 +455,7 @@ On PIO reset, or the assertion of CTRL_SM_RESTART, the input shift counter is cl
 * あるビット数がシフトインされると、自動的に ISR を空にすることができます(セクション 11.5.4 を参照)。
 * PUSH 命令または PULL 命令は、それぞれ入力または出力シフトカウンタを条件とすることができます。
 
-PIO リセッ トまたは CTRL_SM_RESTART のアサー ト時に、 入力シ フ ト カ ウ ン タ は0 に ク リ ア さ れ( まだ何もシ フ ト インされていない)、 出力シ フ ト カ ウ ン タ は32 に初期化 さ れます( シ フ ト ア ウ ト さ れ る 残 り がな く 、 完全に使い切られた)。他のいくつかの命令は、シフトカウンタに影響を与えます: 
+PIO リセットまたは CTRL_SM_RESTART のアサート時に、入力シフトカウンタは 0 にクリアされ(まだ何もシフトインされていない)、 出力シフトカウンタは 32 に初期化されます(シフトアウトされる残りがなく、完全に使い切られた)。他のいくつかの命令は、シフトカウンタに影響を与えます: 
 
 * PULLが成功すると、出力シフトカウンタは0にクリアされます。
 * PUSH が成功すると、入力シフトカウンタは 0 にクリアされます。
@@ -522,11 +522,11 @@ Often, a state machine only transfers data in one direction. In this case, the  
 
 (和訳)
 
-各ステートマシンには、システムからステートマシンへのデータ転送用(TX)と、ステートマシンからシ ステムへのデータ転送用(RX)の、深さ 4 ワードの FIFO があります。TX FIFOはプロセッサやDMAコントローラなどのシステムバスマスタによって書き込まれ、RX FIFOはステートマシンによって書き込まれる。FIFOは、PIOステートマシンとシステムバスのタイミングを切り離し、プロセッサの介入なしにステートマシンを長時間動作させることを可能にする。
+各ステートマシンには、システムからステートマシンへのデータ転送用(TX)と、ステートマシンからシステムへのデータ転送用(RX)の、深さ 4 ワードの FIFO があります。TX FIFOはプロセッサやDMAコントローラなどのシステムバスマスタによって書き込まれ、RX FIFOはステートマシンによって書き込まれる。FIFOは、PIOステートマシンとシステムバスのタイミングを切り離し、プロセッサの介入なしにステートマシンを長時間動作させることを可能にする。
 
 FIFOはまた、データ要求(DREQ)信号を生成し、システムDMAコントローラが、RX FIFO内のデータの有無、またはTX FIFO内の新しいデータのスペースに基づいて、リード/ライトをペース配分することを可能にする。これにより、プロセッサは、何キロバイトものデータを含む可能性のある長いトランザクションをセットアップすることができる。
 
-多くの場合、ステートマシンは一方向にしかデータを転送しない。この場合、SHIFTCTRL_FJOINオプションは、2つのFIFOを1つの8エントリーFIFOに統合し、一方向にのみデータを転送することができる。これは DPI のような高帯域幅インターフェイスに有用である。
+多くの場合、ステートマシンは一方向にしかデータを転送しない。この場合、SHIFTCTRL_FJOINオプションは、2つのFIFOを1つの8エントリFIFOに統合し、一方向にのみデータを転送することができる。これは DPI のような高帯域幅インターフェイスに有用である。
 
 ### 11.2.5. ストール
 
@@ -550,7 +550,7 @@ In this case, the program counter does not advance, and the state machine will c
 * オートプルが有効で、OSR がすでにシフトしきい値に達している場合の OUT 命令。
 * オートプッシュが有効で、ISR がシフトしきい値に達し、RX FIFO が満杯のときの IN 命令。
 
-この場合、プログラムカウンタは進まず、ステートマシ ンは次のサイクルでこの命令の実行を継続する。命令が、次の命令を開始するまでの遅延サイクル数を指定している場合、これらの遅延サイクルは、ストールがクリアされるまで開始されません。
+この場合、プログラムカウンタは進まず、ステートマシンは次のサイクルでこの命令の実行を継続する。命令が、次の命令を開始するまでの遅延サイクル数を指定している場合、これらの遅延サイクルは、ストールがクリアされるまで開始されません。
 
 > 注: サイドセット(セクション 11.5.1)はストールの影響を受けません。
 
@@ -591,7 +591,7 @@ State machines interact with the flags via the IRQ and WAIT instructions.
 
 ### 11.2.7. IRQ フラグ
 
-IRQ フラグはステートマシンやシステムによってセットまたはクリアされる状態ビットで す。全部で 8 つあり、8 つすべてがすべてのステートマシンに表示され、下位 4 つは IRQ0_INTE および IRQ1_INTE 制御レジスタを経由して PIO の割り込み要求ラインの 1 つにマスクすることもできます。
+IRQ フラグはステートマシンやシステムによってセットまたはクリアされる状態ビットです。全部で 8 つあり、8 つすべてがすべてのステートマシンに表示され、下位 4 つは IRQ0_INTE および IRQ1_INTE 制御レジスタを経由して PIO の割り込み要求ラインの 1 つにマスクすることもできます。
 
 これらには主に2つの用途がある: 
 
@@ -628,7 +628,7 @@ The  PIO  Assembler  parses  a  PIO  source  file  and  outputs  the  assembled 
 
 This section briefly introduces the directives and instructions that can be used in pioasm input. For a deeper discussion of how to use pioasm, how it is integrated into the SDK build system, extended features such as code pass through, and the various output formats it can produce, see Raspberry Pi Pico-series C/C++ SDK.
 
-PIO アセンブラは、PIO ソースファイルを解析し、RP2350 アプリケーションに組み込めるようにアセン ブルしたバージョンを出力します。これには、SDK に対してビルドされた C および C++ アプリケーション、および RP2350 MicroPython ポートで実行される Python プログラムが含まれます。
+PIO アセンブラは、PIO ソースファイルを解析し、RP2350 アプリケーションに組み込めるようにアセンブルしたバージョンを出力します。これには、SDK に対してビルドされた C および C++ アプリケーション、および RP2350 MicroPython ポートで実行される Python プログラムが含まれます。
 
 このセクションでは、pioasm 入力で使用できるディレクティブと命令を簡単に紹介します。pioasm の使用方法、SDK ビルドシステムへの統合方法、コードパススルーなどの拡張機能、および pioasm が生成できるさまざまな出力形式については、 "Raspberry Pi Pico-series C/C++ SDK." を参照してください。
 
@@ -785,7 +785,7 @@ PUBLIC <symbol>:
 
 >  TIP A label is really just an automatic .define with a value set to the current program instruction offset. A PUBLIC label is exposed to the user code in the same way as a PUBLIC .define.
 
-> ヒント ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動.defineに過ぎません。PUBLICラベルはPUBLIC .defineと同じようにユーザコードに公開されます。
+> ヒント: ラベルは実際には、現在のプログラム命令オフセットに値が設定された自動.defineに過ぎません。PUBLICラベルはPUBLIC .defineと同じようにユーザコードに公開されます。
 
 ### 11.3.6. Instructions
 
@@ -801,10 +801,10 @@ where:
 
 ||<instruction>||An assembly instruction detailed in the following sections. (see Section 11.4)
 
-以下のセクションで詳述される組立説明書。(セクション11.4参照)
+以下のセクションで詳述されるアセンブリ命令(セクション11.4参照)。
 ||<side_set_value>||A value (see Section 11.3.2) to apply to the side_set pins at the start of the instruction. Note that the rules for a side-set value via side <side_set_value> are dependent on the .side_set (see pioasm_side_set) directive for the program. If no .side_set is specified then the side <side_set_value> is invalid, if an optional number of sideset pins is specified then side <side_set_value> may be present, and if a non-optional number of sideset pins is specified, then side <side_set_value> is required. The <side_set_value> must fit within the number of side-set bits specified in the .side_set directive.
 
-命令開始時にside_setピンに適用する値(セクション11.3.2参照)。side <side_set_value> によるサイドセット値の規則は、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意すること。.side_setが指定されていない場合、side <side_set_value>は無効であり、オプションのサイドセットピン数が指定されている場合、side <side_set_value>が存在してもよく、オプションでないサイドセットピン数が指定されている場合、side <side_set_value>は必須である。<side_set_value>は、.side_set指示文で指定されたサイドセットビット数に収まらなければならない。
+命令開始時に side_se tピンに適用する値(セクション11.3.2参照)。side <side_set_value> によるサイドセット値の規則は、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意すること。.side_setが指定されていない場合、side <side_set_value>は無効であり、オプションのサイドセットピン数が指定されている場合、side <side_set_value>が存在してもよく、オプションでないサイドセットピン数が指定されている場合、side <side_set_value>は必須である。<side_set_value>は、.side_set指示文で指定されたサイドセットビット数に収まらなければならない。
 ||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 11.3.2), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the .side_set (see pioasm_side_set) directive. If the <delay_value> is not present, then the instruction has no delay.
 
 命令が完了した後に遅延させるサイクル数を指定する。delay_valueは値として指定され(セクション11.3.2参照)、通常は0から31の間(5ビット値)であるが、.side_set(pioasm_side_set参照)指令によってサイドセットが有効になっている場合はビット数が減る。<delay_value>が存在しない場合、その命令は遅延を持たない。
@@ -812,17 +812,17 @@ where:
 
 >  NOTE pioasm instruction names, keywords and directives are case insensitive; lower case is used in the Assembly Syntax sections below, as this is the style used in the SDK.
 
->  NOTE Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. out pins, 3 may be written out  pins  3, and  jmp  x--  label may be written as  jmp  x--,  label. The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
+>  NOTE Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. out pins, 3 may be written out  pins  3, and  `jmp  x--  label` may be written as  `jmp  x--,  label`. The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
 > NOTE pioasmの命令名、キーワード、ディレクティブは大文字と小文字を区別しません。
 
-> NOTE 例えば、out pins, 3 は out pins 3、jmp x-- label は jmp x--, label と書くことができます。以下のアセンブリ構文では、SDKで使用されている最初のスタイルを使用しています。
+> NOTE 例えば、`out pins, 3` は `out pins 3`、`jmp x-- label` は `jmp x--, label` と書くことができます。以下のセクションの Assembly Syntax の説明では、SDKで使用されている最初のスタイルを使用しています。
 
 ### 11.3.7. Pseudoinstructions
 
 pioasm provides aliases for certain instructions, as a convenience:
 
-pioasmは、便宜上、特定の命令のエイリアスを提供している: 
+pioasm は、便宜上、特定の命令のエイリアスを提供している: 
 
 <description>
 
@@ -854,7 +854,7 @@ The function of the 5-bit Delay/side-set field depends on the state machine's SI
 
 すべてのPIO命令は1クロックサイクルで実行される。
 
-5ビットのDelay/side-setフィールドの機能は、ステートマシンのSIDESET_COUNTコンフィギュレーションに依存する: 
+5ビットのDelay/side-setフィールドの機能は、ステートマシンの SIDESET_COUNT コンフィギュレーションに依存する: 
 
 * 最大5つのLSB(5からSIDESET_COUNTを引いた値)は、この命令と次の命令の間に挿入されるアイドルサイクル数をエンコードする。
 * SIDESET_COUNT で設定される最大 5 つの MSB は、サイドセット(セクション 11.5.1)をエンコードし、メイン命令実行と同時に、いくつかの GPIO に定数をアサートすることができます。
@@ -887,7 +887,7 @@ Delay  cycles  on  a  JMP  always  take  effect,  whether  Condition  is  true  
 
 JMP PIN branches on the GPIO selected by EXECCTRL_JMP_PIN, a configuration field which selects one out of the maximum of 32 GPIO inputs visible to a state machine, independently of the state machine's other input mapping. The branch is taken if the GPIO is high.
 
-コンディションが真の場合、プログラムカウンタをアドレスに設定する。
+条件が真の場合、プログラムカウンタをアドレスに設定する。
 
 JMPの遅延サイクルは、Conditionがtrueであろうとfalseであろうと常に有効であり、Conditionが評価され、プログラムカウンタが更新された後に実行される。
 
@@ -1112,7 +1112,7 @@ PINS and PINDIRS use the OUT pin mapping, as described in Section 11.5.6.
 
 If automatic pull is enabled, the OSR is automatically refilled from the TX FIFO if the pull threshold, SHIFTCTRL_PULL_THRESH, is reached. The output shift count is simultaneously cleared to 0. In this case, the OUT will stall if the TX FIFO is empty, but otherwise still executes in one cycle. The specifics are given in Section 11.5.4.
 
-出力シフトレジスタ(OSR)からビットカウントビットをシフ トし、それらのビットをデスティネーションに書き込む。さらに、出力シフトカウントをビットカウントずつ増やし、32で飽和させる。
+出力シフトレジスタ(OSR)からビットカウントビットをシフトし、それらのビットをデスティネーションに書き込む。さらに、出力シフトカウントをビットカウントずつ増やし、32で飽和させる。
 
 * デスティネーション: 
   + 000: PINS
@@ -1274,7 +1274,7 @@ If  IdxI  (index  by  immediate)  is  set,  the  RX  FIFO's  registers  are  ind
 
 When only SHIFTCTRL_FJOIN_RX_PUT is set (in SM0_SHIFTCTRL through SM3_SHIFTCTRL), the system can also read the RX FIFO  registers  with  random  access  via  RXF0_PUTGET0  through  RXF0_PUTGET3  (where  RXFx  indicates  which  state machine's FIFO is being accessed). In this state, the FIFO register storage is repurposed as status registers, which the state machine can update at any time and the system can read at any time. For example, a quadrature decoder program could maintain the current step count in a status register at all times, rather than pushing to the RX FIFO and potentially blocking.
 
-選択した RX FIFO エントリに ISR を書き込む。ステートマシンは、Y レジスタまたは命令内の即時インデッ クスによってインデックス付けされたRX FIFO エントリを任意の順序で書き込むことができます。SHIFTCTRL_FJOIN_RX_PUT 設定フィールドが設定されている必要があります。FIFOコンフィギュレーションは、.fifo ディレクティブ(pioasm_fifo を参照)を介してプログラムに指定することができます。
+選択した RX FIFO エントリに ISR を書き込む。ステートマシンは、Y レジスタまたは命令内の即時インデックスによってインデックス付けされたRX FIFO エントリを任意の順序で書き込むことができます。SHIFTCTRL_FJOIN_RX_PUT 設定フィールドが設定されている必要があります。FIFOコンフィギュレーションは、.fifo ディレクティブ(pioasm_fifo を参照)を介してプログラムに指定することができます。
 
 IdxI(即値によるインデックス)が設定されている場合、RX FIFOのレジスタはIndexオペランドの最下位ビット2つによってインデックス付けされます。そうでない場合は、Yレジスタの最下位ビット2つによってインデックスが付けられます。IdxIがクリアされている場合、Indexの0以外の値は全て予約エンコーディングであり、その動作は未定義である。
 
@@ -1322,11 +1322,11 @@ When  only  SHIFTCTRL_FJOIN_RX_GET  is  set,  the  system  can  also  write  the
 
 When  both  SHIFTCTRL_FJOIN_RX_PUT  and  SHIFTCTRL_FJOIN_RX_GET  are  set,  the  system  can  no  longer  access  the  RX  FIFO storage registers, but the state machine can now put/get the registers in arbitrary order, allowing them to be used as additional scratch storage.
 
-選択された RX FIFO エントリを OSR に読み込む。PIO ステートマシンは、Y レジスタまたは命令内の即時インデックスをインデックスとして、 任意の順序でFIFO エントリを読み出すことができます。設定フ ィールドが設定されている必要があり、そうでなければ動作は未定義です。
+選択された RX FIFO エントリを OSR に読み込む。PIO ステートマシンは、Y レジスタまたは命令内の即時インデックスをインデックスとして、 任意の順序でFIFO エントリを読み出すことができます。設定フィールドが設定されている必要があり、そうでなければ動作は未定義です。
 
 IdxI(即時インデックス)が設定されている場合、RX FIFOのレジスタはIndexオペランドの最下位ビット2つによってインデックス付けされます。そうでない場合は、Yレジスタの最下位ビット2つによってインデックスが付けられます。IdxIがクリアされている場合、Indexの0以外の値は全て予約エンコーディングであり、その動作は未定義である。
 
-SHIFTCTRL_FJOIN_RX_GETのみが設定されている場合、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。このステートでは、RX FIFO レジスタストレージは追加コンフィギュレーションレジスタとして再利用され、システムはこれらをいつでも更新でき、ステートマシンはこれらをい つでも読み出しできます。例えば、UART TX プログラムはこれらのレジスタを使用してデータビット数や追加ストップビットの有無を設定することができます。
+SHIFTCTRL_FJOIN_RX_GETのみが設定されている場合、システムはRXF0_PUTGET0～RXF0_PUTGET3(ここでRXFxはどのステートマシンのFIFOにアクセスしているかを示す)を介したランダムアクセスでRX FIFOレジスタを書き込むこともできる。このステートでは、RX FIFO レジスタストレージは追加コンフィギュレーションレジスタとして再利用され、システムはこれらをいつでも更新でき、ステートマシンはこれらをいつでも読み出しできます。例えば、UART TX プログラムはこれらのレジスタを使用してデータビット数や追加ストップビットの有無を設定することができます。
 
 SHIFTCTRL_FJOIN_RX_PUT と SHIFTCTRL_FJOIN_RX_GET の両方が設定されると、システムはRX FIFOストレージレジスタにアクセスできなくなります。
 
@@ -1490,7 +1490,7 @@ The  NEXT/PREV  modes  can  be  used  to  synchronise  between  state  machines 
 
 If Wait is set, Delay cycles do not begin until after the wait period elapses.
 
-モジュロ加算モード(REL)は、同じプログラムを実行しているステートマシンを同期させるため に、 "IRQ" と "WAIT" 命令の相対アドレッシングを可能にする。ビット2(3番目のLSB)はこの加算の影響を受けない。
+モジュロ加算モード(REL)は、同じプログラムを実行しているステートマシンを同期させるために、 "IRQ" と "WAIT" 命令の相対アドレッシングを可能にする。ビット2(3番目のLSB)はこの加算の影響を受けない。
 
 NEXT/PREVモードは、異なるPIOブロック内のステートマシン間の同期に使用できる。 これらのステートマシンのクロックが分周されている場合、それらのクロック分周器は同じでなければならず、関連するNEXT_PIO_MASK/PREV_PIO_MASKビットに加えてCTRL.NEXTPREV_CLKDIV_RESTARTを書き込むことによって同期化されていなければならない。 クロスPIO接続は、ACCESSCTRLに従って、非セキュアコードへのアクセス性が異なるPIO間で切断されることに注意。
 
@@ -1544,7 +1544,7 @@ This can be used to assert control signals such as a clock or chip select, or to
 
 The  mapping  of  SET  and  OUT  onto  pins  is  configured  independently.  They  may  be  mapped  to  distinct  locations,  for example if one pin is to be used as a clock signal, and another for data. They may also be overlapping ranges of pins: a UART transmitter might use SET to assert start and stop bits, and OUT instructions to shift out FIFO data to the same pins.
 
-即値の書き込み データをデスティネーションへ
+即値の書き込みデータをデスティネーションへ
 
 * デスティネーション
   + 000: PINS
@@ -1555,7 +1555,7 @@ The  mapping  of  SET  and  OUT  onto  pins  is  configured  independently.  The
   + 101: 予約
   + 110: 予約
   + 111: 予約
-* データ データ: ピンまたはレジスタにドライブする5ビットの即時値。
+* データ: ピンまたはレジスタにドライブする5ビットの即時値。
 
 これは、クロックやチップセレクトのような制御信号をアサートしたり、ループカウンタを初期化するために使用できる。Dataは5ビットなので、スクラッチレジスタを0～31の値にSETすることができ、これは32回繰り返しのループには十分である。
 
@@ -1782,7 +1782,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squa
 
 By default, each state machine possesses a 4-entry FIFO in each direction: one for data transfer from system to state machine  (TX),  the  other  for  the  reverse  direction  (RX).  However,  many  applications  do  not  require  bidirectional  data transfer  between  the  system  and  an  individual  state  machine,  but  may  benefit  from  deeper  FIFOs:  in  particular,  high- bandwidth interfaces such as DPI. For these cases, SHIFTCTRL_FJOIN can merge the two 4-entry FIFOs into a single 8-entry FIFO.
 
-デフォルトでは、各ステートマシンは、システムからステートマシンへのデータ転送用(TX)と、逆方向(RX)の各方向に4エントリーのFIFOを持つ。 しかし、多くのアプリケーションでは、システムと個々のステートマシン間の双方向のデータ転送を必要としないが、より深いFIFOの恩恵を受けることがある: 特にDPIなどの高帯域幅インターフェース。このような場合、SHIFTCTRL_FJOINは2つの4エントリFIFOを1つの8エントリFIFOに統合することができる。
+デフォルトでは、各ステートマシンは、システムからステートマシンへのデータ転送用(TX)と、逆方向(RX)の各方向に4エントリのFIFOを持つ。 しかし、多くのアプリケーションでは、システムと個々のステートマシン間の双方向のデータ転送を必要としないが、より深いFIFOの恩恵を受けることがある: 特にDPIなどの高帯域幅インターフェース。このような場合、SHIFTCTRL_FJOINは2つの4エントリFIFOを1つの8エントリFIFOに統合することができる。
 
 <figure>
 <img src="img/fig47.png"/>
@@ -1971,11 +1971,11 @@ To trigger automatic push or pull at the correct time, the state machine tracks 
 
 On any  OUT or  IN instruction, the state machine compares the shift counters to the values of  SHIFTCTRL_PULL_THRESH and SHIFTCTRL_PUSH_THRESH  to  decide  whether  action  is  required.  Autopull  and  autopush  are  individually  enabled  by  the SHIFTCTRL_AUTOPULL and SHIFTCTRL_AUTOPUSH fields.
 
-正しいタイミングで自動プッシュまたはプルをトリガーするために、ステートマシンは、飽和する6ビットカウンタのペアを使用して、ISRとOSRの合計シフトカウントを追跡します。
+正しいタイミングで自動プッシュまたはプルをトリガするために、ステートマシンは、飽和する6ビットカウンタのペアを使用して、ISRとOSRの合計シフトカウントを追跡します。
 
 * リセット時、またはCTRL_SM_RESTARTアサート時には、ISRシフトカウンタは0に設定され(何もシフトインされていない)、OSRは32に設定される(シフトアウトされるものは残っていない)。
 * OUT 命令は OSR シフトカウンタをビットカウント増加させます。
-* IN 命令は、ISR シフト カウンタをBit カウント増やします。
+* IN 命令は、ISR シフトカウンタをBit カウント増やします。
 * PULL 命令またはオートプルは、OSR カウンタを 0 にクリアします。
 * PUSH 命令またはオートプッシュは、ISR カウンタを 0 にクリアします。
 * MOV OSR, x または MOV ISR, x は、それぞれ OSR または ISR シフトカウンタを 0 にクリアします。
@@ -2069,7 +2069,7 @@ PULL does not require similar behaviour, because autopush does not have the same
 
 OSRからのMOVは、オートプルが有効になっている間は未定義であることに注意してください。システムDMAとの競合によって、シフトアウトされていない残存データか、FIFOからの新しいワードのいずれかを読み取ることになります。同様に、OSRへのMOVは、オートプルされたばかりのデータを上書きする可能性があります。ただし、OSRにMOVしたデータは、MOVによってシフトカウンタが更新されるため、上書きされることはありません。
 
-OSRの内容を読み出す必要がある場合は、何らかの明示的なPULLを実行す る必要があります。 上記の非決定性は、ハードウェアが自動的にプルを管理するためのコストです。オートプルが有効になっている場合、PULLの動作は変更されます。これはシステムDMAとの競合状態を避けるためである。PULLはフェンスのように動作します。オートプルがすでに実行されている場合は、PULLは何の効果もなく、またはFIFOでデータが利用可能になるまで、プログラムはPULLでストールします。
+OSRの内容を読み出す必要がある場合は、何らかの明示的なPULLを実行する必要があります。 上記の非決定性は、ハードウェアが自動的にプルを管理するためのコストです。オートプルが有効になっている場合、PULLの動作は変更されます。これはシステムDMAとの競合状態を避けるためである。PULLはフェンスのように動作します。オートプルがすでに実行されている場合は、PULLは何の効果もなく、またはFIFOでデータが利用可能になるまで、プログラムはPULLでストールします。
 
 自動プッシュには同じような非決定性がないため、PULLには同様の動作は必要ない。
 
@@ -2220,7 +2220,7 @@ WAIT GPIOのようないくつかの命令では、INデータバスのインデ
 
 To protect PIO from metastabilities, each GPIO input is equipped with a standard 2-flipflop synchroniser. This adds two cycles of latency to input sampling, but the benefit is that state machines can perform an IN PINS at any point, and will see  only  a  clean  high  or  low  level,  not  some  intermediate  value  that  could  disturb  the  state  machine  circuitry.  This  is absolutely necessary for asynchronous interfaces such as UART RX.
 
-PIO をメタスタビリティから保護するために、各 GPIO 入力には標準的な 2 フリップフロップ・シンクロナイザが装備されています。これは入力サンプリングに2サイクルのレイテンシを追加しますが、その利点は、ステートマシ ンがどの時点でも IN PINS を実行でき、ステートマシン回路を乱す可能性のある中間値ではなく、きれいな ハイレベルまたはローレベルだけを見ることができることです。 これはUART RXのような非同期インターフェイスには絶対に必要である。
+PIO をメタスタビリティから保護するために、各 GPIO 入力には標準的な 2 フリップフロップ・シンクロナイザが装備されています。これは入力サンプリングに2サイクルのレイテンシを追加しますが、その利点は、ステートマシンがどの時点でも IN PINS を実行でき、ステートマシン回路を乱す可能性のある中間値ではなく、きれいなハイレベルまたはローレベルだけを見ることができることです。 これはUART RXのような非同期インターフェイスには絶対に必要である。
 
 It is possible to bypass these synchronisers, on a per-GPIO basis. This reduces input latency, but it is then up to the user to guarantee that the state machine does not sample its inputs at inappropriate times. Generally this is only possible for synchronous interfaces such as SPI. Synchronisers are bypassed by setting the corresponding bit in INPUT_SYNC_BYPASS.
 
@@ -2234,7 +2234,7 @@ Besides the instruction memory, state machines can execute instructions from 3 o
 * OUT EXEC which executes data shifted out from the OSR
 * The SMx_INSTR control registers, to which the system can write instructions for immediate execution
 
-GPIOごとに、これらのシンクロナイザーをバイパスすることも可能である。これによって入力レイテンシが減少しますが、ステートマシンが不適切なタイミングで入力をサンプリングしないことを保証するかどうかはユーザ次第です。一般的に、これはSPIなどの同期インターフェイスでのみ可能です。同期器は、INPUT_SYNC_BYPASS の対応するビットを設定することでバイパスされる。
+GPIOごとに、これらのシンクロナイザをバイパスすることも可能である。これによって入力レイテンシが減少しますが、ステートマシンが不適切なタイミングで入力をサンプリングしないことを保証するかどうかはユーザ次第です。一般的に、これはSPIなどの同期インターフェイスでのみ可能です。同期器は、INPUT_SYNC_BYPASS の対応するビットを設定することでバイパスされる。
 
 > 警告 メタステーブル入力をサンプリングすると、ステートマシンの動作が予測不可能になることがある。これは避けるべきである。
 
@@ -2324,7 +2324,7 @@ Cプログラムはステートマシンを実行状態にし、その時点で�
 
 INSTRレジスタに命令が書き込まれると、ステートマシンはPIOの命令メモリからフェッチした命令ではなく、その命令を即座にデコードして実行する。プログラムカウンタは進まないため、次のサイクルでは(INSTRインターフェイスに強制的に書き込まれた命令がストールしなかったと仮定して)、書き込まれた命令自体がPCを操作しない限り、ステートマシンは現在のプログラムを中断した時点から実行し続けます。
 
-INSTRレジスタに書き込まれた命令では、遅延サイクルは無視され、ステートマシンのクロック分周を無視して直ちに実行される。このインターフェイスは、初期セットアップと制御フロー変更のために用意されているため、ステートマシンがどのように構成されていても、命令をタイムリーに実行することができる。
+INSTRレジスタに書き込まれた命令では、遅延サイクルは無視され、ステートマシンのクロック分周を無視して直ちに実行される。このインターフェイスは、初期セットアップと制御フロー変更のために用意されているため、ステートマシンがどのように構成されていても、命令をタイムリに実行することができる。
 
 Instructions written to the INSTR register are permitted to stall, in which case the state machine will latch this instruction internally until it completes. This is signified by the EXECCTRL_EXEC_STALLED flag. This can be cleared by restarting the state machine, or writing a NOP to INSTR.
 
@@ -2417,9 +2417,9 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/
 
 A C helper function configures the state machine, connects the GPIOs, and sets the state machine running. Note that the  SPI  frame  size --- that  is,  the  number  of  bits  transferred  for  each  FIFO  record --- can  be  programmed  to  any  value from 1 to 32, without modifying the program. Once configured, the state machine is set running.
 
-> NOTE チップセレクトは、SPIハードウェアによって動作が大きく異なるため、ソフトウェア制御のGPIOとして実装されることがよくあります。上記のリンク先のspi.pioソースには、PIOがハードウェアチップセレクトラインを実装する例がいくつか含まれています。
+> NOTE チップセレクトは、SPIハードウェアによって動作が大きく異なるため、ソフトウェア制御のGPIOとして実装されることがよくあります。上記のリンク先の spi.pio全ソースには、PIOがハードウェアチップセレクトラインを実装する例がいくつか含まれています。
 
-Cヘルパー関数がステートマシンを設定し、GPIOを接続し、ステートマシンの実行を設定します。SPIフレームサイズ(つまり、FIFOレコードごとに転送されるビット数)は、プログラムを変更することなく、1から32までの任意の値にプログラムできることに注意してください。いったん設定されると、ステートマシンは実行状態に設定される。
+Cヘルパ関数がステートマシンを設定し、GPIOを接続し、ステートマシンの実行を設定します。SPIフレームサイズ(つまり、FIFOレコードごとに転送されるビット数)は、プログラムを変更することなく、1から32までの任意の値にプログラムできることに注意してください。いったん設定されると、ステートマシンは実行状態に設定される。
 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/spi/spi.pio Lines 46 - 72
@@ -2618,7 +2618,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 
 This program shifts bits from the OSR into X, and produces a wide or narrow pulse on side-set pin 0, based on the value of each data bit. Autopull must be configured, with a threshold of 24. Software can then write 24-bit pixel values into the FIFO, and these will be serialised to a chain of WS2812 LEDs. The .pio file contains a C helper function to set this up:
 
-このプログラムはOSRからXにビットをシフトし、各データビットの値に基づいてサイドセットピン0にワイドまたはナローのパルスを生成します。オートプルはスレッショルドを 24 に設定する必要があります。ソフトウェアは24ビットのピクセル値をFIFOに書き込むことができ、これらはWS2812 LEDのチェーンにシリアライズされます。.pioファイルには、これを設定するためのCヘルパー関数が含まれています: 
+このプログラムはOSRからXにビットをシフトし、各データビットの値に基づいてサイドセットピン0にワイドまたはナローのパルスを生成します。オートプルはスレッショルドを 24 に設定する必要があります。ソフトウェアは24ビットのピクセル値をFIFOに書き込むことができ、これらはWS2812 LEDのチェーンにシリアライズされます。.pioファイルには、これを設定するためのCヘルパ関数が含まれています: 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws2812/ws2812.pio Lines 36 - 52
 
@@ -2711,7 +2711,7 @@ The  .pio file in the SDK also contains this function, for configuring the pins 
 3. 8ビットのデータビットをシフトアウトする。
 4. 次のスタートビットをアサートする前に、少なくとも8サイクル、アイドルライン状態に戻る。
 
-ステートマシンのクロック分周器が希望のボーレートの8倍で動作するように設定されている場合、このプログラ ムは、ソフトウェアまたはシステムDMAによってTX FIFOにデータがプッシュされるたびに、適切に形成された UARTシリアルフレームを送信します。異なるフレームサイズ(異なるデータビット数)をカバーするようにプログラムを拡張するには、set x, 7をmov x, yに置き換えて、yスクラッチレジスタをUARTフレームサイズ用のSMごとのコンフィギュレーションレジスタにします。
+ステートマシンのクロック分周器が希望のボーレートの8倍で動作するように設定されている場合、このプログラムは、ソフトウェアまたはシステムDMAによってTX FIFOにデータがプッシュされるたびに、適切に形成された UARTシリアルフレームを送信します。異なるフレームサイズ(異なるデータビット数)をカバーするようにプログラムを拡張するには、set x, 7をmov x, yに置き換えて、yスクラッチレジスタをUARTフレームサイズ用のSMごとのコンフィギュレーションレジスタにします。
 
 SDKの.pioファイルには、プログラムがPIO命令メモリにロードされると、ピンとステートマシンを設定するためのこの関数も含まれています: 
 
@@ -2751,7 +2751,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 
 The  state  machine  is  configured  to  shift  right  in  out  instructions,  because  UARTs  typically  send  data  LSB-first.  Once configured, the state machine will print any characters pushed to the TX FIFO.
 
-UART は通常 LSB ファーストでデータを送信するため、ステートマシンは右シフトするように設定されています。 一度設定されると、ステート マシンは TX FIFO にプッシュされた文字を印刷します。
+UART は通常 LSB ファーストでデータを送信するため、ステートマシンは右シフトするように設定されています。 一度設定されると、ステートマシンは TX FIFO にプッシュされた文字を印刷します。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_tx/uart_tx.pio Lines 53 - 55
 
@@ -2884,7 +2884,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart
 
 The second example does not use autopush (Section 11.5.4), preferring instead to use an explicit  push instruction, so that  it  can  condition  the  push  on  whether  a  correct  stop  bit  is  seen.  The  .pio  file  includes  a  helper  function  which configures the state machine and connects it to a GPIO with the pull-up enabled:
 
-2番目の例では、オートプッシュ(セクション11.5.4)を使用せず、代わりに明示的なプッシュ命令を使用し、正しいストップビットが表示されるかどうかをプッシュの条件としています。 .pioファイルには、ステートマシンを設定し、プルアップを有効にしたGPIOに接続するヘルパー関数が含まれています: 
+2番目の例では、オートプッシュ(セクション11.5.4)を使用せず、代わりに明示的なプッシュ命令を使用し、正しいストップビットが表示されるかどうかをプッシュの条件としています。 .pioファイルには、ステートマシンを設定し、プルアップを有効にしたGPIOに接続するヘルパ関数が含まれています: 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/uart_rx/uart_rx.pio Lines 67 - 85
 
@@ -3050,7 +3050,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manc
 
 Starting from the label called start, this program shifts one data bit at a time into the X register, so that it can branch on the value. Depending on the outcome, it uses side-set to drive either a 1-0 or 0-1 sequence onto the chosen GPIO. This program uses autopull (Section 11.5.4.2) to automatically replenish the OSR from the TX FIFO once a certain amount of data  has  been  shifted  out,  without  interrupting  program  control  flow  or  timing.  This  feature  is  enabled  by  a  helper function in the .pio file which configures and starts the state machine:
 
-このプログラムはstartと呼ばれるラベルから開始し、Xレジスタに一度に1つのデータビットをシフトし、その値で分岐できるようにします。その結果に応じて、サイドセットを使用して、選択した GPIO に 1-0 または 0-1 シーケンスをドライブします。このプログラムでは、オートプル(セクション 11.5.4.2)を使用して、プログラムの制御フローやタイミングを中断することなく、 一定量のデータがシフトアウトされると、TX FIFO から OSR を自動的に補充します。 この機能は、.pio ファイル内のヘルパー関数によって有効化され、ステートマシンを設定および起動します: 
+このプログラムはstartと呼ばれるラベルから開始し、Xレジスタに一度に1つのデータビットをシフトし、その値で分岐できるようにします。その結果に応じて、サイドセットを使用して、選択した GPIO に 1-0 または 0-1 シーケンスをドライブします。このプログラムでは、オートプル(セクション 11.5.4.2)を使用して、プログラムの制御フローやタイミングを中断することなく、 一定量のデータがシフトアウトされると、TX FIFO から OSR を自動的に補充します。 この機能は、.pio ファイル内のヘルパ関数によって有効化され、ステートマシンを設定および起動します: 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/manchester_encoding/manchester_encoding.pio Lines 33 - 46
 
@@ -3181,7 +3181,7 @@ Figure 59. Differential Manchester serial line code, also known as biphase mark 
 
 The  transmit  program  is  similar  to  the  Manchester  example:  it  repeatedly  shifts  a  bit  from  the  OSR  into  X  (relying  on autopull to refill the OSR in the background), branches, and drives a GPIO up and down based on the value of this bit.  The added complication is that the pattern we drive onto the pin depends not just on the value of the data bit, as with vanilla Manchester encoding, but also on the state the line was left in at the end of the last bit period. This is illustrated in Figure 59, where the pattern is inverted if the line is initially high. To cope with this, there are two copies of the test- and-drive code, one for each initial line state, and these are linked together in the correct order by a sequence of jumps.
 
-送信プログラムはマンチェスターの例と同様で、OSRからXにビットを繰り返しシフトし(バックグラウンドでOSRを補充するオートプルに依存する)、分岐し、このビットの値に基づいてGPIOを上下に駆動します。 さらに複雑なのは、ピンにドライブするパターンが、素のマンチェスタエンコーディングのようにデータビットの値に依存するだけでなく、最後のビット期間の終了時にラインが残っていた状態にも依存することです。図 59 に示すように、線が最初にハイの場合、パターンは反転します。この問題に対処するため、テストアンドドライブコードには2つのコピーがあり、各ラインの初期状態ごとに1つずつ、ジャンプのシーケンスによって正しい順序でリンクされている。
+送信プログラムはマンチェスタの例と同様で、OSRからXにビットを繰り返しシフトし(バックグラウンドでOSRを補充するオートプルに依存する)、分岐し、このビットの値に基づいてGPIOを上下に駆動します。 さらに複雑なのは、ピンにドライブするパターンが、素のマンチェスタエンコーディングのようにデータビットの値に依存するだけでなく、最後のビット期間の終了時にラインが残っていた状態にも依存することです。図 59 に示すように、線が最初にハイの場合、パターンは反転します。この問題に対処するため、テストアンドドライブコードには2つのコピーがあり、各ラインの初期状態ごとに1つずつ、ジャンプのシーケンスによって正しい順序でリンクされている。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 8 - 35
 
@@ -3218,7 +3218,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 
 The .pio file also includes a helper function to initialise a state machine for differential Manchester TX, and connect it to a  chosen  GPIO.  We  arbitrarily  choose  a  32-bit  frame  size  and  LSB-first  serialisation  (shift_to_right  is  true  in sm_config_set_out_shift),  but  as  the  program  operates  on  one  bit  at  a  time,  we  could  change  this  by  reconfiguring  the state machine.
 
-.pioファイルには、差動マンチェスターTX用のステートマシンを初期化し、選択したGPIOに接続するヘルパー関数も含まれています。 フレームサイズは32ビットで、LSBファーストのシリアル化(sm_config_set_out_shiftでshift_to_rightがtrue)を任意に選択したが、プログラムは一度に1ビットずつ動作するので、ステートマシンを再構成することで変更できる。
+.pioファイルには、差動マンチェスタTX用のステートマシンを初期化し、選択したGPIOに接続するヘルパ関数も含まれています。 フレームサイズは32ビットで、LSBファーストのシリアル化(sm_config_set_out_shiftでshift_to_rightがtrue)を任意に選択したが、プログラムは一度に1ビットずつ動作するので、ステートマシンを再構成することで変更できる。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 38 - 53
 
@@ -3295,7 +3295,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 
 This  code  assumes  that  X  and  Y  have  the  values  1  and  0,  respectively.  This  is  arranged  for  by  the  included  C  helper function:
 
-このコードでは、XとYがそれぞれ1と0の値を持っていると仮定している。 これは付属のCヘルパー関数によって調整されている: 
+このコードでは、XとYがそれぞれ1と0の値を持っていると仮定している。 これは付属のCヘルパ関数によって調整されている: 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.pio Lines 88 - 104  
 
@@ -3322,7 +3322,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 
 All the pieces now exist to loopback some serial data over a wire between two GPIOs.
 
-これで、2つのGPIO間のワイヤーを介してシリアルデータをループバックするためのすべてのピースが揃った。
+これで、2つのGPIO間のワイヤを介してシリアルデータをループバックするためのすべてのピースが揃った。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/differential_manchester/differential_manchester.c
 
@@ -3379,7 +3379,7 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/diff
 <figcaption>
 Figure 60. A 1-byte I2C read transfer. In the idle state, both lines float high. The initiator drives SDA low (a Start condition), followed by 7 address bits A6-A0, and a direction bit (Read/nWrite). The target drives SDA low to acknowledge the address (ACK). Data bytes follow. The target serialises data on SDA, clocked out by SCL. Every 9th clock, the initiator pulls SDA low to acknowledge the data, except on the last byte, where it leaves the line high (NAK).  Releasing SDA whilst SCL is high is a Stop condition, returning the bus to idle.
 
-図 60. 1 バイト I2C リード転送。アイドル状態では、両方のラインはハイフロートする。イニシエータはSDAをローにドライブし(スタート条件)、続いて7つのアドレスビットA6-A0と方向ビット(Read/nWrite)をドライブする。ターゲットはSDAをローにドライブし、アドレ スを確認する(ACK)。データバイトが続く。ターゲットは、SCLによってクロック出力されるSDAでデータをシリアライズする。9クロックごとに、イニシエータはSDAをローにプルしてデータを確認し ますが、最後のバイトの場合は例外で、SDAはハイのままです(NAK)。 SCLがハイの間にSDAをリリースすることは、バスをアイドルに戻すストップコンディションである。
+図 60. 1 バイト I2C リード転送。アイドル状態では、両方のラインはハイフロートする。イニシエータはSDAをローにドライブし(スタート条件)、続いて7つのアドレスビットA6-A0と方向ビット(Read/nWrite)をドライブする。ターゲットはSDAをローにドライブし、アドレスを確認する(ACK)。データバイトが続く。ターゲットは、SCLによってクロック出力されるSDAでデータをシリアライズする。9クロックごとに、イニシエータはSDAをローにプルしてデータを確認しますが、最後のバイトの場合は例外で、SDAはハイのままです(NAK)。 SCLがハイの間にSDAをリリースすることは、バスをアイドルに戻すストップコンディションである。
 </figcaption>
 </figure>
 
@@ -3395,9 +3395,9 @@ The  PIO  program  listed  below  handles  serialisation,  clock  stretching,  a
 
 I2Cは、"死海文書" に最初に記述され、後に Phillips Semiconductor が使用したユビキタスシリアルバスである。 プルアップ抵抗付きの2本のワイヤーがオープンドレインバスを形成し、複数のエージェントがバスラインをLowに駆動するか、Highにプルアップされるように解放することで、このバス上で互いにアドレスや信号を送受信する。このバスにはいくつかの珍しい特徴がある: 
 
-* SCLは、バスのどのメンバー(転送のターゲットやイニシエータである必要はない。
+* SCLは、バスのどのメンバ(転送のターゲットやイニシエータである必要はない。
 これはクロックストレッチングと呼ばれる)。 これはクロックストレッチとして知られている。全てのドライバがクロックを解放するまでバスは進まない。
-* バスのメンバーは、ある転送のターゲットになり、他の転送を開始することができます(マスター/スレーブの役割は固定されていません)。しかし、これはほとんどのI2Cハードウェアではサポートされていない。
+* バスのメンバは、ある転送のターゲットになり、他の転送を開始することができます(マスタ/スレーブの役割は固定されていません)。しかし、これはほとんどのI2Cハードウェアではサポートされていない。
 * SCLはエッジセンシティブなクロックではなく、SDAはSCLがハイの間ずっと有効でなければならない。
 * SCLに対するSDAの透明性にもかかわらず、SCLがHighの間のSDAの遷移は、転送の開始と終了(Start/Stop)、または1つのアドレスフェーズ内の新しいアドレスフェーズ(Restart)を示すために使用される。
 
@@ -3826,7 +3826,7 @@ There are also further examples in the pio/ directory in the Pico Examples repos
 
 Some of the more experimental example code, such as DPI and SD card support, is currently located in the Pico Extras and Pico Playground repositories. The PIO parts of these are functional, but the surrounding software stacks are still in an experimental state.
 
-Raspberry Pi PicoシリーズのC/C++ SDKにはPIOの章があり、ここでは紹介していないソフトウェア中心のトピックについて深く掘り下げています。これにはPIO + DMAロジックアナライザーのサンプルが含まれており、毎サイクルですべてのGPIOをサンプリングすることができます(125MHzでほぼ4Gbpsの帯域幅ですが、RP2350のRAMはすぐにいっぱいになってしまいます)。
+Raspberry Pi PicoシリーズのC/C++ SDKにはPIOの章があり、ここでは紹介していないソフトウェア中心のトピックについて深く掘り下げています。これにはPIO + DMAロジックアナライザのサンプルが含まれており、毎サイクルですべてのGPIOをサンプリングすることができます(125MHzでほぼ4Gbpsの帯域幅ですが、RP2350のRAMはすぐにいっぱいになってしまいます)。
 
 また、Pico Examplesリポジトリのpio/ディレクトリにもサンプルがあります。
 
