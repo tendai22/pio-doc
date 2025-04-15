@@ -46,35 +46,48 @@ sed '
         s/\&lt;br>/<br>/g
         # divide entries
         /^>>rt/{
-            s/^>>rt||\([^|][^|]*\)||\([^|][^|]*\)||/ <div class="desc-entry">\
+            s/^>>rt||\([^|][^|]*\)||\([^|][^|]*\)||/    <\/span>\
+  <\/div>\
+>>>\
+  <div class="desc-entry">\
     <span class="addr">\1<\/span>\
     <span class="symbol">\2<\/span>\
-  <span class="body">/
-        b
+    <span class="body">/
+            h
+            # hold space, keep first half
+            s/\n>>>.*$//
+            x
+            # pattern space, keep last half
+            s/^.*\n>>>//
+            b
         }
         /^>>bt/{
             # \2, \3 を body より後ろに回す。ホールドスペースに押し込む
-            s/^>>bt||\([^|][^|]*\)||\([^|][^|]*\)||\([^|][^|]*\)||/  <span class="type">\2<\/span>\
+            # 行前半がtail(最後に出力)で、後半がhead(最初に出力)、
+            # それらの間を "\n>>>\n" で区切っている。
+            s/^>>bt||\([^|][^|]*\)||\([^|][^|]*\)||\([^|][^|]*\)||/    <\/div>\
+    <span class="type">\2<\/span>\
     <span class="reset">\3<\/span>\
+  <\/div>\
 >>>\
- <div class="desc-entry">\
+  <div class="desc-entry">\
     <span class="addr">\1<\/span>\
-  <span class="body">/
-        h
-        # hold space, keep last half
-        s/^.*\n>>>//
-        x
-        # pattern space, keep first half
-        s/\n>>>.*$//
-        p
-        # dump hold space (for debug)
-        x
-        s/^/ZZZ /
-        s/$/YYY/p
-        s/ZZZ //
-        s/YYY$//
-        x
-        d
+    <div class="body">/
+            h
+            # hold space, keep first half
+            s/\n>>>\n.*$//
+            x
+            # pattern space, keep last half
+            s/^.*\n>>>\n//
+            p
+            # dump hold space (for debug)
+            #x
+            #s/^/ZZZ /
+            #s/$/YYY/p
+            #s/ZZZ //
+            #s/YYY$//
+            #x
+            d
         }
         b
     }
