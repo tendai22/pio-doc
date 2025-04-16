@@ -728,7 +728,7 @@ dd.glossary {
 }
 
 .register-table > .desc-entry {
-	grid-template-columns: 4rem 8rem 1fr;
+	grid-template-columns: 4rem 12rem 1fr;
 
 	display: grid;
 	margin-bottom: 0.2em;
@@ -736,7 +736,7 @@ dd.glossary {
 }
 
 .bit-table > .desc-entry {
-	grid-template-columns: 4rem 1fr 2rem 2rem;
+	grid-template-columns: 4rem 1fr 2rem 6rem;
 
 	display: grid;
 	margin-bottom: 0.2em;
@@ -745,22 +745,30 @@ dd.glossary {
 
 .desc-entry > .addr {
 	grid-column: 1;
-	font-family: 'Noto Sans JP';
+	font-family: 'Noto Sans';
+	font-size: 10;
 	font-weight: 700;
 	background-color: #c0c0c0;
 }
 
 .desc-entry > .bit-body {
+	font-family: 'Noto Sans';
+	margin-left: 0.1rem;
+	margin-right: 0.1rem;
 	grid-column: 2;
 }
 
 .desc-entry > .type {
 	grid-column: 3;
+	font-family: 'Courier';
+	font-size: 6;
 	background-color: #c0c0c0;
 }
 
 .desc-entry > .reset {
 	grid-column: 4;
+	font-family: 'Courier';
+	font-size: 6;
 	background-color: #f0f0f0;
 }
 
