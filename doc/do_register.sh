@@ -46,13 +46,13 @@ sed '
         s/\&lt;br>/<br>/g
         # divide entries
         /^>>rt/{
-            s/^>>rt||\([^|][^|]*\)||\([^|][^|]*\)||/    <\/span>\
-  <\/div>\
+            s/^>>rt||\([^|][^|]*\)||\([^|][^|]*\)||/<\/span>\
+<\/div>\
 >>>\
-  <div class="desc-entry">\
-    <span class="addr">\1<\/span>\
-    <span class="symbol">\2<\/span>\
-    <span class="body">/
+<div class="desc-entry">\
+<span class="addr">\1<\/span>\
+<span class="symbol">\2<\/span>\
+<span class="register-body">/
             h
             # hold space, keep first half
             s/\n>>>.*$//
@@ -65,14 +65,14 @@ sed '
             # \2, \3 を body より後ろに回す。ホールドスペースに押し込む
             # 行前半がtail(最後に出力)で、後半がhead(最初に出力)、
             # それらの間を "\n>>>\n" で区切っている。
-            s/^>>bt||\([^|][^|]*\)||\([^|][^|]*\)||\([^|][^|]*\)||/    <\/div>\
-    <span class="type">\2<\/span>\
-    <span class="reset">\3<\/span>\
-  <\/div>\
+            s/^>>bt||\([^|][^|]*\)||\([^|][^|]*\)||\([^|][^|]*\)||/<\/div>\
+<span class="type">\2<\/span>\
+<span class="reset">\3<\/span>\
+<\/div>\
 >>>\
-  <div class="desc-entry">\
-    <span class="addr">\1<\/span>\
-    <div class="body">/
+<div class="desc-entry">\
+<span class="addr">\1<\/span>\
+<div class="bit-body">/
             h
             # hold space, keep first half
             s/\n>>>\n.*$//

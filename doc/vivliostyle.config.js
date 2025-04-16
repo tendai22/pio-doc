@@ -5,7 +5,8 @@ module.exports = {
     size: 'JIS-A4',
     theme: 'css/sample1.css',
     entry: [
-        "pio1_jp_x.md",
+//        "pio1_jp_x.md",
+          "x1_x.md",
 //        "test_x.md",
     ],
     workspaceDir: 'work',
