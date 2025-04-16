@@ -10,6 +10,6 @@ module.exports = {
     ],
     workspaceDir: 'work',
     output: [
-        "pio-doc.pdf"
+        "pio-c-sdk_jp.pdf"
     ],
 };
