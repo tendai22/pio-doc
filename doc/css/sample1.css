@@ -717,6 +717,61 @@ dd.glossary {
 	margin-left: 2em;
 }
 
+/* register-table, bit-table */
+
+.register-table {
+	margin-bottom: 1em;
+}
+
+.bit-table {
+	margin-bottom: 1em;
+}
+
+.register-table > .desc-entry {
+	grid-template-columns: 4rem 8rem 1fr;
+
+	display: grid;
+	margin-bottom: 0.2em;
+	background-color: #f0f0f0;
+}
+
+.bit-table > .desc-entry {
+	grid-template-columns: 4rem 1fr 2rem 2rem;
+
+	display: grid;
+	margin-bottom: 0.2em;
+	background-color: #f0f0f0;
+}
+
+.desc-entry > .addr {
+	grid-column: 1;
+	font-family: 'Noto Sans JP';
+	font-weight: 700;
+	background-color: #c0c0c0;
+}
+
+.desc-entry > .bit-body {
+	grid-column: 2;
+}
+
+.desc-entry > .type {
+	grid-column: 3;
+	background-color: #c0c0c0;
+}
+
+.desc-entry > .reset {
+	grid-column: 4;
+	background-color: #f0f0f0;
+}
+
+.desc-entry > .register-body {
+	grid-column: 3;
+}
+
+.desc-entry > p {
+	margin-left: 2em;
+}
+
 /* glossary */
 .glossary {
 }
