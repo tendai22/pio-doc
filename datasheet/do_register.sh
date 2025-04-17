@@ -106,7 +106,9 @@ sed '
     s/</\&lt;/g
     s/\&lt;br>/<br>/g
 }
-' |sed '/^  <span class="body">/,/  <\/span>/{
+' |sed '/^<span class="register-body">/,/<\/span>/b docode
+    /^<div class="bit-body">/,/<\/div>/{
+    :docode
     s/`\([^`][^`]*\)`/<code>\1<\/code>/g
     s/\*\([^*][^*]*\)\*/<em>\1<\/em>/g
     s/\$\$\([^$][^$]*\)\$\$/<span data-math-typeset="true">\\(\1\\)<\/span>/g
