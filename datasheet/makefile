@@ -2,7 +2,7 @@
 
 all: pic-datasheet_jp.pdf
 
-XTARGET= pio1_jp_x.md pio-registers_x.md
+XTARGET= pio1_jp_x.md pio-registers_jp_x.md
 #XTARGET= x1_x.md
 
 TARGET= $(XTARGET)
