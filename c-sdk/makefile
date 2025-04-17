@@ -2,7 +2,7 @@
 
 all: pic-doc.pdf
 
-XTARGET= memo_jp_x.md
+XTARGET= pio-c-sdk_jp_x.md
 #XTARGET= test_x.md
 
 TARGET= $(XTARGET)

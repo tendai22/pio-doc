@@ -5,7 +5,7 @@ module.exports = {
     size: 'JIS-B5',
     theme: 'css/sample1.css',
     entry: [
-        "memo_jp_x.md",
+        "pio-c-sdk_jp_x.md",
 //        "test_x.md",
     ],
     workspaceDir: 'work',
