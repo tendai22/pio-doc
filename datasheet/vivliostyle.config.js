@@ -6,7 +6,7 @@ module.exports = {
     theme: 'css/sample1.css',
     entry: [
         "pio1_jp_x.md",
-        "pio-registers_x.md",
+        "pio-registers_jp_x.md",
 //        "x1_x.md",
 //        "test_x.md",
     ],
