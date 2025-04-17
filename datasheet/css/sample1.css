@@ -748,11 +748,11 @@ dd.glossary {
 	font-family: 'Noto Sans';
 	font-size: 10;
 	font-weight: 700;
+	margin-left: 0.1rem;
 	background-color: #c0c0c0;
 }
 
 .desc-entry > .bit-body {
-	font-family: 'Noto Sans';
 	margin-left: 0.1rem;
 	margin-right: 0.1rem;
 	grid-column: 2;
@@ -773,6 +773,7 @@ dd.glossary {
 }
 
 .desc-entry > .register-body {
+	margin-left: 0.1rem;
 	grid-column: 3;
 }
 
