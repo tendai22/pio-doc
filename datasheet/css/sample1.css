@@ -292,7 +292,8 @@ h5::before {
 
 /* code, pre */
 :not(pre) > code {
-	font-family: udevgothic-r;
+	/*font-family: udevgothic-r;*/
+	font-family: "Courier";
 	tab-size: 4;
 	background-color: #ddd;
 }
