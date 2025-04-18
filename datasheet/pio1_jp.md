@@ -1080,8 +1080,7 @@ in <source>, <bit_count>
 
 where:
 
-<desciption>
-
+<description>
 ||<source>||One of the sources specified above.
 
 上記のソースのいずれか。

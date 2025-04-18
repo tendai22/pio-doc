@@ -691,7 +691,7 @@ dd.glossary {
 	grid-template-columns: 18rem 1fr;
 
 	display: grid;
-	margin-bottom: 1em;
+	margin-bottom: 0.2em;
 	background-color: #f0f0f0;
 }
 
@@ -699,18 +699,20 @@ dd.glossary {
 	grid-template-columns: 10rem 1fr;
 
 	display: grid;
-	margin-bottom: 1em;
+	margin-bottom: 0.2rem;
 	background-color: #f0f0f0;
 }
 
 .desc-entry > .word {
 	grid-column: 1;
 	font-family: 'Noto Sans JP';
+	padding-left: 0.2rem;
 	font-weight: 700;
 	background-color: #c0c0c0;
 }
 
 .desc-entry > .body {
+	padding-left: 0.2rem;
 	grid-column: 2;
 }
 
