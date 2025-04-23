@@ -17,11 +17,10 @@ FIFO data queues buffer data transferred between PIO and the system. GPIO mappin
 図 43. PIO ブロックレベル図。3 つの PIO ブロックがあり、それぞれが 4 つのステートマシンを含む。4 つのステートマシンは、共有命令メモリから同時にプログラムを実行する。
 
 FIFO データキューは、PIO とシステム間で転送されるデータをバッファリングする。GPIO マッピングロジックにより、各ステートマシンは最大 32 個の GPIO を監視および操作できる。
-
 </figcaption>
 </figure>
 
-The programmable input/output block (PIO) is a versatile hardware interface. It can support a variety of IO standards, including:
+The **programmable input/output block** (PIO) is a versatile hardware interface. It can support a variety of IO standards, including:
 
 * 8080 and 6800 parallel bus
 * I2C
@@ -41,7 +40,15 @@ PIO is programmable in the same sense as a processor. There are three PIO blocks
 * DMA interface (sustained throughput up to 1 word per clock from system DMA)
 * IRQ flag set/clear/status
 
-プログラマブル入出力ブロック(PIO)は、汎用性の高いハードウェアインターフェースです。以下のようなさまざまな IO 標準をサポートします: 
+Each state machine, along with its supporting hardware, occupies approximately the same silicon area as a standard serial  interface  block,  such  as  an  SPI  or  I2C  controller.  However,  PIO  state  machines  can  be  configured  and reconfigured dynamically to implement numerous different interfaces.
+
+Making  state  machines  programmable  in  a  software-like  manner,  rather  than  a  fully  configurable  logic  fabric  like  a complex programmable logic device (CPLD), allows more hardware interfaces to be offered in the same cost and power envelope. This also presents a more familiar programming model, and simpler tool flow, to those who wish to exploit PIO's full flexibility by programming it directly, rather than using a pre-made interface from the PIO library.
+
+PIO  is  performant  as  well  as  flexible,  thanks  to  a  carefully  selected  set  of  fixed-function  hardware  inside  each  state machine.  When  outputting  DPI,  PIO  can  sustain  360  Mb/s  during  the  active  scanline  period  when  running  from  a 48 MHz system clock. In this example, one state machine handles frame/scanline timing and generates the pixel clock.  Another handles the pixel data and unpacks run-length-encoded scanlines.
+
+State machines' inputs and outputs are mapped to up to 32 GPIOs (limited to 30 GPIOs for RP2350). All state machines have independent, simultaneous access to any GPIO. For example, the standard UART code allows TX, RX, CTS and RTS to be any four arbitrary GPIOs, and I2C permits the same for `SDA` and `SCL`. The amount of freedom available depends on how exactly  a  given  PIO  program  chooses  to  use  PIO's  pin  mapping  resources,  but  at  the  minimum,  an  interface  can  be freely shifted up or down by some number of GPIOs.
+
+**プログラマブル入出力ブロック(programmable input/output block)**(PIO)は、汎用性の高いハードウェアインターフェースです。以下のようなさまざまな IO 標準をサポートします: 
 
 * 8080 および 6800 パラレルバス
 * I2C
@@ -49,7 +56,7 @@ PIO is programmable in the same sense as a processor. There are three PIO blocks
 * SDIO
 * SPI、DSPI、QSPI
 * UART
-* DPI または VGA(抵抗 DAC 経由)
+* DPI または VGA(抵抗器 DAC を使うもの)
 
 PIO はプロセッサと同じ意味でプログラマブルである。4 つのステートマシンを持つ 3 つの PIO ブロックがある。それぞれが独立してシーケンシャルプログラムを実行し、GPIO の操作やデータ転送を行うことができます。汎用プロセッサとは異なり、PIO のステートマシンは IO に特化しており、決定性、正確なタイミング、固定機能ハードウェアとの密接な統合に重点を置いています。各ステートマシンは以下を備えている: 
 
@@ -61,21 +68,13 @@ PIO はプロセッサと同じ意味でプログラマブルである。4 つ�
 * DMA インターフェース(システム DMA から 1 クロックあたり最大 1 ワードのスループットを維持)
 * IRQ フラグのセット/クリア/ステータス
 
-Each state machine, along with its supporting hardware, occupies approximately the same silicon area as a standard serial  interface  block,  such  as  an  SPI  or  I2C  controller.  However,  PIO  state  machines  can  be  configured  and reconfigured dynamically to implement numerous different interfaces.
-
-Making  state  machines  programmable  in  a  software-like  manner,  rather  than  a  fully  configurable  logic  fabric  like  a complex programmable logic device (CPLD), allows more hardware interfaces to be offered in the same cost and power envelope. This also presents a more familiar programming model, and simpler tool flow, to those who wish to exploit PIO's full flexibility by programming it directly, rather than using a pre-made interface from the PIO library.
-
-PIO  is  performant  as  well  as  flexible,  thanks  to  a  carefully  selected  set  of  fixed-function  hardware  inside  each  state machine.  When  outputting  DPI,  PIO  can  sustain  360  Mb/s  during  the  active  scanline  period  when  running  from  a 48 MHz system clock. In this example, one state machine handles frame/scanline timing and generates the pixel clock.  Another handles the pixel data and unpacks run-length-encoded scanlines.
-
 各ステートマシンは、それをサポートするハードウェアとともに、SPI や I2C コントローラなどの標準的なシリアルインターフェースブロックとほぼ同じシリコン面積を占めます。 しかし、PIO ステートマシンは、多数の異なるインターフェイスを実装するために、動的にコンフィギュレーションおよび再構成することができます。
 
 複合プログラマブルロジックデバイス(CPLD)のような完全にコンフィギュラブルなロジックファブリックではなく、ソフトウェアのような方法でステートマシンをプログラム可能にすることで、同じコストと消費電力でより多くのハードウェアインターフェイスを提供できるようになります。また、PIO ライブラリの既成インタフェースを使用するのではなく、PIO を直接プログラミングして PIO の柔軟性をフルに活用したいと考える人にとっても、より馴染みやすいプログラミングモデルとシンプルなツールフローを提供することができます。
 
 PIO は、各ステートマシン内部の厳選された固定機能ハードウェアセットのおかげで、柔軟性とともに高性能です。 DPI を出力する場合、PIO は 48MHz のシステムクロックで動作させると、アクティブスキャンライン期間中 360Mb/s を維持することができる。この例では、1 つのステートマシンがフレーム/スキャンラインタイミングを処理し、ピクセルクロックを生成する。 もう 1 つのステートマシンはピクセルデータを処理し、ランレングス符号化されたスキャンラインをアンパックする。
 
-State machines' inputs and outputs are mapped to up to 32 GPIOs (limited to 30 GPIOs for RP2350). All state machines have independent, simultaneous access to any GPIO. For example, the standard UART code allows TX, RX, CTS and RTS to be any four arbitrary GPIOs, and I2C permits the same for `SDA` and `SCL`. The amount of freedom available depends on how exactly  a  given  PIO  program  chooses  to  use  PIO's  pin  mapping  resources,  but  at  the  minimum,  an  interface  can  be freely shifted up or down by some number of GPIOs.
-
-ステートマシンの入出力は、最大 32GPIO(RP2350 では 30GPIO に制限)にマッピングされます。すべてのステートマシンは、任意の GPIO に独立して同時にアクセスできます。例えば、標準的な UART コードでは、TX、RX、CTS、RTS を任意の 4 つの GPIO にすることができ、I2C では `SDA` と `SCL` に同じことができます。利用可能な自由度は、PIO プログラムが PIO のピンマッピングリソースをどのように使用するかによって異なりますが、最低限、インターフェイスは GPIO の数だけ自由に上下にシフトすることができます。
+ステートマシンの入出力は、最大 32GPIO(RP2350 では 30GPIO に制限)にマッピングされます。すべてのステートマシンは、任意の GPIO に独立して同時にアクセスできます。例えば、標準的な UART コードでは、　`TX`、`RX`、`CTS`、`RTS` を任意の 4 つの GPIO にすることができ、I2C では `SDA` と `SCL` に同じことができます。利用可能な自由度は、PIO プログラムが PIO のピンマッピングリソースをどのように使用するかによって異なりますが、最低限、インターフェイスは GPIO の数だけ自由に上下にシフトすることができます。
 
 ### 11.1.1. RP2040 からの変更点
 
@@ -454,7 +453,7 @@ On PIO reset, or the assertion of CTRL_SM_RESTART, the input shift counter is cl
 
 (和訳)
 
-ステートマシンは、合計で何ビットが OUT 命令によって OSR からシフトされ、IN 命令 によって ISR にシフトされたかを記憶しています。この情報は、出力シフトカウンタと入力シフトカウンタというハードウェアカウンタのペアによって常に追跡される。それぞれ 0 から 32 までの値を保持することができる。各シフト動作に伴い、関連するカウンタは最大値 32 (シフトレジスタの幅に等しい)まで、シフトカウント分ずつインクリメントします。ステートマシンは、カウンタが設定可能な閾値に達したときに特定のアクションを実行するように構成できます: 
+ステートマシンは、合計で何ビットが OUT 命令によって OSR からシフトされ、IN 命令によって ISR にシフトされたかを記憶しています。この情報は、出力シフトカウンタと入力シフトカウンタというハードウェアカウンタのペアによって常に追跡される。それぞれ 0 から 32 までの値を保持することができる。各シフト動作に伴い、関連するカウンタは最大値 32 (シフトレジスタの幅に等しい)まで、シフトカウント分ずつインクリメントします。ステートマシンは、カウンタが設定可能な閾値に達したときに特定のアクションを実行するように構成できます: 
 
 * あるビット数がシフトアウトされると、OSR を自動的にリフィルすることができる(セクション 11.5.4 を参照)。
 * あるビット数がシフトインされると、自動的に ISR を空にすることができます(セクション 11.5.4 を参照)。
@@ -1236,7 +1235,7 @@ PULL IFEMPTY is useful if an OUT with autopull would stall in an inappropriate l
 
 TX FIFO から OSR に 32 ビットワードをロードする。
 
-* 空の場合:  1 の場合、 総出力シフトカウントがしきい値 SHIFTCTRL_PULL_THRESH に達しない限 り、何もしません (オートプルの場合と同じ。)
+* 空の場合:  1 の場合、 総出力シフトカウントがしきい値 SHIFTCTRL_PULL_THRESH に達しない限り、何もしません (オートプルの場合と同じ。)
 * ブロック:  ブロック: 1 の場合、TX FIFO が空の場合にストールする。0 の場合、空の FIFO からプルするとスクラッチ X が OSR にコピーされる。
 
 いくつかのペリフェラル(UART、SPI など)は、データが利用できないときに停止し、データが入ってきたときにそれを拾うべきである。 これは Block パラメータで実現できる。
@@ -1494,7 +1493,7 @@ If Wait is set, Delay cycles do not begin until after the wait period elapses.
 引数 Index で選択された IRQ フラグをセットまたはクリアする。
 
 * Clear: 1 の場合、Index で選択されたフラグを立てる代わりにクリアする。Clear が設定されている場合、Wait ビットは何の効果もない。
-* Wait: 1 の場合、システム割り込みハンドラがフラグを確認した場合など、フラグが 下がるまで停止する。
+* Wait: 1 の場合、システム割り込みハンドラがフラグを確認した場合など、フラグが下がるまで停止する。
 * Index: 0～7 の IRQ インデックスを指定します。この IRQ フラグは Clear ビットに依存してセット/クリアされる。
 * IdxMode: Index フィールドの動作を変更し、インデックスを修正するか、別の PIO ブロックから IRQ フラグのインデックスを作成します: 
   + 00: 3 つの LSB は、この PIO ブロックの IRQ フラグのインデックスに直接使用される。
@@ -2081,7 +2080,7 @@ If  you  do  need  to  read  the  OSR  contents,  you  should  perform  an  expl
 
 PULL does not require similar behaviour, because autopush does not have the same nondeterminism.
 
-ハードウェアは、シフトデータの最後のシフトアウトと同時に OSR を再充填することができる。しかし、空の OSR を再充填 し、同じサイクルでそれを OUT することはできません。
+ハードウェアは、シフトデータの最後のシフトアウトと同時に OSR を再充填することができる。しかし、空の OSR を再充填し、同じサイクルでそれを OUT することはできません。
 
 再充填はプログラムに対して多少非同期ですが、OUT はデータフェンスとして動作し、ステートマシンが FIFO に書き込まなかったデータを OUT することはありません。
 
@@ -2246,7 +2245,7 @@ PIO をメタスタビリティから保護するために、各 GPIO 入力に�
 
 GPIO ごとに、これらのシンクロナイザをバイパスすることも可能である。これによって入力レイテンシが減少しますが、ステートマシンが不適切なタイミングで入力をサンプリングしないことを保証するかどうかはユーザ次第です。一般的に、これは SPI などの同期インターフェイスでのみ可能です。同期器は、INPUT_SYNC_BYPASS の対応するビットを設定することでバイパスされる。
 
-> 警告 メタステーブル入力をサンプリングすると、ステートマシンの動作が予測不可能になることがある。これは避けるべきである。
+> 警告メタステーブル入力をサンプリングすると、ステートマシンの動作が予測不可能になることがある。これは避けるべきである。
 
 ### 11.5.7. 強制命令と実行命令
 
