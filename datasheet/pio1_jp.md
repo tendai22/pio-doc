@@ -642,29 +642,29 @@ The following directives control the assembly of PIO programs:
 
 <description>
 
-||.define (PUBLIC) <symbol> <value>||Define an integer symbol named <symbol> with the value <value> (see Section 11.3.2). If this .define appears before the first program in the input file, then this define is global to all programs, otherwise it is local to the program in which it occurs. If PUBLIC is specified, the symbol will be emitted into the assembled output for use by user code. For the SDK this takes the following forms:
+||.define (PUBLIC) <symbol> <value>||Define an integer symbol named `<symbol>` with the value `<value>` (see Section 11.3.2). If this `.define` appears before the first program in the input file, then this define is global to all programs, otherwise it is local to the program in which it occurs. If `PUBLIC` is specified, the symbol will be emitted into the assembled output for use by user code. For the SDK this takes the following forms:
 
-* #define <program_name> <symbol> value: for program symbols
-* #define <symbol> value: for global symbols
+* `#define <program_name> <symbol> value`: for program symbols
+* `#define <symbol> value`: for global symbols
 
-<symbol>という名前の整数シンボルを<value>という値で定義する(セクション 11.3.2 参照)。この `.define` が入力ファイルの最初のプログラムの前にある場合、この define は全てのプログラムに対してグローバルであり、そうでない場合、この define が現れたプログラムに対してローカルである。PUBLIC が指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDK の場合、これは次のような形になります: 
+<symbol> という名前の整数シンボルを <value> という値で定義する(セクション 11.3.2 参照)。この `.define` が入力ファイルの最初のプログラムの前にある場合、この define は全てのプログラムに対してグローバルであり、そうでない場合、この `.define` が現れたプログラムに対してローカルである。 `PUBLIC` が指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDK の場合、これは次のような形になります: 
 
-* define <プログラム名> <シンボル> value: プログラムシンボル用
-* #define <symbol> value: グローバルシンボル用
+* `#define <program_name> <symbol> value`: プログラムシンボル用
+* `#define <symbol> value`: グローバルシンボル用
 
-||.clock_div <divider>||If this directive is present, <divider> is the state machine clock divider for the program. Note, that divider is a floating point  value,  but  may  not  currently  use  arithmetic  expressions  or  defined  values.  This  directive  affects  the  default state machine configuration for a program. This directive is only valid within a program before the first instruction.
+||.clock_div <divider>||If this directive is present, `<divider>` is the state machine clock divider for the program. Note, that divider is a floating point  value,  but  may  not  currently  use  arithmetic  expressions  or  defined  values.  This  directive  affects  the  default state machine configuration for a program. This directive is only valid within a program before the first instruction.
 
-この指令が存在する場合、<divider>はプログラムのステートマシン・クロックデバイダである。divider は浮動小数点値であるが、算術式や定義された値を使用することはできない。 この指令は、プログラムのデフォルトのステートマシン構成に影響を与える。この指令はプログラム内で最初の命令の前にのみ有効である。
+この指令が存在する場合、 <divider> はプログラムのステートマシン・クロックデバイダである。 divider は浮動小数点値であるが、算術式や定義された値を使用する*ことはできない*。 この指令は、プログラムのデフォルトのステートマシン構成に影響を与える。この指令はプログラム内で最初の命令の前にのみ有効である。
 ||.fifo <fifo_config>||If this directive is present, it is used to specify the FIFO configuration for the program. It affects the default state machine configuration for a program, but also restricts what instructions may be used (for example PUSH makes no sense if there is no IN FIFO configured).
 
 This directive supports the following configuration values:
 
-* txrx: 4 FIFO entries for each of TX and RX; this is the default.
-* tx: All 8 FIFO entries for TX.
-* rx: All 8 FIFO entries for RX.
-* txput: 4 FIFO entries for TX, and 4 FIFO entries for mov rxfifo[index], isr aka put. This value is not supported on PIO version 0.
-* txget: 4 FIFO entries for TX, and 4 FIFO entries for mov osr, rxfifo[index] aka get. This value is not supported on PIO version 0.
-* putget: 4 FIFO entries for mov rxfifo[index], isr aka put, and 4 FIFO entries for mov osr, rxfifo[index] aka get.  This value is not supported on PIO version 0.
+* `txrx`: 4 FIFO entries for each of TX and RX; this is the default.
+* `tx`: All 8 FIFO entries for TX.
+* `rx`: All 8 FIFO entries for RX.
+* `txput`: 4 FIFO entries for TX, and 4 FIFO entries for `mov rxfifo[index], isr` aka `put`. This value is not supported on PIO version 0.
+* `txget`: 4 FIFO entries for TX, and 4 FIFO entries for `mov osr, rxfifo[index]` aka `get`. This value is not supported on PIO version 0.
+* `putget`: 4 FIFO entries for `mov rxfifo[index], isr` aka `put`, and 4 FIFO entries for mov `osr, rxfifo[index]` aka `get`.  This value is not supported on PIO version 0.
 
 This directive is only valid within a program before the first instruction.
 
@@ -672,60 +672,58 @@ This directive is only valid within a program before the first instruction.
 
 この指令は以下の設定値をサポートする: 
 
-* txrx:  これはデフォルトである。
-* これはデフォルトである:  tx: TX 用の 8 つの FIFO エントリすべて。
-* rx:  rx: RX 用の 8 つの FIFO エントリすべて。
-* txput:  txput: TX 用の 4 つの FIFO エントリ、および mov rxfifo[index]、isr aka put 用の 4 つの FIFO エントリ。この値は PIO バージョン 0 ではサポートされない。
-* txget:  TX 用の 4 つの FIFO エントリと、mov osr, rxfifo[index]用の 4 つの FIFO エントリ。この値は PIO バージョン 0 ではサポートされない。
-* putget:  putget: mov rxfifo[index],isr(別名 put)に対して 4 FIFO エントリ、および mov osr, rxfifo[index](別名 get)に対して 4 FIFO エントリ。 この値は PIO バージョン 0 ではサポートされていません。
+* `txrx`:  これはデフォルトである。
+* `tx`: TX 用の 8 つの FIFO エントリすべて。
+* `rx`:  RX 用の 8 つの FIFO エントリすべて。
+* @: TX 用の 4 つの FIFO エントリ、および `mov rxfifo[index], isr` aka `put` 用の 4 つの FIFO エントリ。この値は PIO バージョン 0 ではサポートされない。
+* `txget`:  TX 用の 4 つの FIFO エントリと、 `mov osr, rxfifo[index]` 用の 4 つの FIFO エントリ。この値は PIO バージョン 0 ではサポートされない。
+* `putget`: `mov rxfifo[index], isr`(別名 `put`)に対して 4 FIFO エントリ、および `mov osr, rxfifo[index]` (別名 `get`)に対して 4 FIFO エントリ。 この値は PIO バージョン 0 ではサポートされていません。
 
 この指令はプログラム内で最初の命令の前にのみ有効である。
-||.mov_status rxfifo < <n><br> .mov_status txfifo < <n><br> .mov_status irq <(next|prev)> set <n>|| This directive configures the source for the  mov  ,  STATUS. One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higher numbered, or lowered numbered PIO instance if next or prev or specified).  Note, that the IRQ option requires PIO version 1.
+||.mov_status rxfifo < <n><br> .mov_status txfifo < <n><br> .mov_status irq <(next|prev)> set <n>|| This directive configures the source for the  `mov  ,  STATUS`. One of the three syntaxes can be used to set the status based on the RXFIFO level being below a value N, the TXFIFO level being below a value N, or an IRQ flag N being set on this PIO instance (or the next higher numbered, or lowered numbered PIO instance if `next` or `prev` or specified).  Note, that the IRQ option requires PIO version 1.
 
 This  directive  affects  the  default  state  machine  configuration  for  a  program.  This  directive  is  only  valid  within  a program before the first instruction.
 
- この指令は mov , STATUS のソースを設定する。RXFIFO レベルが値 N以下であること、TXFIFO レベルが値 N以下であること、または IRQ フラグ N がこの PIO インスタンス(next または prev が指定されている場合は、次に高い番号または低い番号の PIO インスタンス)で設定されていることに基づいてステータスを設定するには、3 つの構文のいずれかを使用できます。 IRQ オプションは PIO バージョン 1 を必要とすることに注意。
+ この指令は `mov , STATUS` のソースを設定する。RXFIFO レベルが値 N 以下であること、TXFIFO レベルが値 N 以下であること、または IRQ フラグ N がこの PIO インスタンス(`next` または `prev` が指定されている場合は、次に高い番号または低い番号の PIO インスタンス)で設定されていることに基づいてステータスを設定するには、3 つの構文のいずれかを使用できます。 IRQ オプションは PIO バージョン 1 を必要とすることに注意。
 
 この指令は、プログラムのデフォルトのステートマシン設定に影響します。 この指令は最初の命令の前のプログラムでのみ有効である。
-||.in <count> (left|right) (auto) (<threshold>)||If this directive is present, <count> indicates the number of IN bits to be used. 'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; <threshold>, if present, specifies the "auto-push" threshold.  This directive affects the default state machine configuration for a program.
+||.in <count> (left|right) (auto) (<threshold>)||If this directive is present, `<count>` indicates the number of IN bits to be used. 'left' or 'right' if specified, control the ISR shift direction; 'auto', if present, enables "auto-push"; `<threshold>`, if present, specifies the "auto-push" threshold.  This directive affects the default state machine configuration for a program.
 
-This directive is only valid within a program before the first instruction. When assembling for PIO version 0, <count> must be 32.
+This directive is only valid within a program before the first instruction. When assembling for PIO version 0, `<count>` must be 32.
 
 この指令がある場合、<count>は使用する IN ビットの数を示す。'left'または'right'が指定された場合、ISR のシフト方向を制御する。'auto'が指定された場合、 "auto-push" を有効にする。<threshold>が指定された場合、 "auto-push" のしきい値を指定する。 この指令は、プログラムのデフォルトのステートマシン構成に影響を与える。
 
-この指令は、プログラム内で最初の命令の前にのみ有効である。PIO バージョン 0 用にアセンブルする場合、<count>は 32 でなければならない。
-||.program <name>||Start  a  new  program  with  the  name  <name>.  Note  that  that  name is  used in  code  so  should  be alphanumeric/underscore not starting with a digit. The program lasts until another .program directive or the end of the source file. PIO instructions are only allowed within a program.
+この指令は、プログラム内で最初の命令の前にのみ有効である。PIO バージョン 0 用にアセンブルする場合、 `<count>` は 32 でなければならない。
+||.program <name>||Start  a  new  program  with  the  name  `<name>`.  Note  that  that  name is  used in  code  so  should  be alphanumeric/underscore not starting with a digit. The program lasts until another `.program` directive or the end of the source file. PIO instructions are only allowed within a program.
 
-名前<name>で新しいプログラムを開始する。 この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の .program 命令かソースファイルの終わりまで続きます。PIO 命令はプログラム内でのみ許される。
+名前 `<name>` で新しいプログラムを開始する。 この名前はコードの中で使われるので、数字で始まらない英数字/アンダースコアでなければならないことに注意してください。このプログラムは、別の  `.program` 命令かソースファイルの終わりまで続きます。PIO 命令はプログラム内でのみ許される。
 ||.origin <offset>||Optional directive to specify the PIO instruction memory offset at which the program must load. Most commonly this is used for programs that must load at offset 0, because they use data based JMPs with the (absolute) jmp target being stored in only a few bits. This directive is invalid outside a program.
 
 プログラムがロードしなければならない PIO 命令メモリのオフセットを指定するためのオプション命令。最も一般的には、オフセット 0 にロードしなければならないプログラムに使用されます。これは、(絶対)jmp ターゲットが数ビットしか格納されていないデータベースの JMP を使用するためです。この命令はプログラム外では無効です。
-||.out <count> (left|right) (auto) (<threshold>)||If this directive is present, <count> indicates the number of OUT bits to be used. 'left' or 'right' if specified control the OSR  shift  direction;  'auto',  if  present,  enables  "auto-pull";  <threshold>,  if  present,  specifies  the  "auto-pull"  threshold.  This  directive  affects  the  default  state  machine  configuration  for  a  program.  This  directive  is  only  valid  within  a program before the first instruction.
+||.out <count> (left|right) (auto) (<threshold>)||If this directive is present, `<count>` indicates the number of OUT bits to be used. 'left' or 'right' if specified control the OSR  shift  direction;  'auto',  if  present,  enables  "auto-pull";  `<threshold>`,  if  present,  specifies  the  "auto-pull"  threshold.  This  directive  affects  the  default  state  machine  configuration  for  a  program.  This  directive  is  only  valid  within  a program before the first instruction.
 
-この指令がある場合、<count>は使用する OUT ビットの数を示す。'left'または'right'が指定された場合、OSR のシフト方向を制御する。'auto'が指定された場合、 "auto-pull" を有効にする。<threshold>が指定された場合、 "auto-pull" のしきい値を指定する。 この指令は、プログラムのデフォルトのステートマシン構成に影響する。 この指令は、最初の命令の前のプログラム内でのみ有効である。
-||.pio_version <version>||This  directive  sets  the  target  PIO  hardware  version.  The  version  for  RP2350  is  1  or  RP2350,  and  is  also  the  default version number. For backwards compatibility with RP2040, 0 or RP2040 may be used.
+この指令がある場合、 `<count>` は使用する OUT ビットの数を示す。'left'または'right'が指定された場合、OSR のシフト方向を制御する。 'auto' が指定された場合、 "auto-pull" を有効にする。 `<threshold>` が指定された場合、 "auto-pull" のしきい値を指定する。 この指令は、プログラムのデフォルトのステートマシン構成に影響する。 この指令は、最初の命令の前のプログラム内でのみ有効である。
+||.pio_version <version>||This  directive  sets  the  target  PIO  hardware  version.  The  version  for  RP2350  is  `1`  or  `RP2350`,  and  is  also  the  default version number. For backwards compatibility with RP2040, `0` or `RP2040` may be used.
 
 If  this  directive  appears  before  the  first  program  in  the  input  file,  then  this  define  is  the  default  for  all  programs,
 
 otherwise it specifies the version for the program in which it occurs. If specified for a program, it must occur before the first instruction.
 
-この指令はターゲット PIO ハードウェアのバージョンを設定する。 RP2350 のバージョンは 1 または RP2350 で、デフォルトのバージョン番号でもあります。RP2040 との後方互換性のために、0 または RP2040 が使用されるかもしれません。
+この指令はターゲット PIO ハードウェアのバージョンを設定する。 RP2350 のバージョンは `1` または `RP2350` で、デフォルトのバージョン番号でもあります。RP2040 との後方互換性のために、`0` または `RP2040` を使うことができます。
 
-この指令が入力ファイルの最初のプログラムの前にある場合は、この定義がすべてのプログラムのデフォルトとなる、
+この指令が入力ファイルの最初のプログラムの前にある場合は、この定義がすべてのプログラムのデフォルトとなる。そうでない場合は、この指令が置かれるプログラムのバージョンを指定する。プログラム中で指定する場合は、最初の命令より前になければならない。
+||.set <count>||If  this  directive  is  present,  `<count>`  indicates  the  number  of  SET  bits  to  be  used.  This  directive  affects  the  default state machine configuration for a program. This directive is only valid within a program before the first instruction.
 
-そうでない場合は、そのプログラムのバージョンを指定する。プログラムに指定する場合は、最初の命令の前になければならない。
-||.set <count>||If  this  directive  is  present,  <count>  indicates  the  number  of  SET  bits  to  be  used.  This  directive  affects  the  default state machine configuration for a program. This directive is only valid within a program before the first instruction.
+この命令が存在する場合、 `<count>` は使用する SET ビットの数を示す。 この指令はプログラムのデフォルトのステートマシン構成に影響する。この指令は最初の命令の前のプログラムでのみ有効である。
+||.side_set <count> (opt) (pindirs)||If this directive is present, `<count>` indicates the number of side-set bits to be used. Additionally, `opt` may be specified to indicate that a `side <value>` is optional for instructions (note this requires stealing an extra bit --- in addition to the `<count>`  bits --- from  those  available  for  the  instruction  delay).  Finally,  `pindirs`  may  be  specified  to  indicate  that  the side  set  values  should  be  applied  to  the  PINDIRs  and  not  the  PINs.  This  directive  is  only  valid  within  a  program before the first instruction.
 
-この命令が存在する場合、<count>は使用する SET ビットの数を示す。 この指令はプログラムのデフォルトのステートマシン構成に影響する。この指令は最初の命令の前のプログラムでのみ有効である。
-||.side_set <count> (opt) (pindirs)||If this directive is present, <count> indicates the number of side-set bits to be used. Additionally, opt may be specified to indicate that a side <value> is optional for instructions (note this requires stealing an extra bit --- in addition to the <count>  bits --- from  those  available  for  the  instruction  delay).  Finally,  pindirs  may  be  specified  to  indicate  that  the side  set  values  should  be  applied  to  the  PINDIRs  and  not  the  PINs.  This  directive  is  only  valid  within  a  program before the first instruction.
-
-この指令がある場合、<count>は使用されるサイドセットビットの数を示す。さらに、opt は、サイド<値>が命令のオプションであることを示すために指定されるかもしれない(これは、<count>ビットに加えて---命令遅延のために利用可能なものから---余分なビットを盗む必要があることに注意すること)。 最後に、サイドセット値が PIN ではなく PINDIR に適用されることを示すために pindirs を指定することができる。 この指令は最初の命令の前のプログラム内でのみ有効である。
+この指令がある場合、 `<count>` は使用されるサイドセットビットの数を示す。さらに、 `opt` は、 `side <value>` が命令のオプションであることを示すために指定することができる(これは、 `<count>` ビットに加えて---命令遅延のために利用可能なものから --- その分多くのビットを盗む必要があることに注意すること)。 最後に、 `pindirs` を指定して、サイドセット値が PIN ではなく PINDIR に適用することを指示することができる。 この指令は最初の命令の前のプログラム内でのみ有効である。
 ||.wrap_target||Place  prior  to  an  instruction,  this  directive  specifies  the  instruction  where  execution  continues  due  to  program wrapping.  This  directive  is  invalid  outside  of  a  program,  may  only  be  used  once  within  a  program,  and  if  not specified defaults to the start of the program.
 
 命令の前に置かれ、プログラムの折り返しによって実行が継続される命令を指定します。 この指令はプログラム外では無効であり、プログラム内で一度だけ使用することができます。
-||.wrap||Placed after an instruction, this directive specifies the instruction after which, in normal control flow (i.e.  jmp with false  condition,  or  no  jmp),  the  program  wraps  (to  .wrap_target  instruction).  This  directive  is  invalid  outside  of  a program,  may  only  be  used  once  within  a  program,  and  if  not  specified  defaults  to  after  the  last  program instruction.
+||.wrap||Placed after an instruction, this directive specifies the instruction after which, in normal control flow (i.e.  `jmp` with false  condition,  or  no  `jmp`),  the  program  wraps  (to  `.wrap_target`  instruction).  This  directive  is  invalid  outside  of  a program,  may  only  be  used  once  within  a  program,  and  if  not  specified  defaults  to  after  the  last  program instruction.
 
-命令の後に置かれ、通常の制御フロー (すなわち、偽の条件での jmp、または jmp なし) において、プログラムがラップする (.wrap_target 命令へ) 命令を指定します。 この指令は、プログラム外では無効で、プログラム内で一度だけ使用することができ、指定されなければ、最後のプログラム命令の後がデフォルトになります。
+命令の後に置かれ、通常の制御フロー (すなわち、偽の条件での `jmp`、または `jmp` なし) において、プログラムが巻き戻る (`.wrap_target` 命令へ) 命令を指定します。 この指令は、プログラム外では無効で、プログラム内で一度だけ使用することができ、指定されなければ、最後のプログラム命令の後がデフォルトになります。
 ||.lang_opt <lang> <name> <option>||Specifies  an  option  for  the  program  related  to  a  particular  language  generator.  (See  Language  Generators  in Raspberry Pi Pico-series C/C++ SDK). This directive is invalid outside of a program.
 
 特定の言語ジェネレータに関連するプログラムのオプションを指定します。 (Raspberry Pi Pico シリーズ C/C++ SDK の言語ジェネレータを参照)。この指令はプログラムの外では無効です。
@@ -799,26 +797,26 @@ All pioasm instructions follow a common pattern:
 
 where:
 
-<description>
+<desc>
 
 ||<instruction>||An assembly instruction detailed in the following sections. (see Section 11.4)
 
 以下のセクションで詳述されるアセンブリ命令(セクション 11.4 参照)。
-||<side_set_value>||A value (see Section 11.3.2) to apply to the side_set pins at the start of the instruction. Note that the rules for a side-set value via side <side_set_value> are dependent on the .side_set (see pioasm_side_set) directive for the program. If no .side_set is specified then the side <side_set_value> is invalid, if an optional number of sideset pins is specified then side <side_set_value> may be present, and if a non-optional number of sideset pins is specified, then side <side_set_value> is required. The <side_set_value> must fit within the number of side-set bits specified in the .side_set directive.
+||<side_set_value>||A value (see Section 11.3.2) to apply to the side_set pins at the start of the instruction. Note that the rules for a side-set value via `side <side_set_value>` are dependent on the `.side_set` (see `pioasm_side_set`) directive for the program. If no .`side_set` is specified then the `side <side_set_value>` is invalid, if an optional number of sideset pins is specified then `side <side_set_value>` may be present, and if a non-optional number of sideset pins is specified, then `side <side_set_value>` is required. The <side_set_value> must fit within the number of side-set bits specified in the `.side_set` directive.
 
-命令開始時に side_set ピンに適用する値(セクション 11.3.2 参照)。side <side_set_value> によるサイドセット値の規則は、プログラムの .side_set (pioasm_side_set 参照) 命令に依存することに注意すること。.side_set が指定されていない場合、side <side_set_value>は無効であり、オプションのサイドセットピン数が指定されている場合、side <side_set_value>が存在してもよく、オプションでないサイドセットピン数が指定されている場合、side <side_set_value>は必須である。<side_set_value>は、.side_set 指令で指定されたサイドセットビット数に収まらなければならない。
-||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 11.3.2), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the .side_set (see pioasm_side_set) directive. If the <delay_value> is not present, then the instruction has no delay.
+命令開始時に side_set ピンに適用する値(セクション 11.3.2 参照)。 `side <side_set_value>` によるサイドセット値の規則は、プログラムの `.side_set` (`pioasm_side_set` 参照) 命令に依存することに注意すること。`.side_set` が指定されていない場合、 `side <side_set_value>` は無効である。オプションのサイドセットピン数が指定されている場合、 `side <side_set_value>` が存在してもよく、オプションでないサイドセットピン数が指定されている場合、 `side <side_set_value>` は必須である。 `<side_set_value>` は、 `.side_set` 指令で指定されたサイドセットビット数に収まらなければならない。
+||<delay_value>||Specifies the number of cycles to delay after the instruction completes. The delay_value is specified as a value (see Section 11.3.2), and in general is between 0 and 31 inclusive (a 5-bit value), however the number of bits is reduced when sideset is enabled via the `.side_set` (see `pioasm_side_set`) directive. If the `<delay_value>` is not present, then the instruction has no delay.
 
-命令が完了した後に遅延させるサイクル数を指定する。delay_value は値として指定され(セクション 11.3.2 参照)、通常は 0 から 31 の間(5 ビット値)であるが、.side_set(pioasm_side_set 参照)指令によってサイドセットが有効になっている場合はビット数が減る。<delay_value>が存在しない場合、その命令は遅延を持たない。
-</description>
+命令が完了した後に遅延させるサイクル数を指定する。delay_value は値として指定され(セクション 11.3.2 参照)、通常は 0 から 31 の間(5 ビット値)であるが、`.side_set`(`pioasm_side_set` 参照)指令によってサイドセットが有効になっている場合はビット数が減る。 `<delay_value>` が存在しない場合、その命令は遅延を持たない。
+</desc>
 
 >  NOTE pioasm instruction names, keywords and directives are case insensitive; lower case is used in the Assembly Syntax sections below, as this is the style used in the SDK.
 
->  NOTE Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. out pins, 3 may be written out  pins  3, and  `jmp  x--  label` may be written as  `jmp  x--,  label`. The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
+>  NOTE Commas appear in some Assembly Syntax sections below, but are entirely optional, e.g. `out pins, 3` may be written `out pins 3`, and  `jmp x-- label` may be written as  `jmp x--, label`. The Assembly Syntax sections below uses the first style in each case as this is the style used in the SDK.
 
-> NOTE pioasm の命令名、キーワード、指令は大文字と小文字を区別しません。
+> NOTE pioasm の命令名、キーワード、指令は大文字と小文字を区別しません。以降の *Assembly Syntax* のセクションでは、SDK のスタイルに合わせ、小文字を使用します。
 
-> NOTE 例えば、`out pins, 3` は `out pins 3`、`jmp x-- label` は `jmp x--, label` と書くことができます。以下のセクションの Assembly Syntax の説明では、SDK で使用されている最初のスタイルを使用しています。
+> NOTE 以降の *Assembly Syntax* セクションではコンマを使用していますが、これは完全にオプション扱いです。例えば、`out pins, 3` は `out pins 3`、`jmp x-- label` は `jmp x--, label` と書くことができます。以下のセクションの *Assembly Syntax* の説明では、SDK で使用されている最初のスタイルを使用しています。
 
 ### 11.3.7. Pseudoinstructions
 
@@ -826,12 +824,12 @@ pioasm provides aliases for certain instructions, as a convenience:
 
 pioasm は、便宜上、特定の命令のエイリアスを提供している: 
 
-<description>
+<desc>
 
 ||nop||Assembles to mov y, y. No side effect, but a useful vehicle for a side-set operation or an extra delay.
 
 副作用はないが、サイドセット操作や追加ディレイのための便利な手段。
-</description>
+</desc>
 
 ## 11.4. Instruction Set
 

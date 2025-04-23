@@ -680,7 +680,7 @@ dd.glossary {
 /* desc, directive, description */
 
 .desc > .desc-entry {
-	grid-template-columns: 7.5rem 1fr;
+	grid-template-columns: 10rem 1fr;
 
 	display: grid;
 	margin-bottom: 1em;
@@ -696,11 +696,24 @@ dd.glossary {
 }
 
 .description > .desc-entry {
-	grid-template-columns: 10rem 1fr;
-
-	display: grid;
+	grid-template-rows: 1rem 1fr;
 	margin-bottom: 0.2rem;
 	background-color: #f0f0f0;
+}
+
+.description > .desc-entry > .word {
+	grid-row: 1;
+	font-family: 'Noto Sans JP';
+	font-weight: 400;
+	display: block;
+	padding-bottom: 0.3rem;
+	background-color: #c0c0c0;
+}
+
+.description > .desc-entry > .body {
+	grid-row: 2;
+	display: block;
+	margin-left: 3rem;
 }
 
 .desc-entry > .word {
