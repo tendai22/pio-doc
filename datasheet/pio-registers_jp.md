@@ -413,39 +413,39 @@ Description: Execution/behavioural settings for state machine N
 Table 995. SM0_EXECCTRL, SM1_EXECCTRL, SM2_EXECCTRL, SM3_EXECCTRL Registers 
 
 <bit-table>
-||31||RO||0x0||EXEC_STALLED: If 1, an instruction written to SMx_INSTR is stalled, and latched by the state machine. Will clear to 0 once this instruction completes. 
+||31||RO||0x0||**EXEC_STALLED**: If 1, an instruction written to SMx_INSTR is stalled, and latched by the state machine. Will clear to 0 once this instruction completes. 
 
-EXEC_STALLED:  1 の場合、SMx_INSTR に書き込まれた命令はストールされ、ステートマシンにラッチされる。この命令が完了すると 0 にクリアされる。
-||30||RW||0x0||SIDE_EN: If 1, the MSB of the Delay/Side-set instruction field is used as side- set enable, rather than a side-set data bit. This allows instructions to perform side-set optionally, rather than on every instruction, but the maximum possible side-set width is reduced from 5 to 4. Note that the value of PINCTRL_SIDESET_COUNT is inclusive of this enable bit. 
+**EXEC_STALLED**:  1 の場合、SMx_INSTR に書き込まれた命令はストールされ、ステートマシンにラッチされる。この命令が完了すると 0 にクリアされる。
+||30||RW||0x0||**SIDE_EN**: If 1, the MSB of the Delay/Side-set instruction field is used as side- set enable, rather than a side-set data bit. This allows instructions to perform side-set optionally, rather than on every instruction, but the maximum possible side-set width is reduced from 5 to 4. Note that the value of PINCTRL_SIDESET_COUNT is inclusive of this enable bit. 
 
-SIDE_EN: 1 の場合、遅延/サイドセット命令フィールドの MSB は、サイドセットデータビットではなく、サイドセットイネーブルとして使用される。PINCTRL_SIDESET_COUNT の値はこのイネーブルビットを含むことに注意してください。
-||29||RW||0x0||SIDE_PINDIR: If 1, side-set data is asserted to pin directions, instead of pin values 
+**SIDE_EN**: 1 の場合、遅延/サイドセット命令フィールドの MSB は、サイドセットデータビットではなく、サイドセットイネーブルとして使用される。PINCTRL_SIDESET_COUNT の値はこのイネーブルビットを含むことに注意してください。
+||29||RW||0x0||**SIDE_PINDIR**: If 1, side-set data is asserted to pin directions, instead of pin values 
 
-SIDE_PINDIR: 1 の場合、サイドセットデータがピン値ではなくピン方向にアサートされる
-||28:24||RW||0x00||JMP_PIN: The GPIO number to use as condition for JMP PIN. Unaffected by input mapping. 
+**SIDE_PINDIR**: 1 の場合、サイドセットデータがピン値ではなくピン方向にアサートされる
+||28:24||RW||0x00||**JMP_PIN**: The GPIO number to use as condition for JMP PIN. Unaffected by input mapping. 
 
-JMP_PIN: JMP PIN の条件として使用する GPIO 番号。入力マッピングの影響を受けない。
-||23:19||RW||0x00||OUT_EN_SEL: Which data bit to use for inline OUT enable 
+**JMP_PIN**: JMP PIN の条件として使用する GPIO 番号。入力マッピングの影響を受けない。
+||23:19||RW||0x00||**OUT_EN_SEL**: Which data bit to use for inline OUT enable 
 
-OUT_EN_SEL: インライン OUT イネーブルに使用するデータビット
-||18||RW||0x0||INLINE_OUT_EN: If 1, use a bit of OUT data as an auxiliary write enable When used in conjunction with OUT_STICKY, writes with an enable of 0 will deassert the latest pin write. This can create useful masking/override behaviour due to the priority ordering of state machine pin writes (SM0 < SM1 < …) 
+**OUT_EN_SEL**: インライン OUT イネーブルに使用するデータビット
+||18||RW||0x0||**INLINE_OUT_EN**: If 1, use a bit of OUT data as an auxiliary write enable When used in conjunction with OUT_STICKY, writes with an enable of 0 will deassert the latest pin write. This can create useful masking/override behaviour due to the priority ordering of state machine pin writes (SM0 < SM1 < …) 
 
-INLINE_OUT_EN: 1 の場合、補助書き込みイネーブルとして OUT データのビットを使用する。 OUT_STICKY と組み合わせて使用すると、イネーブルが 0 の書き込みは最新のピン書き込みをデアサートする。これは、ステートマシンのピン書き込みの優先順位 (SM0 < SM1 < ...) により、有用なマスキング/オーバーライド動作を作り出すことができる。
-||17||RW||0x0||OUT_STICKY: Continuously assert the most recent OUT/SET to the pins 
+**INLINE_OUT_EN**: 1 の場合、補助書き込みイネーブルとして OUT データのビットを使用する。 OUT_STICKY と組み合わせて使用すると、イネーブルが 0 の書き込みは最新のピン書き込みをデアサートする。これは、ステートマシンのピン書き込みの優先順位 (SM0 < SM1 < ...) により、有用なマスキング/オーバーライド動作を作り出すことができる。
+||17||RW||0x0||**OUT_STICKY**: Continuously assert the most recent OUT/SET to the pins 
 
-OUT_STICKY: 最新の OUT/SET をピンにアサートし続ける。
-||16:12||RW||0x1f||WRAP_TOP: After reaching this address, execution is wrapped to wrap_bottom. If the instruction is a jump, and the jump condition is true, the jump takes priority.
+**OUT_STICKY**: 最新の OUT/SET をピンにアサートし続ける。
+||16:12||RW||0x1f||**WRAP_TOP**: After reaching this address, execution is wrapped to wrap_bottom. If the instruction is a jump, and the jump condition is true, the jump takes priority.
 
-WRAP_TOP:  このアドレスに達した後、実行は wrap_bottom にラップされる。命令がジャンプで、ジャンプ条件が真の場合、ジャンプが優先される。
-||11:7||RW||0x00||WRAP_BOTTOM: After reaching wrap_top, execution is wrapped to this address. 
+**WRAP_TOP**:  このアドレスに達した後、実行は wrap_bottom にラップされる。命令がジャンプで、ジャンプ条件が真の場合、ジャンプが優先される。
+||11:7||RW||0x00||**WRAP_BOTTOM**: After reaching wrap_top, execution is wrapped to this address. 
 
-WRAP_BOTTOM: wrap_top に達した後、実行はこのアドレスにラップされる。
-||6:5||RW||0x0||STATUS_SEL: Comparison used for the MOV x, STATUS instruction. Enumerated values: 0x0 → TXLEVEL: All-ones if TX FIFO level < N, otherwise all-zeroes 0x1 → RXLEVEL: All-ones if RX FIFO level < N, otherwise all-zeroes 0x2 → IRQ: All-ones if the indexed IRQ flag is raised, otherwise all-zeroes 
+**WRAP_BOTTOM**: wrap_top に達した後、実行はこのアドレスにラップされる。
+||6:5||RW||0x0||**STATUS_SEL**: Comparison used for the `MOV x, STATUS` instruction.<br> Enumerated values:<br> 0x0 → TXLEVEL: All-ones if TX FIFO level &lt; N, otherwise all-zeroes<br> 0x1 → RXLEVEL: All-ones if RX FIFO level < N, otherwise all-zeroes<br> 0x2 → IRQ: All-ones if the indexed IRQ flag is raised, otherwise all-zeroes 
 
-STATUS_SEL: MOV x, STATUS 命令で使用される比較。列挙値:  <br>0x0 → TXLEVEL:  0x0 → TXLEVEL: TX FIFO レベル&lt;N の場合はオール 1、それ以外の場合はオール 0<br>0x1 → RXLEVEL: RX FIFO レベル&lt;N の場合はオール 1、それ以外の場合はオール 0: <br>>0x2 → IRQ: インデックス付き IRQ フラグが立っている場合はオール 1、それ以外はオール 0
-||4:0||RW||0x00||STATUS_N: Comparison level or IRQ index for the MOV x, STATUS instruction. If STATUS_SEL is TXLEVEL or RXLEVEL, then values of STATUS_N greater than the current FIFO depth are reserved, and have undefined behaviour. Enumerated values: <br>0x00 → IRQ: Index 0-7 of an IRQ flag in this PIO block <br>0x08 → IRQ_PREVPIO: Index 0-7 of an IRQ flag in the next lower-numbered PIO block<br> 0x10 → IRQ_NEXTPIO: Index 0-7 of an IRQ flag in the next higher-numbered PIO block 
+**STATUS_SEL**: `MOV x, STATUS` 命令で使用される比較。列挙値:  <br>0x0 → TXLEVEL:  TX FIFO level &lt; N の場合はオール 1、それ以外の場合はオール 0<br>0x1 → RXLEVEL: RX FIFO level &lt; N の場合はオール 1、それ以外の場合はオール 0: <br>0x2 → IRQ: インデックス付き IRQ フラグが立っている場合はオール 1、それ以外はオール 0
+||4:0||RW||0x00||**STATUS_N**: Comparison level or IRQ index for the `MOV x, STATUS` instruction. If STATUS_SEL is TXLEVEL or RXLEVEL, then values of STATUS_N greater than the current FIFO depth are reserved, and have undefined behaviour. <br>Enumerated values: <br>0x00 → IRQ: Index 0-7 of an IRQ flag in this PIO block <br>0x08 → IRQ_PREVPIO: Index 0-7 of an IRQ flag in the next lower-numbered PIO block<br> 0x10 → IRQ_NEXTPIO: Index 0-7 of an IRQ flag in the next higher-numbered PIO block 
 
-STATUS_N: MOV x, STATUS 命令の比較レベルまたは IRQ インデックス。STATUS_SEL が TXLEVEL または RXLEVEL の場合、現在の FIFO 深度より大きい STATUS_N の値は予約され、未定義の動作をする。<br>列挙値:  <br>0x00 → IRQ: この PIO ブロックの IRQ フラグのインデックス 0～7 <br>0x08 → IRQ_PREVPIO: 次の下位番号の PIO ブロックの IRQ フラグのインデックス 0～7 <br>0x10 → IRQ_NEXTPIO: 次の上位番号の PIO ブロックの IRQ フラグのインデックス 0～7
+**STATUS_N**: `MOV x, STATUS` 命令の比較レベルまたは IRQ インデックス。 `STATUS_SEL` が TXLEVEL または RXLEVEL の場合、現在の FIFO 深度より大きい STATUS_N の値は予約され、未定義の動作をする。<br>列挙値:  <br>0x00 → IRQ: この PIO ブロックの IRQ フラグのインデックス 0～7 <br>0x08 → IRQ_PREVPIO: 次の下位番号の PIO ブロックの IRQ フラグのインデックス 0～7 <br>0x10 → IRQ_NEXTPIO: 次の上位番号の PIO ブロックの IRQ フラグのインデックス 0～7
 </bit-table>
 
 
