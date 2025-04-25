@@ -63,7 +63,9 @@ sed '
     s/</\&lt;/g
     s/\&lt;br>/<br>/g
 }
-' |sed '/^  <span class="body">/,/  <\/span>/{
+' |sed '/^  <span class="body">/,/  <\/span>/b conv
+/^<div class="[a-z][a-z]*-body">/,/^<\/div>/{
+:conv
     s/`\([^`][^`]*\)`/<code>\1<\/code>/g
     s/\*\*\([^*][^*]*\)\*\*/<strong>\1<\/strong>/g
     s/\*\([^*][^*]*\)\*/<em>\1<\/em>/g
