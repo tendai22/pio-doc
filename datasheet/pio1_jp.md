@@ -1233,8 +1233,8 @@ PULL IFEMPTY is useful if an OUT with autopull would stall in an inappropriate l
 
 TX FIFO から OSR に 32 ビットワードをロードする。
 
-* 空の場合:  1 の場合、 総出力シフトカウントがしきい値 SHIFTCTRL_PULL_THRESH に達しない限り、何もしません (オートプルの場合と同じ。)
-* ブロック:  ブロック: 1 の場合、TX FIFO が空の場合にストールする。0 の場合、空の FIFO からプルするとスクラッチ X が OSR にコピーされる。
+* IfEmpty:  1 の場合、 総出力シフトカウントがしきい値 SHIFTCTRL_PULL_THRESH に達しない限り、何もしません (オートプルの場合と同じ。)
+* Block:  1 の場合、TX FIFO が空の場合にストールする。0 の場合、空の FIFO からプルするとスクラッチ X が OSR にコピーされる。
 
 いくつかのペリフェラル(UART、SPI など)は、データが利用できないときに停止し、データが入ってきたときにそれを拾うべきである。 これは Block パラメータで実現できる。
 

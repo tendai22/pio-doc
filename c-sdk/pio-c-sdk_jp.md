@@ -482,12 +482,12 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/ws28
 22
 23 .wrap_target
 24 bitloop:
-25 out x, 1 side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
-26 jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+25      out x, 1        side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
+26      jmp !x do_zero  side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
 27 do_one:
-28 jmp bitloop side 1 [T2 - 1] ; Continue driving high, for a long pulse
+28      jmp bitloop     side 1 [T2 - 1] ; Continue driving high, for a long pulse
 29 do_zero:
-30 nop side 0 [T2 - 1] ; Or drive low, for a short pulse
+30      nop             side 0 [T2 - 1] ; Or drive low, for a short pulse
 31 .wrap
 ```
 
