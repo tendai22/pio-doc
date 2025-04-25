@@ -128,16 +128,16 @@ RP2350 includes the following general improvements:
 
 RP2350 では、以下の新しいレジスタとコントロールが追加されました: 
 
-* `DBG_CFGINFO`.VERSION は PIO のバージョンを示し、実行時に PIO 機能を検出できるようにする。
+* `DBG_CFGINFO.VERSION` は PIO のバージョンを示し、実行時に PIO 機能を検出できるようにする。
   + この 4 ビットフィールドは RP2040 では予約 0 (バージョン 0 を示す) であったが、RP2350 では 1 として読み込まれる。
 * `GPIOBASE` は PIO ブロックあたり 32以上の GPIO をサポートします。
-  + 各 PIO ブロックは一度に 32GPIO に制限されますが、``GPIOBASE` は 32 を選択します。
-* `CTRL`.NEXT_PIO_MASK と `CTRL`.PREV_PIO_MASK は、いくつかの `CTRL`レジスタ操作を隣接する PIO ブロックのステートマシンに同時に適用します。
-  + `CTRL`.NEXTPREV_SM_DISABLE は、複数の PIO ブロックの PIO ステートマシンを同時に停止する。
-  + `CTRL`.NEXTPREV_SM_ENABLE は、複数の PIO ブロック内の PIO ステートマシンを同時に起動する。
-  + `CTRL`.NEXTPREV_CLKDIV_RESTART 複数の PIO ブロックの PIO ステートマシンの分周クロックを同期させる。
-* `SM0_SHIFTCTRL`.IN_COUNT は、不要な IN マップピンをゼロにマスクします。
-  + これは `MOV x, PINS` 命令に便利で、以前は常にフル回転した 32 ビット値を返していた。
+  + 各 PIO ブロックが使用する GPIO は一度に 32個と制限されますが、`GPIOBASE` は、どの 32GPIO を使うかを選択します。
+* `CTRL.NEXT_PIO_MASK` と `CTRL.PREV_PIO_MASK` は、いくつかの `CTRL` レジスタ操作を隣接する PIO ブロックのステートマシンに同時に適用します。
+  + `CTRL.NEXTPREV_SM_DISABLE` は、複数の PIO ブロックの PIO ステートマシンを同時に停止する。
+  + `CTRL.NEXTPREV_SM_ENABLE` は、複数の PIO ブロック内の PIO ステートマシンを同時に起動する。
+  + `CTRL.NEXTPREV_CLKDIV_RESTART` 複数の PIO ブロックの PIO ステートマシンの分周クロックを同期させる。
+* `SM0_SHIFTCTRL.IN_COUNT` は、不要な IN マップピンをゼロにマスクします。
+  + これは `MOV x, PINS` 命令に便利で、以前は常に 32ビットフルローテーションして返していました。
 * `IRQ0_INTE` と `IRQ1_INTE` は、システムレベルの割り込みに対して 8 つの SM IRQ フラグをすべて(下位4 つだけでなく)公開するようになりました。
 * `RXF0_PUTGET0` から始まるレジスタは、各 RX FIFO の内部ストレージレジスタをシステムからのランダムリードまたはライトアクセス用に公開する、
   + 新しい `FJOIN_RX_PUT` FIFO 結合モードは、ステートマシンからのランダム書き込みと、システムからのランダム読み出しを可能にします(ステータスレジスタの実装用)。
@@ -149,22 +149,22 @@ RP2350 は以下の新しい命令機能を追加した:
 * `WAIT` 命令のソースとして `PINCTRL_JMP_PIN` を追加し、さらに 0～3 の範囲のオフセットを追加。
   + これにより、 `WAIT` ピンの引数は、IN にマッピングされたピンとは独立した SM ごとのマッピングとなる。
 * `MOV` のデスティネーションとして `PINDIRS` を追加。
-  + これにより、1 命令ですべての OUT マップされたピンの方向を変更することができます: ` MOV PINDIRS, NULL` または `MOV PINDIRS, ~NULL`
+  + これにより、　`MOV PINDIRS, NULL` または `MOV PINDIRS, ~NULL` の 1 命令ですべての OUT マップされたピンの方向を変更することができます。
 * `MOV x, STATUS` のソースとして SM IRQ フラグを追加。
-  +  これにより、SM IRQ フラグのアサート時に(ブロッキングと同様に)分岐することができる。
+  + これにより、SM IRQ フラグのアサート時に(ブロッキングと同様に)分岐することができる。
 * 異なる PIO ブロックからの IRQ フラグをステートマシンが設定、クリア、監視できるように `IRQ` 命令エンコーディングを拡張。
   + クロス PIO IRQ フラグには遅延ペナルティはない。あるステートマシンの IRQ は、次のサイクルですべてのステートマシンが観測可能。
-* FJOIN_RX_GET FIFO モードを追加。
+* `FJOIN_RX_GET` FIFO モードを追加。
   + 新しい MOV エンコーディングは、4 つの RX FIFO ストレージレジスタのいずれかを OSR に読み出します。
   + この命令では、命令ビットまたは Y スクラッチレジスタによってインデックス付けされた 4 つの FIFO エントリをランダムに読み出すことができます。
-* FJOIN_RX_PUT FIFO モードを追加。
+* `FJOIN_RX_PUT` FIFO モードを追加。
   + 新しい MOV エンコーディングは、ISR を 4 つの RX FIFO ストレージレジスタのいずれかに書き込みます。
   + レジスタは命令ビットまたは Y スクラッチレジスタでインデックス付けされる。
 
 RP2350 は以下のセキュリティ機能を追加します: 
 
-* 非セキュア PIO(ACCESSCTRL 経由で設定)を非セキュア GPIO のみの観測に制限する。セキュア GPIO を読み出そうとすると、0 を返します。
-* 非セキュア PIO ブロック(ACCESSCTRL に従って非セキュアアクセスを許可するブロック)とセキュア専用ブロック(許可しないブロック)間のクロス PIO 機能(IRQ、CTRL_NEXTPREV 操作)を無効にします。
+* 非セキュア PIO(`ACCESSCTRL` 経由で設定)を非セキュア GPIO のみの観測に制限する。セキュア GPIO を読み出そうとすると、0 を返します。
+* 非セキュア PIO ブロック(`ACCESSCTRL` に従って非セキュアアクセスを許可するブロック)とセキュア専用ブロック(許可しないブロック)間のクロス PIO 機能(IRQ や、 `CTRL_NEXTPREV` 操作)を無効にします。
 
 RP2350 には、以下の全般的な改良が含まれています: 
 
@@ -197,7 +197,7 @@ PIO state machines execute short binary programs.
 
 Programs  for  common  interfaces,  such  as  UART,  SPI,  or  I2C,  are  available  in  the  PIO  library.  In  many  cases,  it  is  not necessary to write PIO programs. However, the PIO is much more flexible when programmed directly, supporting a wide variety of interfaces which may not have been foreseen by its designers.
 
-The PIO has a total of nine instructions: JMP, WAIT, IN, OUT, PUSH, PULL, MOV, IRQ, and SET. For more information about these instructions, see Section 11.4.
+The PIO has a total of nine instructions: `JMP`, `WAIT`, `IN`, `OUT`, `PUSH`, `PULL`, `MOV`, `IRQ`, and `SET`. For more information about these instructions, see Section 11.4.
 
 Though  the  PIO  only  has  a  total  of  nine  instructions,  it  would  be  difficult  to  edit  PIO  program  binaries  by  hand.  PIO assembly  is  a  textual  format,  describing  a  PIO  program,  where  each  command  corresponds  to  one  instruction  in  the output binary. The following code snippet contains an example program written in in PIO assembly:
 
@@ -205,9 +205,9 @@ PIO ステートマシンは短いバイナリプログラムを実行します�
 
 UART、SPI、I2C などの一般的なインターフェース用のプログラムは、PIO ライブラリで利用可能です。 多くの場合、PIO プログラムを書く必要はありません。しかし、PIO は直接プログラムした方がはるかに柔軟で、設計者が予期していなかったような多種多様なインターフェースをサポートします。
 
-PIO には全部で 9 つの命令がある:  JMP、WAIT、IN、OUT、PUSH、PULL、MOV、IRQ、SET である。これらの命令の詳細については、セクション 11.4 を参照してください。
+PIO には全部で 9 つの命令がある:  `JMP`, `WAIT`, `IN`, `OUT`, `PUSH`, `PULL`, `MOV`, `IRQ`, `SET` である。これらの命令の詳細については、セクション 11.4 を参照してください。
 
-PIO には合計 9 つの命令しかないが、PIO プログラムのバイナリを手作業で編集するのは難しいだろう。 PIO アセンブリは、PIO プログラムを記述するテキスト形式で、各コマンドが出力バイナリの 1 命令に対応する。以下のコードスニペットには、PIO アセンブリで書かれたプログラム例が含まれています: 
+PIO の命令は合計 9 つだけだが、PIO プログラムのバイナリを手作業で編集するのは難しいだろう。 PIO アセンブリは、PIO プログラムを記述するテキスト形式で、各コマンドが出力バイナリの 1 命令に対応する。以下のコードスニペットには、PIO アセンブリで書かれたプログラム例が含まれています: 
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squarewave/squarewave.pio Lines 8 - 13
 
@@ -230,25 +230,25 @@ PIO アセンブラは SDK に含まれており、pioasm と呼ばれる。こ�
 
 ### 11.2.2. 制御フロー
 
-On every system clock cycle, each state machine fetches, decodes and executes one instruction. Each instruction takes precisely one cycle, unless it explicitly stalls (such as the WAIT instruction). Instructions may insert a delay of up to 31 cycles before the next instruction execute, to help write cycle-exact programs.
+On every system clock cycle, each state machine fetches, decodes and executes one instruction. Each instruction takes precisely one cycle, unless it explicitly stalls (such as the `WAIT` instruction). Instructions may insert a delay of up to 31 cycles before the next instruction execute, to help write cycle-exact programs.
 
-The program counter, or PC, points to the location in the instruction memory being executed on this cycle. Generally, PC increments by one each cycle, wrapping at the end of the instruction memory. Jump instructions are an exception and explicitly provide the next value that PC will take.
+The program counter, or `PC`, points to the location in the instruction memory being executed on this cycle. Generally, `PC` increments by one each cycle, wrapping at the end of the instruction memory. Jump instructions are an exception and explicitly provide the next value that `PC` will take.
 
-Our example assembly program (listed as .program squarewave above) shows both of these concepts in practice. It drives a 50/50 duty cycle square wave with a period of four cycles onto a GPIO. Using some other features (e.g. side-set) this can be made as low as two cycles.
+Our example assembly program (listed as `.program squarewave` above) shows both of these concepts in practice. It drives a 50/50 duty cycle square wave with a period of four cycles onto a GPIO. Using some other features (e.g. side-set) this can be made as low as two cycles.
 
 >  NOTE Side-set  is  where  a  state  machine  drives  a  small  number  of  GPIOs  in  addition  to  the  main  side  effects  of  the instruction it executes. It's described fully in Section 11.5.1.
 
 The system has write-only access to the instruction memory, which is used to load programs. The clock divider slows the state machine's execution by a constant factor, represented as a 16.8 fixed-point fractional number. In the following example, if a clock division of 2.5 were programmed, the square wave would have a period of  cycles. This is useful for setting a precise baud rate for a serial interface, such as a UART.
 
-システムクロックサイクルごとに、各ステートマシンは 1 つの命令をフェッチ、デコード、 実行します。各命令は、明示的にストールしない限り(WAIT 命令など)、正確に 1 サイクルかかります。命令は、次の命令実行までに最大 31 サイクルの遅延を挿入することができ、サイクル精度の高いプログラムを記述するのに役立ちます。
+システムクロックサイクルごとに、各ステートマシンは 1 つの命令をフェッチ、デコード、 実行します。各命令は、明示的にストールしない限り(`WAIT` 命令など)、正確に 1 サイクルかかります。命令は、次の命令実行までに最大 31 サイクルの遅延を挿入することができ、サイクル精度の高いプログラムを記述するのに役立ちます。
 
-プログラムカウンタ(PC)は、このサイクルで実行される命令メモリの場所を指す。通常、PC は各サイクルごとに 1 ずつ増加し、命令メモリの終端で折り返す。ジャンプ命令は例外で、PC が次に取る値を明示的に指定する。
+プログラムカウンタ(`PC`)は、このサイクルで実行される命令メモリの場所を指す。通常、PC は各サイクルごとに 1 ずつ増加し、命令メモリの終端で折り返す。ジャンプ命令は例外で、PC が次に取る値を明示的に指定する。
 
-私たちのサンプルアセンブリプログラム(上記の.program squarewave としてリストされている)は、これらのコンセプトの両方を実際に示しています。これは、周期 4 サイクルのデューティ 50/50 の矩形波を GPIO にドライブします。他の機能(サイドセットなど)を使用すれば、2 サイクルまで下げることができます。
+私たちのサンプルアセンブリプログラム(上記の `.program squarewave` としてリストされている)は、これらのコンセプトの両方を実際に示しています。これは、周期 4 サイクルのデューティ 50/50 の矩形波を GPIO にドライブします。他の機能(サイドセットなど)を使用すれば、2 サイクルまで下げることができます。
 
 > 注: サイドセットとは、ステートマシンが実行する命令の主な副作用に加えて、少数の GPIO を駆動することです。これについてはセクション 11.5.1 で詳しく説明します。
 
-システムは、プログラムのロードに使用される命令メモリへの書き込み専用アクセスを持っている。クロック分周器は、16.8 固定小数点小数で表される定数倍だけ、ステートマシンの実行を遅くする。以下の例では、2.5 のクロック分周がプログラムされた場合、矩形波は周期を持つことになる。これは、UART のようなシリアルインターフェースのボーレートを正確に設定するのに便利です。
+システムは、プログラムのロードに使用される命令メモリへの書き込み専用アクセスを持っている。クロック分周器は、"16.8 固定小数点小数" で表される定数倍だけ、ステートマシンの実行を遅くする。以下の例では、クロック分周比 `2.5` をプログラムした場合、矩形波は 4 x 2.5 = 10 周期を持つことになる。これは、UART のようなシリアルインターフェースのボーレートを正確に設定するのに便利です。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squarewave/squarewave.c Lines 34 - 38
 
@@ -260,9 +260,9 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squa
 38         pio->instr_mem[i] = squarewave_program_instructions[i];
 ```
 
-The following code fragments are part of a complete code example which drives a 12.5 MHz square wave out of GPIO 0 (or  any  other  pins  we  might  choose  to  map).  We  can  also  use  pins  WAIT  PIN  instruction  to  stall  a  state  machine's execution  for  some  amount  of  time,  or  a  JMP  PIN  instruction  to  branch  on  the  state  of  a  pin,  so  control  flow  can  vary based on pin state.
+The following code fragments are part of a complete code example which drives a 12.5 MHz square wave out of GPIO 0 (or  any  other  pins  we  might  choose  to  map).  We  can  also  use  pins  `WAIT PIN`  instruction  to  stall  a  state  machine's execution  for  some  amount  of  time,  or  a  `JMP PIN`  instruction  to  branch  on  the  state  of  a  pin,  so  control  flow  can  vary based on pin state.
 
-以下のコード断片は、GPIO 0(またはマッピングする他のピン)から 12.5MHz の矩形波を駆動する完全なコード例の一部です。 WAIT PIN 命令を使ってステートマシンの実行を一定時間停止させたり、JMP PIN 命令を使ってピンの状態で分岐させたりすることもできます。
+以下のコード断片は、GPIO 0(またはマッピングする他のピン)から 12.5MHz の矩形波を駆動する完全なコード例の一部です。 `WAIT PIN` 命令を使ってステートマシンの実行を一定時間停止させたり、`JMP PIN` 命令を使ってピンの状態で分岐させたりすることもできます。
 
 Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squarewave/squarewave.c Lines 42 - 47
 
@@ -305,19 +305,19 @@ Pico Examples: https://github.com/raspberrypi/pico-examples/blob/master/pio/squa
 
 Most instructions are executed from instruction memory, but there are other sources which can be freely mixed:
 
-* Instructions written to a special configuration register (SMx INSTR) are immediately executed, momentarily interrupting other execution. For example, a JMP instruction written to SMx INSTR causes the state machine to start executing from a different location.
-* Instructions can be executed from a register, using the MOV EXEC instruction.
-* Instructions can be executed from the output shifter, using the OUT EXEC instruction
+* Instructions written to a special configuration register (`SMx INSTR`) are immediately executed, momentarily interrupting other execution. For example, a `JMP` instruction written to `SMx INSTR` causes the state machine to start executing from a different location.
+* Instructions can be executed from a register, using the `MOV EXEC` instruction.
+* Instructions can be executed from the output shifter, using the `OUT EXEC` instruction
 
-The last of these is particularly versatile: instructions can be embedded in the stream of data passing through the FIFO.  The I2C example uses this to embed e.g. STOP and RESTART line conditions alongside normal data. In the case of MOV and OUT EXEC, the MOV/OUT itself executes in one cycle, and the executee on the next.
+The last of these is particularly versatile: instructions can be embedded in the stream of data passing through the FIFO.  The I2C example uses this to embed e.g. `STOP` and `RESTART` line conditions alongside normal data. In the case of `MOV` and `OUT EXEC`, the `MOV`/`OUT` itself executes in one cycle, and the executee on the next.
 
 ほとんどの命令は命令メモリから実行されるが、自由に混在できる他のソースもある: 
 
-* 特別なコンフィギュレーションレジスタ(SMx INSTR)に書き込まれた命令は即座に実行され、他の実行を一時的に中断します。例えば、SMx INSTR に書き込まれた JMP 命令により、ステートマシンは別の場所から実行を開始します。
-* MOV EXEC 命令を使用して、レジスタから命令を実行できます。
-* OUT EXEC 命令を使用すると、出力シフタから命令を実行できます。
+* 特別なコンフィギュレーションレジスタ(`SMx INSTR`)に書き込まれた命令は即座に実行され、他の実行を一時的に中断します。例えば、`SMx INSTR` に書き込まれた `JMP` 命令により、ステートマシンは別の場所から実行を開始します。
+* `MOV EXEC` 命令を使用して、レジスタから命令を実行できます。
+* `OUT EXEC` 命令を使用すると、出力シフタから命令を実行できます。
 
-これらのうち、特に汎用性が高いのは、FIFO を通過するデータのストリームに命令を埋め込むことができる点です。 I2C の例では、通常のデータと一緒に STOP や RESTART などのライン条件を埋め込むためにこれを使用しています。MOV と OUT EXEC の場合、MOV/OUT 自体は 1 サイクルで実行され、次のサイクルで実行される。
+これらのうち、特に汎用性が高いのは、FIFO を通過するデータのストリームに命令を埋め込むことができる点です。 I2C の例では、通常のデータと一緒に STOP や RESTART などのライン条件を埋め込むためにこれを使用しています。 `MOV EXEC` と `OUT EXEC` の場合、 `MOV`/`OUT` 自体は 1 サイクルで実行され、次のサイクルで実行される。
 
 ### 11.2.3. Registers
 
@@ -338,20 +338,20 @@ Figure 45. Output Shift Register (OSR). Data is parcelled out 1…32 bits at a t
 
 The Output Shift Register (OSR) holds and shifts output data between the TX FIFO and the pins or other destinations, such as the scratch registers.
 
-* PULL instructions: remove a 32-bit word from the TX FIFO and place into the OSR.
-* OUT instructions shift data from the OSR to other destinations, 1…32 bits at a time.
+* `PULL` instructions: remove a 32-bit word from the TX FIFO and place into the OSR.
+* `OUT` instructions shift data from the OSR to other destinations, 1…32 bits at a time.
 * The OSR fills with zeroes as data is shifted out
-* The state machine will automatically refill the OSR from the FIFO on an OUT instruction, once some total shift count threshold is reached, if autopull is enabled
+* The state machine will automatically refill the OSR from the FIFO on an `OUT` instruction, once some total shift count threshold is reached, if autopull is enabled
 * Shift direction can be left/right, configurable by the processor via configuration registers
 
 For example, to stream data through the FIFO and output to the pins at a rate of one byte per two clocks:
 
 出力シフトレジスタ(OSR)は、TX FIFO とピンまたはスクラッチレジスタなどの他の出力先との間で出力データを保持し、シフトします。
 
-* PULL 命令: TX FIFO から 32 ビットワードを取り出し、OSR に置きます。
-* OUT 命令: OSR から 1 度に 1～32 ビットのデータを他のデスティネーションにシフトします。
+* `PULL` 命令: TX FIFO から 32 ビットワードを取り出し、OSR に置きます。
+* `OUT` 命令: OSR から 1 度に 1～32 ビットのデータを他のデスティネーションにシフトします。
 * データがシフトアウトされると、OSR はゼロで満たされます。
-* オートプルが有効な場合、総シフト数がしきい値に達すると、ステートマシンは OUT 命令で FIFO から OSR を自動的に補充します。
+* オートプルが有効な場合、総シフト数がしきい値に達すると、ステートマシンは `OUT` 命令で FIFO から OSR を自動的に補充します。
 * シフト方向は、コンフィギュレーションレジスタを介してプロセッサが設定可能な左/右にすることができます。
 
 例えば、2 クロックに 1 バイトの割合でデータを FIFO に流し、ピンに出力する: 
@@ -370,14 +370,14 @@ For example, to stream data through the FIFO and output to the pins at a rate of
 
 ### 11.2.4. Autopull
 
-Autopull (see Section 11.5.4) allows the hardware to automatically refill the OSR in the majority of cases, with the state machine stalling if it tries to OUT from an empty OSR. This has two benefits:
+Autopull (see Section 11.5.4) allows the hardware to automatically refill the OSR in the majority of cases, with the state machine stalling if it tries to `OUT` from an empty OSR. This has two benefits:
 
 * No instructions spent on explicitly pulling from FIFO at the right time
 * Higher throughput: can output up to 32 bits on every single clock cycle, if the FIFO stays topped up
 
 After configuring autopull, the above program can be simplified to the following, which behaves identically:
 
-オートプル(セクション 11.5.4 参照)により、ほとんどの場合、ハードウェアが自動的に OSR を補充し、空の OSR から OUT しようとするとステートマシンがストールする。これには 2 つの利点がある: 
+オートプル(セクション 11.5.4 参照)により、ほとんどの場合、ハードウェアが自動的に OSR を補充し、空の OSR から `OUT` しようとするとステートマシンがストールする。これには 2 つの利点がある: 
 
 * 適切なタイミングで明示的に FIFO からプルするために費やす命令がない。
 * スループットの向上: FIFO が一杯の状態であれば、1 クロックサイクルごとに最大 32 ビットを出力できる。
@@ -417,55 +417,55 @@ Figure 46. Input Shift Register (ISR). Data enters 1…32 bits at a time, and cu
 </figcaption>
 </figure>
 
-* IN instructions shift 1…32 bits at a time into the register.
-* PUSH instructions write the ISR contents to the RX FIFO.
+* `IN` instructions shift 1…32 bits at a time into the register.
+* `PUSH` instructions write the ISR contents to the RX FIFO.
 * The ISR is cleared to all-zeroes when pushed.
-* The state machine will automatically push the ISR on an IN instruction, once some shift threshold is reached, if autopush is enabled.
+* The state machine will automatically push the ISR on an `IN` instruction, once some shift threshold is reached, if autopush is enabled.
 * Shift direction is configurable by the processor via configuration registers
 
-Some  peripherals,  like  UARTs,  must  shift  in  from  the  left  to  get  correct  bit  order,  since  the  wire  order  is  LSB-first;  however, the processor may expect the resulting byte to be right-aligned. This is solved by the special null input source, which allows the programmer to shift some number of zeroes into the ISR, following the data.
+Some  peripherals,  like  UARTs,  must  shift  in  from  the  left  to  get  correct  bit  order,  since  the  wire  order  is  LSB-first;  however, the processor may expect the resulting byte to be right-aligned. This is solved by the special `null` input source, which allows the programmer to shift some number of zeroes into the ISR, following the data.
 
 (和訳)
 
-* IN 命令は 1～32 ビットを一度にレジスタにシフトする。
-* PUSH 命令は ISR の内容を RX FIFO に書き込む。
+* `IN` 命令は 1～32 ビットを一度にレジスタにシフトする。
+* `PUSH` 命令は ISR の内容を RX FIFO に書き込む。
 * ISR はプッシュされるとオールゼロにクリアされる。
-* オートプッシュが有効な場合、あるシフトしきい値に達すると、ステートマシンは IN 命令で自動的に ISR をプッシュします。
+* オートプッシュが有効な場合、あるシフトしきい値に達すると、ステートマシンは `IN` 命令で自動的に ISR をプッシュします。
 * シフト方向は、コンフィギュレーションレジスタを介してプロセッサが設定可能です。
 
-UART のようないくつかの周辺回路は、正しいビット順序を得るために左からシフトする必要があります。これは特別なヌル入力ソースによって解決され、プログラマはデータに続いて、ある数のゼロを ISR にシフトすることができます。
+UART のようないくつかの周辺回路は、正しいビット順序を得るために左からシフトする必要があります。これは特別な `null` 入力ソースによって解決され、プログラマはデータに続いて、ある数のゼロを ISR にシフトすることができます。
 
 #### 11.2.4.2. シフトカウンタ
 
-State machines remember how many bits, in total, have been shifted out of the OSR via OUT instructions, and into the ISR via IN instructions. This information is tracked at all times by a pair of hardware counters: the output shift counter and the input shift counter. Each is capable of holding values from 0 to 32 inclusive. With each shift operation, the relevant counter increments by the shift count, up to the maximum value of 32 (equal to the width of the shift register). The state machine can be configured to perform certain actions when a counter reaches a configurable threshold:
+State machines remember how many bits, in total, have been shifted out of the OSR via `OUT` instructions, and into the ISR via `IN` instructions. This information is tracked at all times by a pair of hardware counters: the output shift counter and the input shift counter. Each is capable of holding values from 0 to 32 inclusive. With each shift operation, the relevant counter increments by the shift count, up to the maximum value of 32 (equal to the width of the shift register). The state machine can be configured to perform certain actions when a counter reaches a configurable threshold:
 
 * The OSR can be automatically refilled once some number of bits have been shifted out (see Section 11.5.4).
 * The ISR can be automatically emptied once some number of bits have been shifted in (see Section 11.5.4.
-* PUSH or PULL instructions can be conditioned on the input or output shift counter, respectively.
+* `PUSH` or `PULL` instructions can be conditioned on the input or output shift counter, respectively.
 
 On PIO reset, or the assertion of CTRL_SM_RESTART, the input shift counter is cleared to 0 (nothing yet shifted in), and the output shift counter is initialised to 32 (nothing remaining to be shifted out; fully exhausted). Some other instructions affect the shift counters:
 
-* A successful PULL clears the output shift counter to 0
-* A successful PUSH clears the input shift counter to 0
-* MOV OSR, … (i.e. any MOV instruction that writes OSR) clears the output shift counter to 0
-* MOV ISR, … (i.e. any MOV instruction that writes ISR) clears the input shift counter to 0
-* OUT ISR, count sets the input shift counter to count
+* A successful `PULL` clears the output shift counter to 0
+* A successful `PUSH` clears the input shift counter to 0
+* `MOV OSR, …` (i.e. any `MOV` instruction that writes OSR) clears the output shift counter to 0
+* `MOV ISR, …` (i.e. any `MOV` instruction that writes ISR) clears the input shift counter to 0
+* `OUT ISR, count` sets the input shift counter to `count`
 
 (和訳)
 
-ステートマシンは、合計で何ビットが OUT 命令によって OSR からシフトされ、IN 命令によって ISR にシフトされたかを記憶しています。この情報は、出力シフトカウンタと入力シフトカウンタというハードウェアカウンタのペアによって常に追跡される。それぞれ 0 から 32 までの値を保持することができる。各シフト動作に伴い、関連するカウンタは最大値 32 (シフトレジスタの幅に等しい)まで、シフトカウント分ずつインクリメントします。ステートマシンは、カウンタが設定可能な閾値に達したときに特定のアクションを実行するように構成できます: 
+ステートマシンは、これまでの累積で何ビットが `OUT` 命令によって OSR からシフトされ、 `IN` 命令によって ISR にシフトされたかを記憶しています。この情報は、出力シフトカウンタと入力シフトカウンタというハードウェアカウンタのペアによって常に追跡される。それぞれ 0 から 32 までの値を保持することができる。各シフト動作に伴い、関連するカウンタは最大値 32 (シフトレジスタの幅に等しい)まで、シフトカウント分ずつインクリメントします。ステートマシンは、カウンタが設定可能な閾値に達したときに特定のアクションを実行するように構成できます: 
 
 * あるビット数がシフトアウトされると、OSR を自動的にリフィルすることができる(セクション 11.5.4 を参照)。
 * あるビット数がシフトインされると、自動的に ISR を空にすることができます(セクション 11.5.4 を参照)。
-* PUSH 命令または PULL 命令は、それぞれ入力または出力シフトカウンタを条件とすることができます。
+* `PUSH` 命令または `PULL` 命令は、それぞれ入力または出力シフトカウンタを条件とすることができます。
 
-PIO リセットまたは CTRL_SM_RESTART のアサート時に、入力シフトカウンタは 0 にクリアされ(まだ何もシフトインされていない)、 出力シフトカウンタは 32 に初期化されます(シフトアウトされる残りがなく、完全に使い切られた)。他のいくつかの命令は、シフトカウンタに影響を与えます: 
+PIO リセットまたは `CTRL_SM_RESTART` のアサート時に、入力シフトカウンタは 0 にクリアされ(まだ何もシフトインされていない)、 出力シフトカウンタは 32 に初期化されます(シフトアウトされる残りがなく、完全に使い切られた)。他のいくつかの命令は、シフトカウンタに影響を与えます: 
 
-* PULL が成功すると、出力シフトカウンタは 0 にクリアされます。
-* PUSH が成功すると、入力シフトカウンタは 0 にクリアされます。
-* MOV OSR, ...(すなわち、OSR を書き込むすべての MOV 命令)は、出力シフトカウンタを 0 にクリアします。
-* MOV ISR, ...(すなわち、ISR を書き込むすべての MOV 命令)は、入力シフトカウンタを 0 にクリアします。
-* OUT ISR, count は入力シフトカウンタを count に設定します。
+* `PULL` が成功すると、出力シフトカウンタは 0 にクリアされます。
+* `PUSH` が成功すると、入力シフトカウンタは 0 にクリアされます。
+* `MOV OSR, ...`(すなわち、OSR を書き込むすべての MOV 命令)は、出力シフトカウンタを 0 にクリアします。
+* `MOV ISR, ...`(すなわち、ISR を書き込むすべての MOV 命令)は、入力シフトカウンタを 0 にクリアします。
+* `OUT ISR, count` は入力シフトカウンタを `count` に設定します。
 
 #### 11.2.4.3. スクラッチレジスタ
 
@@ -473,7 +473,7 @@ Each state machine has two 32-bit internal scratch registers, called X and Y.
 
 They are used as:
 
-* Source/destination for IN/OUT/SET/MOV
+* Source/destination for `IN`/`OUT`/`SET`/`MOV`
 * Source for branch conditions
 
 For example, suppose we wanted to produce a long pulse for "1" data bits, and a short pulse for "0" data bits:
@@ -482,7 +482,7 @@ For example, suppose we wanted to produce a long pulse for "1" data bits, and a 
 
 これらは以下のように使用されます: 
 
-* IN/OUT/SET/MOV のソース/デスティネーション。
+* `IN`/`OUT`/`SET`/`MOV` のソース/デスティネーション。
 * 分岐条件のソース
 
 例えば、 "1" データビットには長いパルスを、 "0" データビットには短いパルスを生成したいとします: 
@@ -504,15 +504,15 @@ For example, suppose we wanted to produce a long pulse for "1" data bits, and a 
 14     jmp entry_point
 ```
 
-Here X is used as a loop counter, and Y is used as a temporary variable for branching on single bits from the OSR. This program can be used to drive a WS2812 LED interface, although more compact implementations are possible (as few as 3 instructions).
+Here `X` is used as a loop counter, and `Y` is used as a temporary variable for branching on single bits from the OSR. This program can be used to drive a WS2812 LED interface, although more compact implementations are possible (as few as 3 instructions).
 
-MOV allows the use of the scratch registers to save/restore the shift registers if, for example, you would like to repeatedly shift out the same sequence.
+`MOV` allows the use of the scratch registers to save/restore the shift registers if, for example, you would like to repeatedly shift out the same sequence.
 
 >  NOTE A much more compact WS2812 example (4 instructions total) is shown in Section 11.6.2.
 
 ここでは、X をループカウンタとして使用し、Y を OSR からのシングルビットで分岐するための一時変数として使用しています。このプログラムは WS2812 LED インターフェースを駆動するために使用できますが、よりコンパクトな実装も可能です(わずか 3 命令)。
 
-MOV は、例えば同じシーケンスを繰り返しシフトアウトしたい場合、シフトレジスタを保存/復元するためにスクラッチレジスタを使用することができます。
+`MOV` は、例えば同じシーケンスを繰り返しシフトアウトしたい場合、シフトレジスタを保存/復元するためにスクラッチレジスタを使用することができます。
 
 > 注: 11.6.2 節に、よりコンパクトな WS2812 の例(合計 4 命令)を示します。
 
@@ -522,7 +522,7 @@ Each state machine has a pair of 4-word deep FIFOs, one for data transfer from s
 
 FIFOs also generate data request (DREQ) signals, which allow a system DMA controller to pace its reads/writes based on the presence of data in an RX FIFO, or space for new data in a TX FIFO. This allows a processor to set up a long transaction, potentially involving many kilobytes of data, which will proceed with no further processor intervention.
 
-Often, a state machine only transfers data in one direction. In this case, the  SHIFTCTRL_FJOIN option can merge the two FIFOs into a single 8-entry FIFO that only goes in one direction. This is useful for high-bandwidth interfaces such as DPI.
+Often, a state machine only transfers data in one direction. In this case, the  `SHIFTCTRL_FJOIN` option can merge the two FIFOs into a single 8-entry FIFO that only goes in one direction. This is useful for high-bandwidth interfaces such as DPI.
 
 (和訳)
 
@@ -530,17 +530,17 @@ Often, a state machine only transfers data in one direction. In this case, the  
 
 FIFO はまた、データ要求(DREQ)信号を生成し、システム DMA コントローラが、RX FIFO 内のデータの有無、または TX FIFO 内の新しいデータのスペースに基づいて、リード/ライトをペース配分することを可能にする。これにより、プロセッサは、何キロバイトものデータを含む可能性のある長いトランザクションをセットアップすることができる。
 
-多くの場合、ステートマシンは一方向にしかデータを転送しない。この場合、SHIFTCTRL_FJOIN オプションは、2 つの FIFO を 1 つの 8 エントリ FIFO に統合し、一方向にのみデータを転送することができる。これは DPI のような高帯域幅インターフェイスに有用である。
+多くの場合、ステートマシンは一方向にしかデータを転送しない。この場合、 `SHIFTCTRL_FJOIN` オプションは、2 つの FIFO を 1 つの 8 エントリ FIFO に統合し、一方向にのみデータを転送することができる。これは DPI のような高帯域幅インターフェイスに有用である。
 
 ### 11.2.5. ストール
 
 State machines may momentarily pause execution for a number of reasons:
 
-* A WAIT instruction's condition is not yet met
-* A blocking PULL when the TX FIFO is empty, or a blocking PUSH when the RX FIFO is full
-* An IRQ WAIT instruction which has set an IRQ flag, and is waiting for it to clear
-* An OUT instruction when autopull is enabled, and OSR has already reached its shift threshold
-* An IN instruction when autopush is enabled, ISR reaches its shift threshold, and the RX FIFO is full
+* A `WAIT` instruction's condition is not yet met
+* A blocking `PULL` when the TX FIFO is empty, or a blocking `PUSH` when the RX FIFO is full
+* An `IRQ WAIT` instruction which has set an `IRQ` flag, and is waiting for it to clear
+* An `OUT` instruction when autopull is enabled, and OSR has already reached its shift threshold
+* An `IN` instruction when autopush is enabled, ISR reaches its shift threshold, and the RX FIFO is full
 
 In this case, the program counter does not advance, and the state machine will continue executing this instruction on the next cycle. If the instruction specifies some number of delay cycles before the next instruction starts, these do not begin until after the stall clears.
 
@@ -548,11 +548,11 @@ In this case, the program counter does not advance, and the state machine will c
 
 ステートマシンは、いくつかの理由で実行を一時停止することがあります: 
 
-* WAIT 命令の条件がまだ満たされていない。
-* TX FIFO が空のときのブロッキング PULL、または RX FIFO が一杯のときのブロッキング PUSH
-* IRQ フラグをセットし、それがクリアされるのを待っている IRQ WAIT 命令。
-* オートプルが有効で、OSR がすでにシフトしきい値に達している場合の OUT 命令。
-* オートプッシュが有効で、ISR がシフトしきい値に達し、RX FIFO が満杯のときの IN 命令。
+* `WAIT` 命令の条件がまだ満たされていない。
+* TX FIFO が空のときのブロッキング `PULL`、または RX FIFO が一杯のときのブロッキング `PUSH`
+* 事前にセットされた IRQ フラグがクリアされるのを待つ `IRQ WAIT` 命令。
+* オートプルが有効で、OSR がすでにシフトしきい値に達している場合の `OUT` 命令。
+* オートプッシュが有効で、ISR がシフトしきい値に達し、RX FIFO が満杯のときの `IN` 命令。
 
 この場合、プログラムカウンタは進まず、ステートマシンは次のサイクルでこの命令の実行を継続する。命令が、次の命令を開始するまでの遅延サイクル数を指定している場合、これらの遅延サイクルは、ストールがクリアされるまで開始されません。
 
@@ -562,45 +562,45 @@ In this case, the program counter does not advance, and the state machine will c
 
 PIO controls the output level and direction of up to 32 GPIOs, and can observe their input levels. On every system clock cycle, each state machine may do none, one, or both of the following:
 
-* Change the level or direction of some GPIOs via an OUT or SET instruction, or read some GPIOs via an IN instruction
+* Change the level or direction of some GPIOs via an `OUT` or `SET` instruction, or read some GPIOs via an `IN` instruction
 * Change the level or direction of some GPIOs via a side-set operation
 
-Each  of  these  operations  uses  one  of  four  contiguous  ranges  of  GPIOs,  with  the  base  and  count  of  each  range configured  via  each  state  machine's  PINCTRL  register.  There  is  a  range  for  each  of  OUT,  SET,  IN  and  side-set  operations.  Each range can cover any of the GPIOs accessible to a given PIO block (on RP2350 this is the 30 user GPIOs), and the ranges can overlap.
+Each  of  these  operations  uses  one  of  four  contiguous  ranges  of  GPIOs,  with  the  base  and  count  of  each  range configured  via  each  state  machine's  `PINCTRL`  register.  There  is  a  range  for  each  of  `OUT`,  `SET`,  `IN`  and  side-set  operations.  Each range can cover any of the GPIOs accessible to a given PIO block (on RP2350 this is the 30 user GPIOs), and the ranges can overlap.
 
-PIO は最大 32 個の GPIO の出力レベルと方向を制御し、その入力レベルを観測することができます。システムクロックサイクルごとに、各ステートマシンは以下のいずれか、または両方を実行します: 
-
-* OUT 命令または SET 命令で一部の GPIO のレベルまたは方向を変更するか、 IN 命令で一部の GPIO を読み出します。
-* サイドセット操作によっていくつかの GPIO のレベルまたは方向を変更する。
-
-これらの各操作は GPIO の 4 つの連続した範囲の 1 つを使用し、各範囲のベースとカウントは各ステートマシンの PINCTRL レジスタで設定します。 OUT、SET、IN、およびサイドセット操作のそれぞれに範囲があります。 各範囲は、指定された PIO ブロック(RP2350 では 30 個のユーザ GPIO)にアクセス可能な GPIO のいずれかをカバーすることができ、範囲は重複することができます。
-
-For each individual GPIO output (level and direction separately), PIO considers all 8 writes that may have occurred on that cycle, and applies the write from the highest-numbered state machine. If the same state machine performs a SET /OUT  and  a  side-set  on  the  same  GPIO  simultaneously,  the  side-set  is  used.  If  no  state  machine  writes  to  this  GPIO output, its value does not change from the previous cycle.
+For each individual GPIO output (level and direction separately), PIO considers all 8 writes that may have occurred on that cycle, and applies the write from the highest-numbered state machine. If the same state machine performs a `SET`/`OUT`  and  a  side-set  on  the  same  GPIO  simultaneously,  the  side-set  is  used.  If  no  state  machine  writes  to  this  GPIO output, its value does not change from the previous cycle.
 
 Generally  each  state  machine's  outputs  are  mapped  to  a  distinct  group  of  GPIOs,  implementing  some  peripheral interface.
 
-個々の GPIO 出力(レベルと方向は別々)に対して、PIO はそのサイクルで発生した可能性のある 8 つの書き込みすべてを考慮し、最も番号の高いステートマシンからの書き込みを適用します。同じステートマシンが同じ GPIO に対して SET /OUT とサイドセットを同時に実行した場合、サイドセットが使用されます。 この GPIO 出力に書き込むステートマシンがない場合、その値は前のサイクルから変化しません。
+PIO は最大 32 個の GPIO の出力レベルと方向を制御し、その入力レベルを観測することができます。システムクロックサイクルごとに、各ステートマシンは以下のいずれか、または両方を実行します: 
+
+* `OUT` 命令または `SET` 命令で一部の GPIO のレベルまたは方向を変更するか、 `IN` 命令で一部の GPIO を読み出します。
+* サイドセット操作によっていくつかの GPIO のレベルまたは方向を変更する。
+
+これらの各操作は GPIO の 4 つの連続した範囲の 1 つを使用し、各範囲のベースとカウントは各ステートマシンの `PINCTRL` レジスタで設定します。 `OUT`、`SET`、`IN`、およびサイドセット操作のそれぞれに範囲があります。 各範囲は、指定された PIO ブロック(RP2350 では 30 個のユーザ GPIO)にアクセス可能な GPIO のいずれかをカバーすることができ、範囲は重複することができます。
+
+個々の GPIO 出力(レベルと方向は別々)に対して、PIO はそのサイクルで発生した可能性のある 8 つの書き込みすべてを考慮し、最も番号の高いステートマシンからの書き込みを適用します。同じステートマシンが同じ GPIO に対して `SET`/`OUT` とサイドセットを同時に実行した場合、サイドセットが使用されます。 この GPIO 出力に書き込むステートマシンがない場合、その値は前のサイクルから変化しません。
 
 一般に、各ステートマシンの出力は GPIO の別個のグループにマッピングされ、何らかのペリフェラルインターフェースを実装します。
 
 ### 11.2.7. IRQ フラグ
 
-IRQ flags are state bits which can be set or cleared by state machines or the system. There are 8 in total: all 8 are visible to all state machines, and the lower 4 can also be masked into one of PIO's interrupt request lines, via the IRQ0_INTE and IRQ1_INTE control registers.
+IRQ flags are state bits which can be set or cleared by state machines or the system. There are 8 in total: all 8 are visible to all state machines, and the lower 4 can also be masked into one of PIO's interrupt request lines, via the `IRQ0_INTE` and `IRQ1_INTE` control registers.
 
 They have two main uses:
 
 * Asserting system level interrupts from a state machine program, and optionally waiting for the interrupt to be acknowledged
 * Synchronising execution between two state machines
 
-State machines interact with the flags via the IRQ and WAIT instructions.
+State machines interact with the flags via the `IRQ` and `WAIT` instructions.
 
-IRQ フラグはステートマシンやシステムによってセットまたはクリアされる状態ビットです。全部で 8 つあり、8 つすべてがすべてのステートマシンに表示され、下位 4 つは IRQ0_INTE および IRQ1_INTE 制御レジスタを経由して PIO の割り込み要求ラインの 1 つにマスクすることもできます。
+IRQ フラグはステートマシンやシステムによってセットまたはクリアされる状態ビットです。全部で 8 つあり、8 つすべてがすべてのステートマシンに表示され、下位 4 つは `IRQ0_INTE` および `IRQ1_INTE` 制御レジスタを経由して PIO の割り込み要求ラインの 1 つにマスクすることもできます。
 
 これらには主に 2 つの用途がある: 
 
 * ステートマシンプログラムからシステムレベルの割り込みをアサートし、オプションで割り込みが確認されるのを待ちます。
 * 2 つのステートマシン間の実行の同期
 
-ステートマシンは IRQ 命令と WAIT 命令を介してフラグと相互作用します。
+ステートマシンは `IRQ` 命令と `WAIT` 命令を介してフラグと相互作用します。
 
 ### 11.2.8. ステートマシン間の相互作用
 
@@ -620,25 +620,25 @@ State machines cannot communicate data, but they can synchronise with one anothe
 
 * 複数のステートマシンを同じプログラムに向ける
 * 複数のステートマシンを異なるプログラムに向ける
-* 例えば、UART の TX 側と RX 側、DPI ディスプレイのクロック/Hsync とピクセルデータなどです。
+* 複数のステートマシンを同じインタフェースの異なる部分を実行させる。例えば、UART の TX 側と RX 側、DPI ディスプレイのクロック/Hsync とピクセルデータなどです。
 
-ステートマシンはデータを通信することはできませんが、IRQ フラグを使用することで互いに同期することができます。フラグは全部で 8 つあります。各ステートマシンは、IRQ 命令を使って任意のフラグをセットまたはクリアでき、WAIT IRQ 命令を使ってフラグが High または Low になるのを待つことができます。これにより、ステートマシン間でサイクル精度の高い同期を取ることができる。
+ステートマシンはデータを通信することはできませんが、IRQ フラグを使用することで互いに同期することができます。フラグは全部で 8 つあります。各ステートマシンは、IRQ 命令を使って任意のフラグをセットまたはクリアでき、 `WAIT IRQ` 命令を使ってフラグが High または Low になるのを待つことができます。これにより、ステートマシン間でサイクル精度の高い同期を取ることができる。
 
 ## 11.3. PIO アセンブラ (pioasm)
 
 The  PIO  Assembler  parses  a  PIO  source  file  and  outputs  the  assembled  version  ready  for  inclusion  in  an  RP2350 application. This includes C and C++ applications built against the SDK, and Python programs running on the RP2350 MicroPython port.
 
-This section briefly introduces the directives and instructions that can be used in pioasm input. For a deeper discussion of how to use pioasm, how it is integrated into the SDK build system, extended features such as code pass through, and the various output formats it can produce, see Raspberry Pi Pico-series C/C++ SDK.
+This section briefly introduces the directives and instructions that can be used in `pioasm` input. For a deeper discussion of how to use `pioasm`, how it is integrated into the SDK build system, extended features such as code pass through, and the various output formats it can produce, see Raspberry Pi Pico-series C/C++ SDK.
 
 PIO アセンブラは、PIO ソースファイルを解析し、RP2350 アプリケーションに組み込めるようにアセンブルしたバージョンを出力します。これには、SDK に対してビルドされた C および C++ アプリケーション、および RP2350 MicroPython ポートで実行される Python プログラムが含まれます。
 
-このセクションでは、pioasm 入力で使用できる指令と命令を簡単に紹介します。pioasm の使用方法、SDK ビルドシステムへの統合方法、コードパススルーなどの拡張機能、および pioasm が生成できるさまざまな出力形式については、 "Raspberry Pi Pico-series C/C++ SDK." を参照してください。
+このセクションでは、 `pioasm` 入力で使用できる指令と命令を簡単に紹介します。 `pioasm` の使用方法、SDK ビルドシステムへの統合方法、コードパススルーなどの拡張機能、および `pioasm` が生成できるさまざまな出力形式については、 "Raspberry Pi Pico-series C/C++ SDK." を参照してください。
 
 ### 11.3.1. Directives
 
 The following directives control the assembly of PIO programs:
 
-以下の指令は、PIO プログラムのアセンブリを制御する: 
+以下の指令(directives)は、PIO プログラムのアセンブリを制御する: 
 
 <description>
 
@@ -647,14 +647,14 @@ The following directives control the assembly of PIO programs:
 * `#define <program_name> <symbol> value`: for program symbols
 * `#define <symbol> value`: for global symbols
 
-<symbol> という名前の整数シンボルを <value> という値で定義する(セクション 11.3.2 参照)。この `.define` が入力ファイルの最初のプログラムの前にある場合、この define は全てのプログラムに対してグローバルであり、そうでない場合、この `.define` が現れたプログラムに対してローカルである。 `PUBLIC` が指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDK の場合、これは次のような形になります: 
+`<symbol>` という名前の整数シンボルを `<value>` という値で定義する(セクション 11.3.2 参照)。この `.define` が入力ファイルの最初のプログラムの前にある場合、この `.define` は全てのプログラムに対してグローバルであり、そうでない場合、この `.define` が現れたプログラムに対してローカルである。 `PUBLIC` が指定された場合、シンボルはユーザコードで使用するためにアセンブルされた出力に出力されます。SDK の場合、これは次のような形になります: 
 
 * `#define <program_name> <symbol> value`: プログラムシンボル用
 * `#define <symbol> value`: グローバルシンボル用
 
 ||.clock_div <divider>||If this directive is present, `<divider>` is the state machine clock divider for the program. Note, that divider is a floating point  value,  but  may  not  currently  use  arithmetic  expressions  or  defined  values.  This  directive  affects  the  default state machine configuration for a program. This directive is only valid within a program before the first instruction.
 
-この指令が存在する場合、 <divider> はプログラムのステートマシン・クロックデバイダである。 divider は浮動小数点値であるが、算術式や定義された値を使用する*ことはできない*。 この指令は、プログラムのデフォルトのステートマシン構成に影響を与える。この指令はプログラム内で最初の命令の前にのみ有効である。
+この指令が存在する場合、 `<divider>` はプログラムのステートマシン・クロック分周比である。 分周比は浮動小数点値であるが、算術式や定義された値を使用する*ことはできない*。 この指令は、プログラムのデフォルトのステートマシン構成に影響を与える。この指令はプログラム内で最初の命令の前にのみ有効である。
 ||.fifo <fifo_config>||If this directive is present, it is used to specify the FIFO configuration for the program. It affects the default state machine configuration for a program, but also restricts what instructions may be used (for example PUSH makes no sense if there is no IN FIFO configured).
 
 This directive supports the following configuration values:
