@@ -1124,7 +1124,7 @@ OUT PC behaves as an unconditional jump to an address shifted out from the OSR.
 * デスティネーション: 
   + 000: PINS
   + 001: X(スクラッチレジスタ X)
-  + 010: 010: Y(スクラッチレジスタ Y)
+  + 010: Y(スクラッチレジスタ Y)
   + 011: NULL(データ破棄)
   + 100: PINDIRS
   + 101: PC
@@ -1410,7 +1410,7 @@ MOV PINDIRS, src is not supported on PIO version 0.
 * デスティネーション: 
   + 000: PINS (OUT と同じピンマッピングを使用)
   + 001: X(スクラッチレジスタ X)
-  + 010: 010: Y(スクラッチレジスタ Y)
+  + 010: Y(スクラッチレジスタ Y)
   + 011: PINDIRS (OUT と同じピンマッピング)
   + 100: EXEC (データを命令として実行)
   + 101: PC
@@ -1559,8 +1559,8 @@ The  mapping  of  SET  and  OUT  onto  pins  is  configured  independently.  The
 
 * デスティネーション
   + 000: PINS
-  + 001: X (スクラッチレジスタ X) 5 LSB が Data にセットされ、その他は 0 にクリアされる。
-  + 010: 010: Y(スクラッチレジスタ Y) 5 LSB が Data に設定され、その他は 0 にクリアされる。
+  + 001: X(スクラッチレジスタ X) 5 LSB が Data にセットされ、その他は 0 にクリアされる。
+  + 010: Y(スクラッチレジスタ Y) 5 LSB が Data に設定され、その他は 0 にクリアされる。
   + 011: 予約
   + 100: PINDIRS
   + 101: 予約
@@ -2174,8 +2174,7 @@ Figure 53. The state machine has two independent output channels, one shared by 
 
 The write data and write masks for the output level and output enable registers come from the following sources:
 
-* An OUT instruction writes to up to 32 bits. Depending on the instruction's Destination field, this is applied to either
-pins or pindirs. The least-significant bit of OUT data is mapped to PINCTRL_OUT_BASE, and this mapping continues for PINCTRL_OUT_COUNT bits, wrapping after GPIO31.
+* An OUT instruction writes to up to 32 bits. Depending on the instruction's Destination field, this is applied to either pins or pindirs. The least-significant bit of OUT data is mapped to PINCTRL_OUT_BASE, and this mapping continues for PINCTRL_OUT_COUNT bits, wrapping after GPIO31.
 * A SET instruction writes up to 5 bits. Depending on the instruction's Destination field, this is applied to either pins or pindirs. The least-significant bit of SET data is mapped to PINCTRL_SET_BASE, and this mapping continues for PINCTRL_SET_COUNT bits, wrapping after GPIO31.
 * A side-set operation writes up to 5 bits. Depending on the register field EXECCTRL_SIDE_PINDIR, this is applied to either pins or pindirs. The least-significant bit of side-set data is mapped to PINCTRL_SIDESET_BASE, continuing for PINCTRL_SIDESET_COUNT pins, minus one if EXECCTRL_SIDE_EN is set.
 
@@ -2187,9 +2186,8 @@ If a side-set overlaps with an OUT/SET performed by that state machine on the sa
 
 出力レベルと出力イネーブルレジスタの書き込みデータと書き込みマスクは、以下のソースから得られます: 
 
-* OUT 命令は最大 32 ビットに書き込みます。OUT 命令は最大 32 ビットに書き込みます。
-ピンまたはピンディレクトリに適用されます。OUT データの最下位ビットは PINCTRL_OUT_BASE にマッピングされ、このマッピングは PINCTRL_OUT_COUNT ビットの間、GPIO31 の後に続きます。
-* SET 命令は最大 5 ビットを書き込みます。SET 命令は最大 5 ビットを書き込みます。命令の Destination フィールドによって、これはピンまたはピンディールに適用されます。SET データの最下位ビットは PINCTRL_SET_BASE にマッピングされ、このマッピングは PINCTRL_SET_COUNT ビットの間、GPIO31 の後に続きます。
+* OUT 命令は最大 32 ビットに書き込みます。命令のディスティネーションフィールドにより、pin または pindir に適用されます。 OUT データの最下位ビットは PINCTRL_OUT_BASE にマッピングされ、このマッピングは PINCTRL_OUT_COUNT ビットの間、GPIO31 の後に続きます。
+* SET 命令は最大 5 ビットを書き込みます。命令のディスティネーションフィールドにより、pin または pindir に適用されます。SET データの最下位ビットは PINCTRL_SET_BASE にマッピングされ、このマッピングは PINCTRL_SET_COUNT ビットの間、GPIO31 の後に続きます。
 * サイドセット動作は最大 5 ビットを書き込みます。レジスタフィールド EXECCTRL_SIDE_PINDIR によって、これはピンまたはピンディールに適用されます。サイドセットデータの最下位ビットは PINCTRL_SIDESET_BASE にマップされ、PINCTRL_SIDESET_COUNT ピンの場合は続き、EXECCTRL_SIDE_EN が設定されている場合はマイナス 1 されます。
 
 各 OUT/SET/サイドセット動作はピンの連続した範囲に書き込みますが、これらの範囲はそれぞれ独立したサイズで 32 ビット GPIO 空間に配置されます。 これは、多くのアプリケーションにとって十分に柔軟です。 例えば、あるステートマシンがピンのグループに SPI などのインターフェイスを実装している場合、別のステートマシンが同じプログラムを実行し、別のピンのグループにマッピングして、2 番目の SPI インターフェイスを提供することができます。
