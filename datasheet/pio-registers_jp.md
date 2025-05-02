@@ -158,6 +158,12 @@ PIO から 32 個以上の GPIO にアクセスするために、システム GP
 
 </register-table>
 
+## PIO: CTRL Register
+
+Offset: 0x0
+
+Description: PIO CTRL Register
+
 Table 981. CTRL Register 
 
 <bit-table>
